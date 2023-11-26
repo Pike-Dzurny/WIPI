@@ -2,10 +2,12 @@
 FROM node:alpine
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/frontend
 
 # Copy package.json and package-lock.json (if available) to the container
 COPY package*.json ./
+
+COPY package*.json next.config.js ./
 
 # Install dependencies
 RUN npm install
@@ -13,14 +15,17 @@ RUN npm install
  # Install missing dependencies
 RUN npm install lodash.debounce date-fns
 
-# Copy the rest of the application code
-COPY . .
+RUN npm install --save-dev @types/lodash.debounce
 
-# Build the Next.js application
-RUN npm run build
+# Copy the rest of the application code
+COPY . /app
 
 # Expose the port Next.js runs on
 EXPOSE 3000
 
-# Command to start the Next.js application
-CMD ["npm", "start"]
+# Build the Next.js application
+RUN npm run build
+
+
+
+CMD ["npm", "run", "dev"]

@@ -66,7 +66,7 @@ export default function SignIn() {
           </Link>
         </form>
         <div className="shadow p-5 border-gray-300 rounded-md bg-white flex flex-col items-center w-full">
-            <p className="mb-4">Don't have an account?</p>
+            <p className="mb-4">Don&apos;t have an account?</p>
             <Link href="/signup" className='w-full'>
                 <div className="w-full p-2 bg-green-500 text-white text-center rounded-md">Sign Up</div>
             </Link>

@@ -58,7 +58,7 @@ function RootLayout({
                     <div className="circle shadow-xl p-2 bg-slate-50 rounded-full flex flex-row items-center gap-x-2 overflow-hidden">
                             <Image className="shadow-inner rounded-full w-full h-full object-cover" style={{ width: '60px' }} alt="Icon" src="https://img1.cgtrader.com/items/2870638/80931d2ba4/large/smiley-ball-3d-model-obj-blend.jpg" />    
                             <div className={`icon1 transition-all duration-500 ease-in-out transform ${isScrolled ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
-                            {iconstuff}
+                            {iconstuff.current}
                             </div>
                             <div className={`icon2 transition-all duration-500 ease-in-out transform ${isScrolled ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                             {/* Icon 2 here */}

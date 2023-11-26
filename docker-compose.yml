@@ -5,9 +5,11 @@ services:
     build: ./frontend # Path to the directory containing the Dockerfile for Next.js
     ports:
       - '3000:3000' # Map port 3000 on the host to port 3000 in the container
+    restart: always
     volumes:
-      - ./frontend:/app # Mount the frontend directory to the /app directory in the container
-      - /app/node_modules # Use a volume for node_modules to avoid overwriting the container's version
+      - ./:/app
+      - /app/node_modules
+      - /app/.next
     environment:
       - NODE_ENV=development
 

@@ -3,7 +3,6 @@
 import React from 'react';
 import { useInfiniteQuery } from 'react-query';
 import axios from 'axios';
-import { RealPost } from '../../../components/Post/RealPost'; // Import RealPost component
 
 
 const fetchPosts = async ({ pageParam = null }) => {
