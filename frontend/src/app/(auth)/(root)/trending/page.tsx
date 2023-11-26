@@ -3,8 +3,8 @@ import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { themeChange } from 'theme-change'
 
-import { Dropdown } from '../../../components/Dropdown/Dropdown';
-import { PFP } from '../../../components/pfp';
+import { Dropdown } from '../../../../components/Dropdown/Dropdown';
+import { PFP } from '../../../../components/pfp';
 
 
 const AboutPage = () => {
