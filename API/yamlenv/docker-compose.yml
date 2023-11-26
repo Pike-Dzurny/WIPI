@@ -1,0 +1,8 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    container_name: test_db
+    env_file: varsfordb.env
+    ports:
+      - 5432:5432
