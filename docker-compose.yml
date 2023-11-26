@@ -13,7 +13,7 @@ services:
 
   # FastAPI service definition
   api:
-    build: ./API # Path to the directory containing the Dockerfile for FastAPI
+    build: ./API/yamlenv # Path to the directory containing the Dockerfile for FastAPI
     ports:
       - '8000:8000' # Map port 8000 on the host to port 8000 in the container
     volumes:
