@@ -7,7 +7,6 @@ import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 
-/* eslint-disable */
 
 
 export default function SignIn() {

@@ -3,7 +3,6 @@
 import { Roboto } from 'next/font/google'
 import './../../globals.css'
 
-/* eslint-disable */
 
 const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
