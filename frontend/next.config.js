@@ -6,6 +6,8 @@ module.exports = nextConfig
 module.exports = {
     images: {
       domains: ['localhost'],
+      domains: ['extension.unh.edu'],
+
     },
     
   }
