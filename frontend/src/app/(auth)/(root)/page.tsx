@@ -117,7 +117,7 @@ export default function Home() {
 
                     // If it's the last post of the last page, attach the ref for intersection observer
                     if (i === data.pages.length - 1 && index === page.length - 1) {
-                      return <div ref={ref}>{postElement}</div>;
+                      return <div ref={ref} key={post.id}>{postElement}</div>;
                     }
 
                     return postElement;
