@@ -50,3 +50,7 @@ node_modules
 /node_modules/*
 /node_modules/
 /frontend/API
+
+*/*.env*
+*/*.env
+*/env.local
