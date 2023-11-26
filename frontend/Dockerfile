@@ -2,7 +2,7 @@
 FROM node:alpine
 
 # Set the working directory inside the container
-WORKDIR /app/frontend
+WORKDIR /app
 
 # Copy package.json and package-lock.json (if available) to the container
 COPY package*.json ./
@@ -18,7 +18,13 @@ RUN npm install lodash.debounce date-fns
 RUN npm install --save-dev @types/lodash.debounce
 
 # Copy the rest of the application code
-COPY . /app
+# If you want the src directory to be inside the /app directory in the Docker image, you should adjust the COPY command in your Dockerfile:
+COPY src/ /app/src/
+
+COPY *.js /app/
+COPY *.json /app/
+COPY *.ts /app/ 
+
 
 # Expose the port Next.js runs on
 EXPOSE 3000

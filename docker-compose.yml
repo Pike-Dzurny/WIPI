@@ -7,9 +7,7 @@ services:
       - '3000:3000' # Map port 3000 on the host to port 3000 in the container
     restart: always
     volumes:
-      - ./:/app
-      - /app/node_modules
-      - /app/.next
+      - ./frontend:/app # Map the local src/app directory to the /app directory in the container
     environment:
       - NODE_ENV=development
 
