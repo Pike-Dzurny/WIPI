@@ -29,13 +29,23 @@ import hashlib
 import binascii
 
 import re
-
+import os
 
 
 
 
 Base = declarative_base()
-engine = create_engine(f'postgresql://postgres:pass@localhost:5432/mydatabase')
+
+# Retrieve the DATABASE_URL from the environment variables
+database_url = os.getenv('DATABASE_URL')
+
+# If the DATABASE_URL is not found, fall back to a default or throw an error
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable not found")
+
+# Create the SQLAlchemy engine using the DATABASE_URL
+engine = create_engine(database_url)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 from typing import Optional
 from fastapi import HTTPException

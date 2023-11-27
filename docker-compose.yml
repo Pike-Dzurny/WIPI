@@ -9,27 +9,28 @@ services:
     ports:
       - '3000:3000'
 
-  # FastAPI service definition
   api:
-    build: ./API/yamlenv # Path to the directory containing the Dockerfile for FastAPI
+    build: ./API/yamlenv
     ports:
-      - '8000:8000' # Map port 8000 on the host to port 8000 in the container
+      - '8000:8000'
     volumes:
-      - ./API:/app # Mount the API directory to the /app directory in the container
+      - ./API/yamlenv:/app
     depends_on:
-      - db # Ensure the database is started before the API service
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:pass@db:5432/mydatabase
 
-  # PostgreSQL service definition
   db:
     image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/postgresql_init.sql:/docker-entrypoint-initdb.d/postgresql_init.sql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: mydatabase
     ports:
-      - '5432:5432' # Optional: Expose PostgreSQL port for local connections
+      - '5432:5432'
 
 volumes:
   postgres_data: # Named volume to persist PostgreSQL data
