@@ -2,14 +2,12 @@ version: '3.8'
 services:
   # Next.js service definition
   frontend:
-    build: ./frontend # Path to the directory containing the Dockerfile for Next.js
-    ports:
-      - '3000:3000' # Map port 3000 on the host to port 3000 in the container
-    restart: always
+    build: ./frontend
     volumes:
-      - ./frontend:/app # Map the local src/app directory to the /app directory in the container
-    environment:
-      - NODE_ENV=development
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
 
   # FastAPI service definition
   api:
@@ -27,9 +25,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: yourusername
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdbname
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydatabase
     ports:
       - '5432:5432' # Optional: Expose PostgreSQL port for local connections
 
