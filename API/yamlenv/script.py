@@ -102,7 +102,7 @@ async def create_user(user: SignUpUser):
         raise HTTPException(status_code=400, detail="Email already in use")
 
     # If no existing user is found, create a new one
-    db_user = User(**user.model_dump())
+    db_user = User(**user.dict())    
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
@@ -163,7 +163,7 @@ async def authenticate_user(auth_details: AuthDetails):
 
 @app.post("/post")
 def create_post(post: PostBase):
-    db_post = Post(**post.model_dump())
+    db_post = Post(**post.dict())
     session = SessionLocal()
     session.add(db_post)
     session.commit()

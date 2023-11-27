@@ -32,4 +32,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to start the FastAPI application
-CMD ["uvicorn", "script:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "script:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
