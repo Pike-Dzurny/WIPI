@@ -3,17 +3,23 @@ services:
   # Next.js service definition
   frontend:
     build: ./frontend
+    environment:
+      - BACKEND_URL=http://api:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
       - '3000:3000'
+    expose:
+      - '3000'
 
   api:
     build: ./API/yamlenv
     command: uvicorn script:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - '8000:8000'
+    expose:
+      - '8000'
     volumes:
       - ./API/yamlenv:/app
     depends_on:

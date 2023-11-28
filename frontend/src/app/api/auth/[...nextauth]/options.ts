@@ -14,50 +14,37 @@ export const options: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET as string,
     }),
     CredentialsProvider({
-      // The name to display on the sign-in form (e.g., 'Sign in with...')
       name: 'Credentials',
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: {  label: "Password", type: "password" }
+        username: { label: "Username", type: "text", placeholder: "username" },
+        password: { label: "Password", type: "password" }
       },
       authorize: async (credentials) => {
-        if (credentials) {
-          try {
-            const response = await axios.post('http://localhost:8000/auth', {
+        try {
+          // If credentials are present, make a request to the backend for authentication
+          if (credentials) {
+            const response = await axios.post(`${process.env.BACKEND_URL}/auth`, {
               username: credentials.username,
               password: credentials.password,
             });
-      
-            if (response.status === 200) {
-              // If the response is OK, return the user data
+    
+            // If the response is OK and includes user data, return the user object
+            if (response.status === 200 && response.data) {
               return response.data;
-            } else {
-              // If the response is not OK, return null
-              return null;
             }
-          } catch (error) {
-            // If an error occurs, return null
-            return null;
-          }
-        } else {
+          } 
+          // If credentials are not valid, return null to indicate authentication failure
+          return null;
+        } catch (error) {
+          // Catch and log any errors, then return null to indicate authentication failure
+          console.error('Authentication error:', error);
           return null;
         }
       }
     })
   ],
-  callbacks: {
-    redirect: async ({ url, baseUrl }) => {
-      if (url === '/signin' || url === '/signup' || url === '/api/auth/signin' || url === '/api/auth/signup') {
-        // If the user is being redirected to the sign-in page, don't include the callbackUrl parameter
-        return baseUrl;
-      }
-      return url;
-    },
-  },
   pages: {
     signIn: '/signin',
-    error: '/error', 
-    verifyRequest: '/verify-request', 
     newUser: '/signup' 
   }
   

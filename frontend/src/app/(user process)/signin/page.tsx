@@ -18,7 +18,7 @@ export default function SignIn() {
 
     useEffect(() => {
         if (status === 'loading') return; // Do nothing while loading
-        if (session?.user) {
+        if (session?.user && status === 'authenticated') {
           router.push('/'); // Redirect to home page if already signed in
         }
       }, [session, router, status]);
@@ -50,12 +50,13 @@ export default function SignIn() {
     <div className="flex flex-col md:flex-row items-center justify-center min-h-screen py-2">
       <div className="hidden md:block md:w-2/3">
       <Image
-  src="https://extension.unh.edu/sites/default/files/styles/max_width_480px/public/migrated_images/trees.jpg?itok=b-gZXROM"
-  alt="Placeholder"
-  className="object-cover w-full h-full"
-  width={480} // Add the width property
-  height={480} // Add the height property
-/>      </div>
+        src="https://extension.unh.edu/sites/default/files/styles/max_width_480px/public/migrated_images/trees.jpg?itok=b-gZXROM"
+        alt="Placeholder"
+        className="object-cover w-full h-full"
+        width={480} // Add the width property
+        height={480} // Add the height property
+      />      
+      </div>
       <div className="w-full md:w-1/3 p-4">
         <form onSubmit={handleSubmit} className="shadow p-5 border-gray-300 rounded-md bg-white mb-4">
         <h2 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 mb-4">Sign back in</h2>

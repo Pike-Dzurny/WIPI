@@ -56,6 +56,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",  # adjust to match the origins you need
+    "http://frontend:3000",
+    "*",
 ]
 
 app.add_middleware(
@@ -143,22 +145,26 @@ async def authenticate_user(auth_details: AuthDetails):
         raise HTTPException(status_code=400, detail="Does not exist")
 
     # Verify the password
-    salt = db_user.salt.encode()  # convert salt to bytes
-    stored_password = binascii.unhexlify(db_user.password_hash)
-    hashed_password = hashlib.pbkdf2_hmac('sha512', auth_details.password.encode(), salt, db_user.iterations)
+    salt = db_user.salt.encode('utf-8')  # Ensure that the salt is encoded to bytes
+    hashed_password = hashlib.pbkdf2_hmac(
+        'sha512',
+        auth_details.password.encode('utf-8'),  # Ensure that the password is encoded to bytes
+        salt,
+        db_user.iterations
+    )
 
-    logging.log(logging.INFO, f"password_hash: {db_user.password_hash}")
-    logging.log(logging.INFO, f"Stored password: {stored_password}")
-    logging.log(logging.INFO, f"Hashed password: {hashed_password}")
+    hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')  # Convert to hex for comparison
+    logging.info(f"Hashed password: {hashed_password_hex}")
+    logging.info(f"Database password: {db_user.password_hash}")
+    logging.info(f"Salt: {db_user.salt}")
+    logging.info(f"Iterations: {db_user.iterations}")
+    logging.info(f"Password: {auth_details.password}")
     # If the password is incorrect, raise an HTTPException
-    if hashed_password != stored_password:
-        session.close()
+    if hashed_password_hex != db_user.password_hash:
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     # If the username and password are correct, return the user details
-    session.close()
     return {"id": db_user.id, "name": db_user.display_name, "email": db_user.email}
-
 
 
 @app.post("/post")

@@ -1,13 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {}
 
-module.exports = nextConfig
-
 module.exports = {
-    images: {
-      domains: ['localhost'],
-      domains: ['extension.unh.edu'],
-
-    },
-    
-  }
+  images: {
+    domains: ['localhost', 'extension.unh.edu', 'img1.cgtrader.com'],
+  },
+}
