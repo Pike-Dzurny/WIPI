@@ -11,9 +11,11 @@ COPY package*.json ./
 RUN npm install
 
 # Install specific dependencies
-RUN npm install lodash.debounce date-fns
+RUN npm install lodash.debounce
 RUN npm install --save-dev @types/lodash.debounce
 RUN npm install -g next
+RUN npm install date-fns
+
 
 # Copy the rest of the application code
 COPY . .
