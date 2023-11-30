@@ -1,7 +1,7 @@
 "use client";
 
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { PFP } from '../../../components/pfp';
 
 import { QueryClient, useInfiniteQuery } from 'react-query';
@@ -9,6 +9,7 @@ import { useIntersection } from '@mantine/hooks';
 import { RealPost } from '../../../components/Post/RealPost'; // Import RealPost at the top of your file
 import  ProfileCard  from '../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
 
+import { OverlayContext } from '../../../components/OverlayContext';
 
 
 import axios from 'axios';
@@ -27,6 +28,14 @@ const fetchPosts = async ({ pageParam = 1 }: QueryFunctionContext<'posts', numbe
 
 
 export default function Home() {
+
+
+  const context = useContext(OverlayContext);
+  if (!context) {
+    throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
+  }
+  const { isOverlayOpen, setIsOverlayOpen } = context;
+
 
 
   const queryClient = new QueryClient();
@@ -88,8 +97,7 @@ export default function Home() {
           <main className="w-full">
               
             <div className="relative rounded-t-2xl">
-              <ProfileCard backgroundImage="" profileImage={<PFP />} />
-            </div>
+            <ProfileCard backgroundImage="" profileImage={<PFP />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} />            </div>
 
             <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
               <Dropdown />

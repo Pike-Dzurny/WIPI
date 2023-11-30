@@ -73,6 +73,10 @@ app.add_middleware(
 class UserBase(BaseModel):
     account_name: str
 
+class UserPostBase(BaseModel):
+    user: str
+    post_content: str
+
 class SignUpUser(BaseModel):
     account_name: str
     display_name: str
@@ -168,8 +172,8 @@ async def authenticate_user(auth_details: AuthDetails):
 
 
 @app.post("/post")
-def create_post(post: PostBase):
-    db_post = Post(**post.dict())
+def create_post(user_post: UserPostBase):
+    db_post = Post(user=user_post.user, content=user_post.post_content)
     session = SessionLocal()
     session.add(db_post)
     session.commit()

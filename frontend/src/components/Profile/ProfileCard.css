@@ -1,0 +1,8 @@
+.blur {
+  }
+
+
+
+.no-blur {
+    filter: none !important;
+  }
