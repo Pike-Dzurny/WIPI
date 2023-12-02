@@ -23,8 +23,8 @@ function RootLayout({
     <QueryClientProvider client={queryClient}>
     <html lang="en">
       <AuthProvider>
-{children}
-        </AuthProvider>
+        {children}
+      </AuthProvider>
     </html>
     </QueryClientProvider>
 

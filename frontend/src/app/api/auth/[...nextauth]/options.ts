@@ -27,7 +27,7 @@ export const options: NextAuthOptions = {
               username: credentials.username,
               password: credentials.password,
             });
-    
+            
             // If the response is OK and includes user data, return the user object
             if (response.status === 200 && response.data) {
               return response.data;
@@ -46,9 +46,14 @@ export const options: NextAuthOptions = {
   pages: {
     signIn: '/signin',
     newUser: '/signup' 
-  }
+  },
+  callbacks: {
+    redirect: async ({ url, baseUrl }) => {
+      return url === baseUrl ? '/signin' : url
+    },
+  },
   
-
+  
 };
 
 export default options;
