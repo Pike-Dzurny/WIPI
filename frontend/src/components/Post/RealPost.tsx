@@ -9,9 +9,6 @@ interface User {
   account_name: string;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
-
-
 export interface Post {
   user_poster_id: number;
   content: string;
@@ -37,18 +34,18 @@ export const RealPost: React.FC<RealPostProps> = ({ post, className }) => {
 
   useEffect(() => {
     // Fetch the likes count
-    fetch(`${API_BASE_URL}/post/${post.id}/likes_count`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/likes_count`)
       .then(response => response.json())
       .then(data => setLikesCount(data.likes_count));
   
     // Check if the user has liked the post
-    fetch(`${API_BASE_URL}/post/${post.id}/is_liked_by/${someUserId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/is_liked_by/${someUserId}`)
       .then(response => response.json())
       .then(data => setIsFavorite(data.isLiked));
   }, [post.id]);
 
   function toggleLike() {
-    fetch(`${API_BASE_URL}/post/${post.id}/toggle_like/${someUserId}`, {  // include user_id in the URL
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${someUserId}`, {  // include user_id in the URL
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

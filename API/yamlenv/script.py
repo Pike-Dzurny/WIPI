@@ -138,6 +138,7 @@ async def check_username(username: Optional[str] = None):
 
 @app.post("/auth")
 async def authenticate_user(auth_details: AuthDetails):
+    logging.info("Creating an instance of PostBase")
     session = SessionLocal()
 
     # Fetch the user from the database
@@ -260,7 +261,13 @@ def get_s3_object(bucket, key):
 
 @app.get("/user/{user_id}/profile_picture")
 def get_profile_picture(user_id: int):
+    if user_id == 0:
+        return FileResponse('./defaultpfp.png', media_type='image/png')
     bucket = "yamlpfps111"  # replace with your bucket name
     key = f"pfp_{user_id}.png"  # replace with your key pattern
-    get_s3_object(bucket, key)
-    return FileResponse('./' + key, media_type='image/png')
+    result = get_s3_object(bucket, key)
+    
+    if "error" in result:
+        return FileResponse('./defaultpfp.png', media_type='image/png')
+    else:
+        return FileResponse('./' + key, media_type='image/png')

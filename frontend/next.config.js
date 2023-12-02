@@ -3,6 +3,6 @@ const nextConfig = {}
 
 module.exports = {
   images: {
-    domains: ['localhost', 'extension.unh.edu', 'img1.cgtrader.com'],
+    domains: ['localhost', 'extension.unh.edu', 'img1.cgtrader.com', 'api', 'api:8000'],
   },
 }

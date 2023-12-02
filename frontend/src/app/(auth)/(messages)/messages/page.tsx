@@ -6,6 +6,7 @@ import axios from 'axios';
 
 
 const fetchPosts = async ({ pageParam = null }) => {
+  console.log("trying to fetch posts");
   const url = pageParam ? `http://localhost:8000/posts?page=1&per_page=6&id=${pageParam}` : 'http://localhost:8000/posts?page=1&per_page=6';
   const response = await axios.get(url);
   return response.data;

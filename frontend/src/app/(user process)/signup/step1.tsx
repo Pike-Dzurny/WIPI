@@ -41,7 +41,7 @@ const Step1: FC<Step1Props> = ({ nextStep }) => {
     const checkUsernameAvailability = useCallback(debounce(async (username) => {
       // Call your API to check if the username is available
       console.log('Checking username availability...');
-      const response = await fetch(`http://localhost:8000/check-username?username=${username}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/check-username?username=${username}`);
       console.log('Response:', response);
       const data = await response.json();
     
@@ -117,11 +117,11 @@ const Step1: FC<Step1Props> = ({ nextStep }) => {
         setMessage(success.message ? 'Sign-up was successful' : 'Sign-up failed');
         if(success.message){
           console.log(success);
-          console.log(`Email: ${email}, Password: ${password}`)
+          console.log(`Username: ${username}, Password: ${password}`)
           signIn('credentials', {
             callbackUrl: '/',
             redirect: true,
-            email: email,
+            username: username,
             password: password
           });
         }

@@ -6,6 +6,16 @@ import NextAuth from 'next-auth';
 
 import axios from 'axios';
 
+class AuthDetails {
+  username: string;
+  password: string;
+
+  constructor(username: string, password: string) {
+      this.username = username;
+      this.password = password;
+  }
+}
+
 //     signOut: '/signout',
 export const options: NextAuthOptions = {
   providers: [
@@ -20,14 +30,16 @@ export const options: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       authorize: async (credentials) => {
+        console.log('Consle is being tried');  // Log the credentials
+        console.log(credentials);
         try {
           // If credentials are present, make a request to the backend for authentication
           if (credentials) {
-            const response = await axios.post(`${process.env.BACKEND_URL}/auth`, {
-              username: credentials.username,
-              password: credentials.password,
-            });
-            
+            const authDetails = new AuthDetails(credentials.username, credentials.password);
+            console.log('Sending credentials:', authDetails);  // Log the credentials
+            const response = await axios.post(`http://api:8000/auth`, authDetails);
+            console.log('Received response');  // Log the response
+
             // If the response is OK and includes user data, return the user object
             if (response.status === 200 && response.data) {
               return response.data;

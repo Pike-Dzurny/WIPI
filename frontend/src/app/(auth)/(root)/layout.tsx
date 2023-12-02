@@ -34,7 +34,7 @@ function RootLayout({
       return;
     }
   
-    console.log(session.user); // The authenticated user
+    console.log("Trying to post!"); // The authenticated user
     try {
       const response = await fetch(`http://localhost:8000/post`, {
         method: 'POST',
