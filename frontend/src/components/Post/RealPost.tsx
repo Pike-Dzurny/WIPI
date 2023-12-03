@@ -2,8 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { parseISO, formatDistanceToNow, differenceInMinutes, differenceInHours, differenceInDays, differenceInMonths, differenceInYears } from 'date-fns';
-import Link from 'next/link';
+import { differenceInYears } from 'date-fns/differenceInYears';
+import { parseISO } from 'date-fns/parseISO';
+import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+import { differenceInHours } from 'date-fns/differenceInHours';
+import { differenceInDays } from 'date-fns/differenceInDays';
+import { differenceInMonths } from 'date-fns/differenceInMonths';import Link from 'next/link';
+
+
+
 interface User {
   id: number;
   account_name: string;

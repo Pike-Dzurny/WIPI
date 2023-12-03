@@ -21,7 +21,9 @@ from postgresql_init import User, Post
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("uvicorn")
+
+
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Depends, HTTPException
@@ -74,7 +76,7 @@ class UserBase(BaseModel):
     account_name: str
 
 class UserPostBase(BaseModel):
-    user: str
+    username: str
     post_content: str
 
 class SignUpUser(BaseModel):
@@ -138,7 +140,7 @@ async def check_username(username: Optional[str] = None):
 
 @app.post("/auth")
 async def authenticate_user(auth_details: AuthDetails):
-    logging.info("Creating an instance of PostBase")
+    logging.info("Creating an instance of AuthDetails")
     session = SessionLocal()
 
     # Fetch the user from the database
@@ -174,12 +176,23 @@ async def authenticate_user(auth_details: AuthDetails):
 
 @app.post("/post")
 def create_post(user_post: UserPostBase):
-    db_post = Post(user=user_post.user, content=user_post.post_content)
-    session = SessionLocal()
-    session.add(db_post)
-    session.commit()
-    session.close()
-    return {"status": "success"}
+    logger.info("Trying to create post")
+    try:
+        print(f"User: {user_post.username}")
+        print(f"Post: {user_post.post_content}")
+
+        session = SessionLocal()
+        user = session.query(User).filter(User.name == user_post.username).first()
+        if user is None:
+            return {"status": "error", "message": "User not found"}
+
+        db_post = Post(user=user, content=user_post.post_content)
+        session.add(db_post)
+        session.commit()
+        session.close()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.get("/post/{post_id}/likes_count")
 def get_likes_count(post_id: int): 

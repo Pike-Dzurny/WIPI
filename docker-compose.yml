@@ -5,6 +5,7 @@ services:
     build: ./frontend
     environment:
       - BACKEND_URL=http://api:8000
+      - IGNORE_WATCH=true
     volumes:
       - ./frontend:/app
       - /app/node_modules

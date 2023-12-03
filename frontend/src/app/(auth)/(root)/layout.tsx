@@ -14,6 +14,11 @@ import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
 
+interface UserPostBase {
+  user: string;
+  post_content: string;
+}
+
 function RootLayout({
     children,
   }: {
@@ -34,19 +39,28 @@ function RootLayout({
       return;
     }
   
-    console.log("Trying to post!"); // The authenticated user
+    console.log("Trying to p!"); // The authenticated user
+    if (!session.user || !session.user.name) {
+      throw new Error('User or username is not defined');
+    }
+
+    // Create an instance of UserPostBase
+    const userPost: UserPostBase = {
+      user: session.user.name, // replace with the actual username
+      post_content: postContent,
+    };
+
+    console.log(userPost);
+
     try {
       const response = await fetch(`http://localhost:8000/post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          user: session.user?.name, // replace with the actual username
-          post_content: postContent,
-        }),
+        body: JSON.stringify(userPost),
       });
-  
+    
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
