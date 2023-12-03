@@ -47,17 +47,16 @@ export default function SignIn() {
       };
     if(status === 'unauthenticated') {
     return (
-    <div className="flex flex-col md:flex-row items-center justify-center min-h-screen py-2">
-      <div className="hidden md:block md:w-2/3">
-      <Image
-        src="https://extension.unh.edu/sites/default/files/styles/max_width_480px/public/migrated_images/trees.jpg?itok=b-gZXROM"
-        alt="Placeholder"
-        className="object-cover w-full h-full"
-        width={480} // Add the width property
-        height={480} // Add the height property
-      />      
+    <div className="flex flex-col md:flex-row items-center justify-center min-h-screen p-4 md:p-24">
+      <div className="hidden md:block md:w-2/3 text-center pl-20">
+        <p className="text-5xl font-bold">Your next artistic home.</p>
+        <p className="text- font-light mt-4 text-center whitespace-normal px-16">Effortlessly blend AI-generated ideas with your unique artistic style, creating a synergy that pushes the boundaries of creativity offering an endless stream of inspiration and a new frontier in the art world. Join us and be part of the movement redefining creativity.</p>
+        <div className="flex pt-4">
+          <hr className="h-0.5 border-none bg-gradient-to-l from-indigo-200 flex-grow" />
+          <hr className="h-0.5 border-none bg-gradient-to-r  from-indigo-200 flex-grow" />
+        </div>
       </div>
-      <div className="w-full md:w-1/3 p-4">
+      <div className="w-full md:w-1/3 pr-20">
         <form onSubmit={handleSubmit} className="shadow p-5 border-gray-300 rounded-md bg-white mb-4">
         <h2 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 mb-4">Sign back in</h2>
 
