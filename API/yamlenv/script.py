@@ -183,7 +183,7 @@ def create_post(user_post: UserPostBase):
         print(f"Post: {user_post.post_content}")
 
         session = SessionLocal()
-        user = session.query(User).filter(User.name == user_post.username).first()
+        user = session.query(User).filter(User.account_name == user_post.username).first()
         if user is None:
             return {"status": "error", "message": "User not found"}
 

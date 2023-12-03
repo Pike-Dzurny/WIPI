@@ -15,7 +15,7 @@ import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
 
 interface UserPostBase {
-  user: string;
+  username: string;
   post_content: string;
 }
 
@@ -46,7 +46,7 @@ function RootLayout({
 
     // Create an instance of UserPostBase
     const userPost: UserPostBase = {
-      user: session.user.name, // replace with the actual username
+      username: session.user.name, // replace with the actual username
       post_content: postContent,
     };
 
@@ -66,7 +66,8 @@ function RootLayout({
       }
   
       const data = await response.json();
-  
+      
+      console.log(data);
       if (data.status === 'success') {
         // Handle success (e.g., clear the textarea and close the overlay)
         setPostContent('');
