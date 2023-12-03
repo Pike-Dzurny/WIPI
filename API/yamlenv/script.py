@@ -55,6 +55,7 @@ from fastapi import HTTPException
 app = FastAPI()
 
 
+logger.log(logging.INFO, "aaaaaaaaaaaaaaaa")
 
 origins = [
     "http://localhost:3000",  # adjust to match the origins you need
@@ -140,7 +141,7 @@ async def check_username(username: Optional[str] = None):
 
 @app.post("/auth")
 async def authenticate_user(auth_details: AuthDetails):
-    logging.info("Creating an instance of AuthDetails")
+    logging.info(logging.INFO, "Creating an instance of AuthDetails")
     session = SessionLocal()
 
     # Fetch the user from the database
@@ -176,7 +177,7 @@ async def authenticate_user(auth_details: AuthDetails):
 
 @app.post("/post")
 def create_post(user_post: UserPostBase):
-    logger.info("Trying to create post")
+    logger.info(logging.INFO, "Trying to create post")
     try:
         print(f"User: {user_post.username}")
         print(f"Post: {user_post.post_content}")

@@ -15,6 +15,7 @@ export const PFP: React.FC = () => {
           width={200} // Width of the image
           height={200} // Height of the image
           className="rounded-full" // Makes the image circular
+          priority={true}
         />
       </div>
       <div className={clsx(
@@ -26,6 +27,7 @@ export const PFP: React.FC = () => {
           width={200} // Width of the image
           height={200} // Height of the image
           className="rounded-full" // Makes the image circular
+          priority={true}
         />
       </div>
     </div>

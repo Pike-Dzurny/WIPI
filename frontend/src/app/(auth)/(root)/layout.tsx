@@ -39,7 +39,7 @@ function RootLayout({
       return;
     }
   
-    console.log("Trying to p!"); // The authenticated user
+    console.log("Trying to pass!"); // The authenticated user
     if (!session.user || !session.user.name) {
       throw new Error('User or username is not defined');
     }

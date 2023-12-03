@@ -17,7 +17,8 @@ RUN npm install -g next
 
 
 # Copy the rest of the application code
-COPY . .
+# COPY . .
+# Don't use this while developing. It will copy the code from the host machine to the container.
 
 # Expose the port Next.js runs on
 EXPOSE 3000
