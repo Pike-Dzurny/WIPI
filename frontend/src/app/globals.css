@@ -50,7 +50,22 @@
   
 }
 
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; transform: rotateX(-90deg); }
+  10%, 90% { opacity: 1; transform: rotateX(0deg); }
+}
 
+.perspective-text {
+    perspective: 1000px;
+}
+
+.rotating-text {
+    overflow: hidden;
+}
+
+.rotating-text span {
+    animation: fadeInOut 2s linear infinite;
+}
 
 .tooltip {
   visibility: hidden;

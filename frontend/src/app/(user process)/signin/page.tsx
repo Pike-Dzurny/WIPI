@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react';
@@ -15,13 +15,30 @@ export default function SignIn() {
     const [error, setError] = useState<string | null>(null);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const words = ["home", "community", "group", "friend", "life"];
+    const [currentWord, setCurrentWord] = useState(words[0]);
+    const rotatingTextRef = useRef<HTMLElement | null>(null);
+    const [index, setIndex] = useState(0);
 
     useEffect(() => {
-        if (status === 'loading') return; // Do nothing while loading
-        if (session?.user && status === 'authenticated') {
-          router.push('/'); // Redirect to home page if already signed in
-        }
-      }, [session, router, status]);
+      if (status === 'loading') return;
+      if (session?.user && status === 'authenticated') {
+        router.push('/');
+      }
+    
+      const handleAnimationIteration = () => {
+        setIndex((index + 1) % words.length);
+      };
+    
+      const rotatingTextElement = rotatingTextRef.current;
+      if (rotatingTextElement) {
+        rotatingTextElement.addEventListener('animationiteration', handleAnimationIteration);
+      
+        return () => {
+          rotatingTextElement.removeEventListener('animationiteration', handleAnimationIteration);
+        };
+      }
+    }, [session, router, status, words]);
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -48,9 +65,20 @@ export default function SignIn() {
     if(status === 'unauthenticated') {
     return (
     <div className="flex flex-col md:flex-row items-center justify-center min-h-screen p-4 md:p-24">
-      <div className="hidden md:block md:w-2/3 text-center pl-20">
-        <p className="text-5xl font-bold">Your next artistic home.</p>
-        <p className="text- font-light mt-4 text-center whitespace-normal px-16">Effortlessly blend AI-generated ideas with your unique artistic style, creating a synergy that pushes the boundaries of creativity offering an endless stream of inspiration and a new frontier in the art world. Join us and be part of the movement redefining creativity.</p>
+      <div className="hidden md:block md:w-2/3 text-center pl-20 mx-auto">
+        <div className="flex items-center justify-center">
+          <div className="flex justify-between w-full">
+            <div className="text-right flex-1">
+              <span className="text-5xl font-bold">Your next artistic</span>
+            </div>
+            <div className="text-left ml-3 flex-1">
+              <div className="rotating-text text-5xl font-bold">
+                <span ref={rotatingTextRef}>{words[index]}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text- font-light mt-4 text-left whitespace-normal px-16">Effortlessly blend AI-generated ideas with your unique artistic style, creating a synergy that pushes the boundaries of creativity offering an endless stream of inspiration and a new frontier in the art world. Join us and be part of the movement redefining creativity.</p>
         <div className="flex pt-4">
           <hr className="h-0.5 border-none bg-gradient-to-l from-indigo-200 flex-grow" />
           <hr className="h-0.5 border-none bg-gradient-to-r  from-indigo-200 flex-grow" />
