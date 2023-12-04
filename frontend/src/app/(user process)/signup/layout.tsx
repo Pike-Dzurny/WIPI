@@ -15,7 +15,7 @@ function RootLayout({
   return (
 
     <html lang="en">
-        <body className={`${font.className} antialiased bg-gradient-to-br from-sky-50 to-cyan-100 min-h-screen` }>
+        <body className={`${font.className} antialiased bg-gradient-to-br from-sky-50 via-slate-100 to-indigo-100 min-h-screen` }>
         <div className="flex items-center justify-center min-h-screen">
                   {children}
         </div>

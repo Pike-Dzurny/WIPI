@@ -99,7 +99,7 @@ function RootLayout({
 
   if (status === 'authenticated' || status === 'loading') {
     return (
-        <body className={`${font.className} antialiased bg-gradient-to-br from-sky-50 to-cyan-100` }>
+        <body className={`${font.className} antialiased bg-gradient-to-br from-sky-50 via-slate-100 to-indigo-100` }>
             <div className={`grid grid-cols-1 md:grid-cols-3 ${isOverlayOpen ? 'blur-sm' : ''}`}>
               <div className="hidden md:block md:col-span-1">
             </div>

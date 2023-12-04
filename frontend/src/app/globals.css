@@ -39,6 +39,43 @@
 
 }
 
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.Sign_In_Button {
+  background: radial-gradient(circle at top left, #0284c7, #0ea5e9, #0284c7);
+  animation: gradient 25s linear infinite;
+  background-size: 200% 200%;
+
+}
+
+.Sign_Up_Button {
+  background: radial-gradient(circle at top right, #16a34a, #22c55e, #16a34a);
+  animation: gradient 10s linear infinite;
+  background-size: 200% 200%;
+
+}
+
+
+
+.button_animate {
+  background: linear-gradient(270deg, #ff0000, #0000ff);
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
 
 .loading-circle {
   border: 8px solid #f3f3f3;
@@ -51,8 +88,8 @@
 }
 
 @keyframes fadeInOut {
-  0%, 100% { opacity: 0; transform: rotateX(-90deg); }
-  10%, 90% { opacity: 1; transform: rotateX(0deg); }
+  0%, 90%, 100% { opacity: 0; transform: rotateX(-90deg); }
+  5%, 80% { opacity: 1; transform: rotateX(0deg); }
 }
 
 .perspective-text {
@@ -60,12 +97,31 @@
 }
 
 .rotating-text {
-    overflow: hidden;
+  
 }
 
 .rotating-text span {
-    animation: fadeInOut 2s linear infinite;
+    animation: fadeInOut 3s linear infinite;
+    transform-origin: center;
+
 }
+
+
+
+
+@keyframes resize {
+  0% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.border-animation {
+  animation: transform 0.5s ease-out;
+}
+
 
 .tooltip {
   visibility: hidden;
@@ -91,6 +147,14 @@
 
 .progress-bar {
   transition: width 0.3s ease-in-out;
+}
+
+.input-field:focus ~ .label, .input-field:valid ~ .label {
+  top: -12px;
+  left: 15px;
+  font-size: small;
+  background-color:#fff;
+  padding:0 5px 0 5px;
 }
 
 
