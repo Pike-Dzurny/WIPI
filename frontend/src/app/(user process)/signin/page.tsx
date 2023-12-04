@@ -114,7 +114,7 @@ export default function SignIn() {
               <input name="password" type="password" required className="input-field w-full p-2 border-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" />
               <label className="label absolute left-2 top-2 transition-all duration-200 text-gray-400">Password</label>
             </div>
-            <button type="submit" className="mb-4 w-full p-2 bg-sky-500 hover:bg-sky-400 text-white rounded-md Sign_In_Button">Sign In</button>
+            <button type="submit" className="mb-4 w-full p-2 text-white rounded-md Sign_In_Button hover:bg-slate-100/90">Sign In</button>
             <hr className='p-2'/>
             {error && <div className="text-center mx-auto text-red-500">{error}</div>}
 

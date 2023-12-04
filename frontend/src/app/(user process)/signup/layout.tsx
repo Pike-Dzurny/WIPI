@@ -1,10 +1,11 @@
 "use client";
 
-import { Roboto } from 'next/font/google'
 import './../../globals.css'
 import AuthProvider from '../../../components/AuthProvider';
-const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
+import ParticleBackground from '../../../components/Particles/particle';
 
+import { Inter } from 'next/font/google'
+const font = Inter({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
 function RootLayout({
   children,
@@ -18,6 +19,7 @@ function RootLayout({
         <body className={`${font.className} antialiased bg-gradient-to-br from-sky-50 via-slate-100 to-indigo-100 min-h-screen` }>
         <div className="flex items-center justify-center min-h-screen">
                   {children}
+                  <ParticleBackground />
         </div>
         </body>
     </html>
