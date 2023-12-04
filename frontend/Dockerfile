@@ -12,6 +12,7 @@ RUN npm install
 
 # Install specific dependencies
 RUN npm install lodash.debounce
+RUN npm install react-tsparticles
 RUN npm install --save-dev @types/lodash.debounce
 RUN npm install -g next
 

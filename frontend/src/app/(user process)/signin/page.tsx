@@ -5,7 +5,9 @@ import { Inter } from 'next/font/google'
 const font = Inter({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
 import React from 'react';
-import Particles from 'react-tsparticles';
+import Particles from "react-particles";
+import { loadSlim } from "tsparticles-slim"; // if you are going to use `loadSlim`, install the "tsparticles-slim" package too.
+
 
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react';
@@ -31,11 +33,25 @@ export default function SignIn() {
   const rotatingTextRef = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState(0);
 
+  const particlesInit = useCallback(async engine => {
+    console.log(engine);
+    // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
+    // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+    // starting from v2 you can add only the features you need reducing the bundle size
+    //await loadFull(engine);
+    await loadSlim(engine);
+}, []);
+
+const particlesLoaded = useCallback(async container => {
+    console.log(container);
+}, []);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (session?.user && status === 'authenticated') {
       router.push('/');
     }
+
   
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % words.length);
@@ -74,33 +90,16 @@ export default function SignIn() {
     }
   }, [router]);
 
+
+
   if (status === 'unauthenticated') {
     return (
       <div className={`${font.className} flex flex-col md:flex-row items-center justify-center min-h-screen p-4 md:p-24 pt-16 md:pt-24 px-`}>
         <header className="fixed flex top-0 left-0 right-0 items-right justify-end py-4 px-8 backdrop-blur-2xl bg-opacity-30 font-light">
           <div className="flex">test</div>
         </header>
-        <Particles
-            id="tsparticles"
-            options={{
-                particles: {
-                    number: {
-                        value: 50,
-                    },
-                    size: {
-                        value: 3,
-                    },
-                },
-                interactivity: {
-                    events: {
-                        onhover: {
-                            enable: true,
-                            mode: "repulse",
-                        },
-                    },
-                },
-            }}
-        />
+        <Particles id="tsparticles" url="http://foo.bar/particles.json" init={particlesInit} loaded={particlesLoaded} />
+
         <div className="hidden md:block md:w-2/3 md:h-max text-center med:px-20 mx-auto py-32">
           <div className="flex items-center justify-center">
             <div className="flex items-center justify-between w-full h-full">
