@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Inter } from 'next/font/google'
 const font = Inter({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
+
 import React from 'react';
 import Particles from 'react-tsparticles';
-
 
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react';
@@ -85,90 +85,20 @@ export default function SignIn() {
             options={{
                 particles: {
                     number: {
-                        value: 200,
-                        density: {
-                            enable: true,
-                            value_area: 800
-                        }
-                    },
-                    color: {
-                        value: "#ffffff"
-                    },
-                    shape: {
-                        type: "circle",
-                    },
-                    opacity: {
-                        value: 0.5,
-                        random: false,
-                        anim: {
-                            enable: false,
-                        }
+                        value: 50,
                     },
                     size: {
-                        value: 5,
-                        random: true,
-                        anim: {
-                            enable: false,
-                        }
+                        value: 3,
                     },
-                    line_linked: {
-                        enable: false,
-                    },
-                    move: {
-                        enable: true,
-                        speed: 2,
-                        direction: "none",
-                        random: false,
-                        straight: false,
-                        out_mode: "out",
-                        bounce: false,
-                        attract: {
-                            enable: false,
-                            rotateX: 600,
-                            rotateY: 1200
-                        }
-                    }
                 },
                 interactivity: {
-                    detect_on: "canvas",
                     events: {
                         onhover: {
                             enable: true,
-                            mode: "repulse"
+                            mode: "repulse",
                         },
-                        onclick: {
-                            enable: true,
-                            mode: "push"
-                        },
-                        resize: true
                     },
-                    modes: {
-                        grab: {
-                            distance: 400,
-                            line_linked: {
-                                opacity: 1
-                            }
-                        },
-                        bubble: {
-                            distance: 400,
-                            size: 40,
-                            duration: 2,
-                            opacity: 8,
-                            speed: 3
-                        },
-                        repulse: {
-                            distance: 200,
-                            duration: 0.4
-                        },
-                        push: {
-                            particles_nb: 4
-                        },
-                        remove: {
-                            particles_nb: 2
-                        }
-                    }
                 },
-                retina_detect: true
             }}
         />
         <div className="hidden md:block md:w-2/3 md:h-max text-center med:px-20 mx-auto py-32">

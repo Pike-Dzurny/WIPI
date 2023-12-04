@@ -30,8 +30,7 @@
     "react-dom": "^18",
     "react-query": "^3.39.3",
     "react-tsparticles": "^2.12.2",
-    "theme-change": "^2.5.0",
-    "tsparticles": "^2.12.0"
+    "theme-change": "^2.5.0"
   },
   "devDependencies": {
     "@types/cookies": "^0.7.10",
