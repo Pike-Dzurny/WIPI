@@ -32,6 +32,9 @@ const config: Config = {
         'gradient': 'gradient 1.5s ease infinite',
 
       },
+      spacing: {
+        '2.5': '10px',
+      }
     },
   },
 }

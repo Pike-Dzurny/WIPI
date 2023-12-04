@@ -5,8 +5,6 @@ import { Inter } from 'next/font/google'
 const font = Inter({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
 import React from 'react';
-import Particles from "react-particles";
-import { loadSlim } from "tsparticles-slim"; // if you are going to use `loadSlim`, install the "tsparticles-slim" package too.
 
 
 import { useRouter } from 'next/navigation'
@@ -32,19 +30,14 @@ export default function SignIn() {
   const [currentWord, setCurrentWord] = useState(words[0]);
   const rotatingTextRef = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState(0);
+  
 
-  const particlesInit = useCallback(async engine => {
-    console.log(engine);
-    // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
-    // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
-    // starting from v2 you can add only the features you need reducing the bundle size
-    //await loadFull(engine);
-    await loadSlim(engine);
-}, []);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-const particlesLoaded = useCallback(async container => {
-    console.log(container);
-}, []);
+  const isActivated = username !== '' && password !== '';
+
+
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -98,8 +91,6 @@ const particlesLoaded = useCallback(async container => {
         <header className="fixed flex top-0 left-0 right-0 items-right justify-end py-4 px-8 backdrop-blur-2xl bg-opacity-30 font-light">
           <div className="flex">test</div>
         </header>
-        <Particles id="tsparticles" url="http://foo.bar/particles.json" init={particlesInit} loaded={particlesLoaded} />
-
         <div className="hidden md:block md:w-2/3 md:h-max text-center med:px-20 mx-auto py-32">
           <div className="flex items-center justify-center">
             <div className="flex items-center justify-between w-full h-full">
@@ -126,15 +117,15 @@ const particlesLoaded = useCallback(async container => {
             <h2 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-700 mb-4">Sign back in</h2>
 
             <div className="relative mb-4">
-              <input name="username" required className="input-field w-full p-2 border-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" />
-              <label className="label absolute left-2 top-2 transition-all duration-200 text-gray-400">Username</label>
+              <input id="username" name="username" required value={username} className="input-field w-full p-2 border border-gray-300 shadow-sm  focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" onChange={(e) => setUsername(e.target.value)} />
+              <label htmlFor="username" className="label absolute left-2 top-2.5 transition-all duration-200 text-gray-400">Username or Email</label>
             </div>
 
             <div className="relative mb-4">
-              <input name="password" type="password" required className="input-field w-full p-2 border-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" />
-              <label className="label absolute left-2 top-2 transition-all duration-200 text-gray-400">Password</label>
+              <input id="password" name="password" type="password" required value={password} className="input-field w-full p-2 border shadow-sm  border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" onChange={(e) => setPassword(e.target.value)} />
+              <label htmlFor="password" className="label absolute left-2 top-2.5 transition-all duration-200 text-gray-400">Password</label>
             </div>
-            <button type="submit" className="mb-4 w-full p-2 text-white rounded-md Sign_In_Button hover:bg-slate-100/90">Sign In</button>
+            <button type="submit" className={`mb-4 w-full p-2 text-white rounded-md ${isActivated ? 'Sign_In_Button--activated' : ' bg-sky-300 cursor-not-allowed hover:bg-sky-200'}`}>Sign In</button>
             <hr className='p-2'/>
             {error && <div className="text-center mx-auto text-red-500">{error}</div>}
 
@@ -147,7 +138,7 @@ const particlesLoaded = useCallback(async container => {
             <Link href="/signup" className='w-full'>
             <div className='relative'>
               <div className="absolute w-full p-2 inset-0 rounded-md bg-green-300 blur-sm group-hover:bg-green-500 group-hover:blur trasnition duration-1000 group-hover:duration-300"></div>
-              <div className="relative w-full p-2 text-white text-center rounded-md Sign_Up_Button">Sign Up</div>
+              <div className={`relative w-full p-2 text-white text-center rounded-md Sign_Up_Button`}>Sign Up</div>
             </div>
             </Link>
           </div>

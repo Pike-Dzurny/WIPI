@@ -51,11 +51,21 @@
   }
 }
 
-.Sign_In_Button {
+.Sign_In_Button--deactivated {
+  background: radial-gradient(circle at top left, #0284c7, #bae6fd, #0284c7);
+  animation: gradient 25s linear infinite;
+  background-size: 200% 200%;
+  cursor: not-allowed;
+}
+
+
+.Sign_In_Button--deactivated:hover {
+  background-color: #7dd3fc; /* replace with the color you want */
+}
+.Sign_In_Button--activated {
   background: radial-gradient(circle at top left, #0284c7, #0ea5e9, #0284c7);
   animation: gradient 25s linear infinite;
   background-size: 200% 200%;
-
 }
 
 .Sign_Up_Button {

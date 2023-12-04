@@ -139,12 +139,10 @@ const Step1: FC<Step1Props> = ({ nextStep }) => {
               <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign up for an account</h2>
             </div>
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">Email address</label>
-            <div className="mt-2">
-              <input id="email" name="email" type="email" required className="focus:outline-none p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-sky-300 sm:text-sm sm:leading-6" />
-            </div>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="relative mb-4">
+            <input id="email" name="email" type="email" required className="input-field w-full p-2 border-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" />
+            <label htmlFor="email" className="label absolute left-2 top-2.5 transition-all duration-200 text-gray-400">Email address</label>
           </div>
               
           <div className="relative">
