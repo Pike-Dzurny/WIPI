@@ -117,7 +117,8 @@ const Step1: FC<Step1Props> = ({ nextStep }) => {
         setMessage(success.message ? 'Sign-up was successful' : 'Sign-up failed');
         if(success.message){
           console.log(success);
-          console.log(`Username: ${username}, Password: ${password}`)
+          console.log(`Username: ${username}, Password: ${password}, userId: ${success.userId}`)
+          const userId = success.userId;
           signIn('credentials', {
             callbackUrl: '/',
             redirect: true,
@@ -140,11 +141,10 @@ const Step1: FC<Step1Props> = ({ nextStep }) => {
             </div>
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="relative mb-4">
-            <input id="email" name="email" type="email" required className="input-field w-full p-2 border-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" />
-            <label htmlFor="email" className="label absolute left-2 top-2.5 transition-all duration-200 text-gray-400">Email address</label>
+        <div className="relative">
+            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">Email</label>
+            <input id="email" name="email" type="email" required className="mt-2 p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:outline-none ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" />
           </div>
-              
           <div className="relative">
           <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">Username</label>
           <div className="mt-2 relative">

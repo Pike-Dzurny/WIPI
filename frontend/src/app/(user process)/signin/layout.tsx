@@ -18,7 +18,7 @@ export default function RootLayout({
   
   return (
     <html lang="en">
-      <body className={`${font.className} antialiased min-h-screen bg-gradient-to-br from-sky-50 via-slate-100 to-indigo-100`}>
+      <body className={`${font.className} antialiased min-h-screen bg-gradient-to-br from-sky-100 via-slate-100 to-indigo-100`}>
         <div className="flex items-center justify-center min-h-screen">
         <AuthProvider>
           {children}

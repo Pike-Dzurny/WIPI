@@ -90,9 +90,9 @@ const AboutPage = () => {
           </div>
         </div>
       </div>
-            <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
-              <Dropdown />
-            </div>
+      <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
+        <Dropdown />
+      </div>
       <div className='p-8 flex-col-reverse overflow-auto'>
 
             {data?.pages.map((page, i) => (

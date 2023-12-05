@@ -10,14 +10,15 @@ from sqlalchemy.orm import sessionmaker
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import joinedload, relationship
 
+from sqlalchemy import desc
 
-import boto3
-from botocore.exceptions import NoCredentialsError, ClientError
-import botocore
+#import boto3
+#from botocore.exceptions import NoCredentialsError, ClientError
+#import botocore
 
 from fastapi.responses import FileResponse
 
-from postgresql_init import User, Post
+from postgresql_init import User, Post, post_likes
 
 import logging
 
@@ -79,6 +80,7 @@ class UserBase(BaseModel):
 class UserPostBase(BaseModel):
     username: str
     post_content: str
+    
 
 class SignUpUser(BaseModel):
     account_name: str
@@ -91,6 +93,7 @@ class SignUpUser(BaseModel):
 class AuthDetails(BaseModel):
     username: str
     password: str
+    reply_to: Optional[int] = None
 
 class UsernameAvailability(BaseModel):
     available: bool
@@ -99,6 +102,9 @@ class UsernameAvailability(BaseModel):
 class PostBase(BaseModel):
     user_poster_id: int
     content: str
+    likes_count: int
+    #comments_count: int
+    #respost_count: int
 
 @app.post("/signup")
 async def create_user(user: SignUpUser):
@@ -118,7 +124,7 @@ async def create_user(user: SignUpUser):
     logging.info(f"Created user with username {db_user.account_name}")
     logging.info(f"Created user with password {db_user.password_hash}")
     session.close()
-    return {"message": "User created successfully"}
+    return {"id": db_user.id}
 
 @app.get("/check-username", response_model=UsernameAvailability)
 async def check_username(username: Optional[str] = None):
@@ -187,13 +193,48 @@ def create_post(user_post: UserPostBase):
         if user is None:
             return {"status": "error", "message": "User not found"}
 
-        db_post = Post(user=user, content=user_post.post_content)
+        # Use the reply_to field when creating the Post object
+        db_post = Post(user=user, content=user_post.post_content, reply_to=user_post.reply_to)
         session.add(db_post)
         session.commit()
         session.close()
         return {"status": "success"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    
+@app.get("/post/{post_id}")
+def get_post(post_id: int, page: int = 1, per_page: int = 6):
+    offset = (page - 1) * per_page
+    session = SessionLocal()
+    post = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture, func.count(post_likes.c.post_id).label('likes_count'), func.array_agg(Comment.id).label('comment_ids'))
+            .join(User, Post.user_poster_id == User.id)  # Join the User table
+            .outerjoin(post_likes, Post.id == post_likes.c.post_id)  # Join the post_likes table
+            .outerjoin(Comment, Post.id == Comment.post_id)  # Join the Comment table
+            .filter(Post.id == post_id)  # Filter by post_id
+            .group_by(Post.id, User.id)  # Group by Post.id and User.id
+            .order_by(desc(Post.date_of_post))
+            .offset(offset)
+            .limit(per_page)
+            .first())
+    session.close()
+    if post is None:
+        return {"status": "error", "message": "Post not found"}
+    post, account_name, bio, display_name, profile_picture, likes_count, comment_ids = post
+    return {"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}, "comment_ids": comment_ids}}
+
+@app.get("/post/{post_id}/comments")
+def read_comments(post_id: int, page: int = 1, per_page: int = 6):
+    offset = (page - 1) * per_page
+    session = SessionLocal()
+    comments = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture)
+                .join(User, Post.user_poster_id == User.id)  # Join the User table
+                .filter(Post.reply_to == post_id)  # Filter by reply_to field
+                .order_by(desc(Post.date_of_post))
+                .offset(offset)
+                .limit(per_page)
+                .all())
+    session.close()
+    return [{"comment": {**comment.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for comment, account_name, bio, display_name, profile_picture in comments]
 
 @app.get("/post/{post_id}/likes_count")
 def get_likes_count(post_id: int): 
@@ -209,14 +250,18 @@ def toggle_like(post_id: int, user_id: int):
     try:
         post = session.query(Post).get(post_id)
         user = session.query(User).get(user_id)
+        if post is None or user is None:
+            return {"status": "error", "message": "Post or User not found"}
         if post in user.liked_posts:
             # If the post is already liked by the user, unlike it
             logging.info("unliking")
             user.liked_posts.remove(post)
+            post.likes_count -= 1  # decrement the likes_count field
         else:
             # If the post is not liked by the user, like it
             logging.info("liking")
             user.liked_posts.append(post)
+            post.likes_count += 1  # increment the likes_count field
         session.flush()  # flush the session to update the relationship immediately
         session.commit()
     except:
@@ -246,9 +291,16 @@ def read_users():
 def read_posts(page: int = 1, per_page: int = 6):
     offset = (page - 1) * per_page
     session = SessionLocal()
-    posts = session.query(Post).options(joinedload(Post.user)).offset(offset).limit(per_page).all()
+    posts = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture, func.count(post_likes.c.post_id).label('likes_count'))
+            .join(User, Post.user_poster_id == User.id)  # Join the User table
+            .outerjoin(post_likes, Post.id == post_likes.c.post_id)  # Assuming Like has a post_id field
+            .group_by(Post.id, Post.user_poster_id, Post.date_of_post, Post.content, Post.reply_to, User.account_name, User.bio, User.display_name, User.profile_picture)  # Group by all non-aggregated columns
+            .order_by(desc(Post.date_of_post))
+            .offset(offset)
+            .limit(per_page)
+            .all())
     session.close()
-    return posts
+    return [{"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for post, account_name, bio, display_name, profile_picture, likes_count in posts]
 
 @app.get("/user/{user_id}/posts")
 def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
@@ -264,24 +316,26 @@ def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
     return posts
 
 def get_s3_object(bucket, key):
-    s3 = boto3.client('s3')
+    return 
+    #s3 = boto3.client('s3')
 
-    try:
-        s3.download_file(bucket, key, './' + key)
-    except botocore.exceptions.ClientError as e:
-        print(f"Error getting object {key} from bucket {bucket}. Make sure they exist and your bucket is in the same region as this function.")
-        print(e)
-        return {"error": "Could not download file"}
+    #try:
+    #    s3.download_file(bucket, key, './' + key)
+    #except botocore.exceptions.ClientError as e:
+    #    print(f"Error getting object {key} from bucket {bucket}. Make sure they exist and your bucket is in the same region as this function.")
+    #    print(e)
+    #    return {"error": "Could not download file"}
 
 @app.get("/user/{user_id}/profile_picture")
 def get_profile_picture(user_id: int):
-    if user_id == 0:
-        return FileResponse('./defaultpfp.png', media_type='image/png')
-    bucket = "yamlpfps111"  # replace with your bucket name
-    key = f"pfp_{user_id}.png"  # replace with your key pattern
-    result = get_s3_object(bucket, key)
+    #if user_id == 0:
+    #if user_id:
+    return FileResponse('./defaultpfp.png', media_type='image/png')
+    #bucket = "yamlpfps111"  # replace with your bucket name
+    #key = f"pfp_{user_id}.png"  # replace with your key pattern
+    #result = get_s3_object(bucket, key)
     
-    if "error" in result:
-        return FileResponse('./defaultpfp.png', media_type='image/png')
-    else:
-        return FileResponse('./' + key, media_type='image/png')
+    #if "error" in result:
+    #    return FileResponse('./defaultpfp.png', media_type='image/png')
+    #else:
+    #    return FileResponse('./' + key, media_type='image/png')

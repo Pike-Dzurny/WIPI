@@ -1,14 +1,18 @@
 "use client";
 
-import { Roboto } from 'next/font/google'
 import './../globals.css'
 import { Sidebar } from '../../components/Sidebar/Sidebar';
 
 import AuthProvider from '../../components/AuthProvider';
 
+
+
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
+import Head from 'next/head';
+
+import { Inter } from 'next/font/google'
+const font = Inter({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
 
 function RootLayout({
@@ -21,6 +25,8 @@ function RootLayout({
   return (
 
     <QueryClientProvider client={queryClient}>
+    <Head>
+    </Head>
     <html lang="en">
       <AuthProvider>
         {children}

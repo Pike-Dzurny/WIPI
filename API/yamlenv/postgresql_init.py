@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 import os
 from dotenv import load_dotenv
-from sqlalchemy import inspect
+from sqlalchemy import inspect, MetaData
 
 # Check if the script is being run by Docker Compose
 if os.getenv('COMPOSE_PROJECT_NAME'):
@@ -29,12 +29,6 @@ print(postgres_user)
 
 Base = declarative_base()
 
-post_likes = Table(
-    'post_likes',
-    Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id')),
-    Column('post_id', Integer, ForeignKey('posts.id'))
-)
 
 
 class User(Base):
@@ -55,12 +49,8 @@ class User(Base):
 
     # Define relationships
 
-    posts = relationship("Post", backref="user")
-    liked_posts = relationship(
-        "Post",
-        secondary=post_likes,
-        backref=backref("liked_by", lazy='dynamic')
-    ) 
+    posts = relationship("Post", back_populates="poster")
+
 
 
 class Post(Base):
@@ -72,6 +62,34 @@ class Post(Base):
     date_of_post = Column(DateTime(timezone=True), default=func.now())
     content = Column(String)
     likes_count = Column(Integer, default=0)
+
+    poster = relationship("User", back_populates="posts")
+        
+    reply_to = Column(Integer, ForeignKey('posts.id'))  # New field
+    replies = relationship('Post', backref=backref('parent', remote_side=[id]))
+
+
+
+
+
+post_likes = Table(
+    'post_likes',
+    Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('post_id', Integer, ForeignKey('posts.id'))
+)
+
+User.liked_posts = relationship(
+    "Post",
+    secondary=post_likes,
+    lazy='dynamic'
+)
+
+Post.liked_by = relationship(
+    "User",
+    secondary=post_likes,
+    lazy='dynamic'
+)
 
 def main():
     engine = create_engine(f'postgresql://postgres:{postgres_password}@localhost:5432/mydatabase')

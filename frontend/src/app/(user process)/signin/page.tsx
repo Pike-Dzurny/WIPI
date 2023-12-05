@@ -14,8 +14,8 @@ import Image from 'next/image';
 
 
 
-const words = ["home", "friend", "group", "clique", "band"];
-const colorClasses = ['bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500', 'bg-gradient-to-r from-sky-400 via-rose-400 to-lime-400', 'bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400', 'bg-gradient-to-r from-red-500 to-red-800', 'bg-gradient-to-r from-fuchsia-600 to-pink-600', 'bg-gradient-to-r from-rose-400 to-orange-300', 'bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500'];
+const words = ["home", "passion", "group", "clique", "band"];
+const colorClasses = ['bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500', 'bg-gradient-to-r from-sky-400 via-rose-400 to-green-400', 'bg-gradient-to-r from-fuchsia-500 via-red-600 to-orange-400', 'bg-gradient-to-r from-red-500 to-red-800', 'bg-gradient-to-r from-fuchsia-600 to-pink-600', 'bg-gradient-to-r from-rose-400 to-orange-300', 'bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500'];
 
 
 /**
@@ -34,6 +34,8 @@ export default function SignIn() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const [PromptisVisible, setPromptIsVisible] = useState(false);
 
   const isActivated = username !== '' && password !== '';
 
@@ -74,6 +76,8 @@ export default function SignIn() {
       console.log(result);
       if (result?.ok && result.url) {
         console.log(`Result_URL: ${result.url} | Result_OK: ${result.ok} | Result: ${result}`);
+        setPromptIsVisible(true);
+        await router.prefetch('/');
         router.push('/');
       } else {
         setError('Sorry, your password was incorrect. Please double-check your password.');
@@ -87,7 +91,7 @@ export default function SignIn() {
 
   if (status === 'unauthenticated') {
     return (
-      <div className={`${font.className} flex flex-col md:flex-row items-center justify-center min-h-screen p-4 md:p-24 pt-16 md:pt-24 px-`}>
+      <div className={`${font.className} flex flex-col md:flex-row items-center justify-center min-h-screen p-4 md:p-24 pt-16 md:pt-24`}>
         <header className="fixed flex top-0 left-0 right-0 items-right justify-end py-4 px-8 backdrop-blur-2xl bg-opacity-30 font-light">
           <div className="flex">test</div>
         </header>
@@ -112,7 +116,7 @@ export default function SignIn() {
             <hr className="h-0.5 border-none bg-gradient-to-r  from-indigo-200 flex-grow" />
           </div>
         </div>
-        <div className="w-full md:w-1/3 med:pr-20 flex flex-col items-center justify-center">
+        <div className="w-full  md:block md:w-1/3 med:pr-20 flex flex-col items-center justify-center">
           <form onSubmit={handleSubmit} className="shadow p-5 border-gray-200 rounded-md bg-white mb-4 w-full">
             <h2 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-700 mb-4">Sign back in</h2>
 
@@ -125,8 +129,12 @@ export default function SignIn() {
               <input id="password" name="password" type="password" required value={password} className="input-field w-full p-2 border shadow-sm  border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-400 rounded-md" onChange={(e) => setPassword(e.target.value)} />
               <label htmlFor="password" className="label absolute left-2 top-2.5 transition-all duration-200 text-gray-400">Password</label>
             </div>
-            <button type="submit" className={`mb-4 w-full p-2 text-white rounded-md ${isActivated ? 'Sign_In_Button--activated' : ' bg-sky-300 cursor-not-allowed hover:bg-sky-200'}`}>Sign In</button>
+            <div className='relative w-full'>
+              <div className={`${isActivated ? '' : 'hidden'} absolute w-full mb-4  p-2 inset-0 rounded-md bg-blue-300 hover:bg-blue-800 blur-sm hover:blur-xl trasnition duration-1000 hover:duration-300`}></div>
+              <button type="submit" className={`w-full relative mb-4 p-2 text-white rounded-md ${isActivated ? 'Sign_In_Button--activated' : ' bg-sky-300 cursor-not-allowed hover:bg-sky-200'}`}>Sign In</button>
+            </div>
             <hr className='p-2'/>
+
             {error && <div className="text-center mx-auto text-red-500">{error}</div>}
 
             <Link href="/forgot-password">
@@ -144,7 +152,25 @@ export default function SignIn() {
           </div>
         </div>
 
+        {PromptisVisible && (
+        <div className="fixed inset-x-0 bottom-0 sm:flex sm:justify-center lg:px-8 md:pb-4">
+        
+        
+        <div className="pointer-events-auto flex items-center justify-between gap-x-6 bg-red-500 px-6 py-2.5 sm:rounded-md sm:py-3 sm:pl-4 sm:pr-3.5">
+          <p className="text-sm leading-6 text-white">
+              You are now logged in. You are being redirected.
+          </p>
+          <button type="button" className="-m-1.5 flex-none p-1.5">
+            <svg className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" onClick={() => setPromptIsVisible(false)}  />
+            </svg>
+          </button>
+        </div>
       </div>
+      )}
+
+      </div>
+      
     );
   }
 }

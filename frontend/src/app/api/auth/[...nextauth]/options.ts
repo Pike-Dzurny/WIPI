@@ -6,6 +6,17 @@ import NextAuth from 'next-auth';
 
 import axios from 'axios';
 
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      name: string | null;
+      email: string | null;
+      image: string | null;
+      id: number; // Add the id field
+    };
+  }
+}
+
 class AuthDetails {
   username: string;
   password: string;
@@ -63,6 +74,22 @@ export const options: NextAuthOptions = {
     redirect: async ({ url, baseUrl }) => {
       return url === baseUrl ? '/signin' : url
     },
+    async jwt({ token, user }) {
+      // If user object is available (i.e., on sign in), add the user's ID to the JWT
+      console.log('JWT is being tried');  // Log the credentials
+      if (user) {
+        token.userId = user.id;
+      }
+      return token;
+    },
+
+    async session({ session, token }) {
+      // Add the user's ID from the JWT to the session object
+      console.log('Session is being tried');  // Log the credentials
+      (session.user as any).id = token.userId;
+      return session;
+    }
+    
   },
   
   

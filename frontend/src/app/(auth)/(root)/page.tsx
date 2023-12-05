@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 
 import React, { useEffect, useState, useContext } from 'react';
 import { PFP } from '../../../components/pfp';
@@ -35,6 +36,9 @@ export default function Home() {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
   }
   const { isOverlayOpen, setIsOverlayOpen } = context;
+
+  const { data: session } = useSession();
+  console.log(session);
 
 
 
@@ -77,17 +81,21 @@ export default function Home() {
 
 
   interface User {
-    id: number;
     account_name: string;
+    bio: string | null;
+    display_name: string;
+    profile_picture: string | null;
   }
   
   interface Post {
-    user_poster_id: number;
-    content: string;
     date_of_post: string;
+    likes_count: number;
     id: number;
+    content: string;
+    user_poster_id: number;
     user: User;
   }
+  
   
   
 
@@ -110,7 +118,7 @@ export default function Home() {
                   {page.map((post: Post, index: number) => {
                     const postElement = (
                       <div className="h-100" key={post.id}>
-                        <RealPost post={post} />
+                        <RealPost postObject={post} id={session?.user.id} />
                       </div>
                     );
 

@@ -23,7 +23,10 @@ export const handleSignUp = async (username: string, password: string, email: st
 
   // Handle the response from the server
   if (response.ok) {
-    return { message: 'Sign-up was successful' };
+    const userData = await response.json();
+    // Assuming that the backend returns the user ID in the response
+    const userId = userData.id;
+    return { message: 'Sign-up was successful', userId: userId };
   } else {
     const data = await response.json();
     return { message: data.message };

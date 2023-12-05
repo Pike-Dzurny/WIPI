@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS posts (
     user_poster_id INTEGER REFERENCES users (id),
     date_of_post TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR,
-    likes_count INTEGER DEFAULT 0
+    likes_count INTEGER DEFAULT 0,
+    reply_to INTEGER REFERENCES posts (id)
 );
 
 CREATE TABLE IF NOT EXISTS post_likes (

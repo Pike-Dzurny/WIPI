@@ -12,38 +12,44 @@ import { differenceInMonths } from 'date-fns/differenceInMonths';import Link fro
 
 
 interface User {
-  id: number;
   account_name: string;
+  bio: string | null;
+  display_name: string;
+  profile_picture: string | null;
 }
 
-export interface Post {
-  user_poster_id: number;
-  content: string;
+interface Post {
   date_of_post: string;
+  likes_count: number;
   id: number;
+  content: string;
+  user_poster_id: number;
   user: User;
 }
 
 
 interface RealPostProps {
-  post: Post;
+  postObject: Post;
   className?: string;
+  id: number;
 }
 
-export const RealPost: React.FC<RealPostProps> = ({ post, className }) => {
+export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isChatBubble, setIsChatBubble] = useState(false);
   const [isChangeCircle, setIsChangeCircle] = useState(false);
+  let post = postObject.post;
+  const [likes_count, setLikesCount] = useState(post.likes_count);
 
-  const [likes_count, setLikesCount] = useState(0);
+  const someUserId = id;
 
-  const someUserId = 1;
+  console.log(id);
 
   useEffect(() => {
     // Fetch the likes count
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/likes_count`)
-      .then(response => response.json())
-      .then(data => setLikesCount(data.likes_count));
+    //fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/likes_count`)
+    //  .then(response => response.json())
+    //  .then(data => setLikesCount(data.likes_count));
   
     // Check if the user has liked the post
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/is_liked_by/${someUserId}`)
@@ -52,15 +58,19 @@ export const RealPost: React.FC<RealPostProps> = ({ post, className }) => {
   }, [post.id]);
 
   function toggleLike() {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${someUserId}`, {  // include user_id in the URL
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${someUserId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     })
-    .then(() => {
-      setIsFavorite(prevIsFavorite => !prevIsFavorite);
-      setLikesCount(prevCount => prevCount + (isFavorite ? -1 : 1));
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        setIsFavorite(prevIsFavorite => !prevIsFavorite);
+        setLikesCount(prevCount => prevCount + (isFavorite ? -1 : 1));
+      } else {
+      }
     });
   }
 
@@ -77,6 +87,7 @@ export const RealPost: React.FC<RealPostProps> = ({ post, className }) => {
   }
 
   let paddingClass = 'pr-4 pb-2 pl-2';
+
   if (post.content.length > 50) paddingClass = 'pr-4 pb-2 pl-2';
   if (post.content.length > 100) paddingClass = 'pr-4 pb-4 pl-2';
 
