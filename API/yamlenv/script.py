@@ -1,69 +1,57 @@
-from pydantic import BaseModel
-from fastapi import FastAPI
-from sqlalchemy.orm import Session
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import func
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, create_engine, ForeignKey, Table
-from sqlalchemy.orm import sessionmaker
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import joinedload, relationship
-
-from sqlalchemy import desc
-
-#import boto3
-#from botocore.exceptions import NoCredentialsError, ClientError
-#import botocore
-
-from fastapi.responses import FileResponse
-
-from postgresql_init import User, Post, post_likes
-
-import logging
-
-logger = logging.getLogger("uvicorn")
-
-
-
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi import Depends, HTTPException
-import hashlib
 import binascii
-
-import re
+import hashlib
+import logging
 import os
+import re
+# import boto3
+# import botocore
+# from botocore.exceptions import NoCredentialsError, ClientError
+#import pytest
+from sqlite3 import IntegrityError
+from typing import Optional
+
+# fastapi imports
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from sqlalchemy import create_engine, desc, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
+
+# models and postgresql_init are in the same directory as this script
+from models import AuthDetails, SignUpUser, UserPostBase, UsernameAvailability
+from postgresql_init import Post, User, post_likes
 
 
 
 
+# The declarative_base() function returns a class that is used as a base class for our models
 Base = declarative_base()
 
 # Retrieve the DATABASE_URL from the environment variables
-database_url = os.getenv('DATABASE_URL')
-
 # If the DATABASE_URL is not found, fall back to a default or throw an error
+# Then create the SQLAlchemy engine using the DATABASE_URL
+database_url = os.getenv('DATABASE_URL')
 if not database_url:
     raise ValueError("DATABASE_URL environment variable not found")
-
-# Create the SQLAlchemy engine using the DATABASE_URL
 engine = create_engine(database_url)
 
+# SessionLocal is a class that can be used to create a database session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-from typing import Optional
-from fastapi import HTTPException
 
+# FastAPI() is the main application object
 app = FastAPI()
 
-
-logger.log(logging.INFO, "aaaaaaaaaaaaaaaa")
-
+# Origins for CORS
 origins = [
     "http://localhost:3000",  # adjust to match the origins you need
     "http://frontend:3000",
     "*",
 ]
 
+# Add the middleware to the FastAPI app
+# Middleware is code that runs before the request is processed
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -73,79 +61,39 @@ app.add_middleware(
 )
 
 
-
-class UserBase(BaseModel):
-    account_name: str
-
-class UserPostBase(BaseModel):
-    """
-    Represents the structure of a user post.
-
-    Args:
-        username (str): The username of the user making the post.
-        post_content (str): The content of the post.
-        reply_to (Optional[int], optional): The ID of the post being replied to. Defaults to None.
-
-    Attributes:
-        username (str): The username of the user making the post.
-        post_content (str): The content of the post.
-        reply_to (Optional[int]): The ID of the post being replied to.
-
-    Example:
-        user_post = UserPostBase(username="john_doe", post_content="Hello world!", reply_to=1)
-        print(user_post.username)  # Output: "john_doe"
-        print(user_post.post_content)  # Output: "Hello world!"
-        print(user_post.reply_to)  # Output: 1
-    """
-
-    username: str
-    post_content: str
-    reply_to: Optional[int] = None
-    
-
-class SignUpUser(BaseModel):
-    account_name: str
-    display_name: str
-    email: str
-    password_hash: str
-    iterations: int
-    salt: str
-
-class AuthDetails(BaseModel):
-    username: str
-    password: str
-    reply_to: Optional[int] = None
-
-class UsernameAvailability(BaseModel):
-    available: bool
-
-
-class PostBase(BaseModel):
-    user_poster_id: int
-    content: str
-    likes_count: int
-    #comments_count: int
-    #respost_count: int
+logger = logging.getLogger("uvicorn")
+logger.log(logging.INFO, "(Re?)starting App!")
 
 @app.post("/signup")
 async def create_user(user: SignUpUser):
-    session = SessionLocal()
+    """
+    Creates a new user in the database if the provided email is not already in use.
 
-    # Check if a user with the same email already exists
-    existing_user = session.query(User).filter(User.email == user.email).first()
-    if existing_user is not None:
-        session.close()
-        raise HTTPException(status_code=400, detail="Email already in use")
+    Args:
+        user (SignUpUser): A SignUpUser object containing the email and password of the user to be created.
 
-    # If no existing user is found, create a new one
-    db_user = User(**user.dict())    
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-    logging.info(f"Created user with username {db_user.account_name}")
-    logging.info(f"Created user with password {db_user.password_hash}")
-    session.close()
-    return {"id": db_user.id}
+    Returns:
+        dict: A dictionary containing the ID of the newly created user.
+
+    Raises:
+        HTTPException: If a user with the same email already exists in the database.
+    """
+    with SessionLocal() as session:
+        existing_user = session.query(User).filter(User.email == user.email).first()
+        if existing_user is not None:
+            raise HTTPException(status_code=400, detail="Email already in use")
+        try:
+            db_user = User(**user.dict())    
+            session.add(db_user)
+            session.commit()
+            session.refresh(db_user)
+            logging.info(f"Created user with username {db_user.account_name}")
+            logging.info("Created user")
+            return {"id": db_user.id}
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Email already in use")
+        
 
 @app.get("/check-username", response_model=UsernameAvailability)
 async def check_username(username: Optional[str] = None):

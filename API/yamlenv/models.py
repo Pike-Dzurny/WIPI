@@ -1,125 +1,104 @@
-import boto3
-import time
+from typing import Optional
+from pydantic import BaseModel
 
-# Create a DynamoDB resource pointing to your local instance
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8123')
+class UserPostBase(BaseModel):
+    """
+    Represents the structure of a user post.
 
+    Args:
+        username (str): The username of the user making the post.
+        post_content (str): The content of the post.
+        reply_to (Optional[int], optional): The ID of the post being replied to. Defaults to None.
 
+    Attributes:
+        username (str): The username of the user making the post.
+        post_content (str): The content of the post.
+        reply_to (Optional[int]): The ID of the post being replied to.
 
+    Example:
+        user_post = UserPostBase(username="john_doe", post_content="Hello world!", reply_to=1)
+        print(user_post.username)  # Output: "john_doe"
+        print(user_post.post_content)  # Output: "Hello world!"
+        print(user_post.reply_to)  # Output: 1
+    """
 
-print("Creating tables...")
+    username: str
+    post_content: str
+    reply_to: Optional[int] = None
+    
 
-# Create the Users table
-users_table = dynamodb.create_table(
-    TableName='Users',
-    KeySchema=[
-        {
-            'AttributeName': 'uid',
-            'KeyType': 'HASH'
-        },
-    ],
-    AttributeDefinitions=[
-        {
-            'AttributeName': 'uid',
-            'AttributeType': 'N'
-        },
-    ],
-    ProvisionedThroughput={
-        'ReadCapacityUnits': 5,
-        'WriteCapacityUnits': 5
-    }
-)
+class SignUpUser(BaseModel):
+    """
+    Represents a user signing up for an account.
 
-# Create the Posts table
-posts_table = dynamodb.create_table(
-    TableName='Posts',
-    KeySchema=[
-        {
-            'AttributeName': 'id',
-            'KeyType': 'HASH'
-        },
-    ],
-    AttributeDefinitions=[
-        {
-            'AttributeName': 'id',
-            'AttributeType': 'N'
-        },
-    ],
-    ProvisionedThroughput={
-        'ReadCapacityUnits': 5,
-        'WriteCapacityUnits': 5
-    }
-)
+    Args:
+        account_name (str): The user's account name.
+        display_name (str): The user's display name.
+        email (str): The user's email address.
+        password_hash (str): The hashed password.
+        iterations (int): The number of iterations used for password hashing.
+        salt (str): The salt used for password hashing.
+    """
+    account_name: str
+    display_name: str
+    email: str
+    password_hash: str
+    iterations: int
+    salt: str
 
-# Wait until the tables exist
-print("Waiting for tables to be created...")
+class AuthDetails(BaseModel):
+    """
+    Represents authentication details.
 
-time.sleep(5)
+    Args:
+        username (str): The username for authentication.
+        password (str): The password for authentication.
+        reply_to (Optional[int], optional): An optional reply-to ID. Defaults to None.
 
-print("Tables created!")
-# Populate the Users table
-users = [
-    {
-        'uid': 1,
-        'account_name': 'user1',
-        'username': 'user1',
-        'email': 'user1@example.com',
-        'password_hash': 'hash1',
-        'profile_picture': 'url1'
-    },
-    {
-        'uid': 2,
-        'account_name': 'user2',
-        'username': 'user2',
-        'email': 'user2@example.com',
-        'password_hash': 'hash2',
-        'profile_picture': 'url2'
-    },
-    {
-        'uid': 3,
-        'account_name': 'user3',
-        'username': 'user3',
-        'email': 'user3@example.com',
-        'password_hash': 'hash3',
-        'profile_picture': 'url3'
-    },
-    {
-        'uid': 4,
-        'account_name': 'user4',
-        'username': 'user4',
-        'email': 'user4@example.com',
-        'password_hash': 'hash4',
-        'profile_picture': 'url4'
-    },
-    {
-        'uid': 5,
-        'account_name': 'user5',
-        'username': 'user5',
-        'email': 'user5@example.com',
-        'password_hash': 'hash5',
-        'profile_picture': 'url5'
-    },
-]
+    Attributes:
+        username (str): The username for authentication.
+        password (str): The password for authentication.
+        reply_to (Optional[int]): An optional reply-to ID.
+
+    Example:
+        auth = AuthDetails(username="john", password="password123")
+        print(auth.username)  # Output: john
+        print(auth.password)  # Output: password123
+        print(auth.reply_to)  # Output: None
+    """
+
+    username: str
+    password: str
+    reply_to: Optional[int] = None
 
 
+class UsernameAvailability(BaseModel):
+    """
+    Represents the availability of a username.
 
-# Populate the Posts table
-posts = [
-    {
-        'id': i,
-        'poster_uid': i % 5 + 1,  # Cycle through user UIDs
-        'date_of_post': f'2023-01-{i:02}',  # Use i to generate different dates
-        'post_content': f'Hello, world! This is post {i}.',
-        'liked_by': [1, 2, 3, 4, 5]  # All users like all posts
-    }
-    for i in range(1, 21)  # Generate 20 posts
-]
+    Example Usage:
+    ```
+    username_availability = UsernameAvailability(available=True)
+    print(username_availability.available)  # Output: True
+    ```
 
-for user in users:
-    users_table.put_item(Item=user)
+    Fields:
+    - available (bool): Indicates whether the username is available or not.
+    """
 
-for post in posts:
-    posts_table.put_item(Item=post)
+    available: bool
 
 
-print("Tables populated!")
+class PostBase(BaseModel):
+    """
+    Represents a post.
+
+    Example Usage:
+    Fields:
+    - user_poster_id (int): Represents the ID of the user who posted it.
+    - content (str): Represents the content of the post.
+    - likes_count (int): Represents the number of likes the post has.
+    """
+    user_poster_id: int
+    content: str
+    likes_count: int
