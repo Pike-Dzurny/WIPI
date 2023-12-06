@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 import binascii
 import hashlib
 import logging
@@ -11,7 +12,7 @@ from sqlite3 import IntegrityError
 from typing import Optional
 
 # fastapi imports
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -32,10 +33,13 @@ Base = declarative_base()
 # Retrieve the DATABASE_URL from the environment variables
 # If the DATABASE_URL is not found, fall back to a default or throw an error
 # Then create the SQLAlchemy engine using the DATABASE_URL
-database_url = os.getenv('DATABASE_URL')
-if not database_url:
-    raise ValueError("DATABASE_URL environment variable not found")
-engine = create_engine(database_url)
+# postgresql://postgres:pass@db:5432/mydatabase
+
+# database_url = os.getenv('DATABASE_URL')
+#if not database_url:
+#    raise ValueError("DATABASE_URL environment variable not found")
+#engine = create_engine(database_url)
+engine = create_engine('postgresql://postgres:pass@localhost:5432/mydatabase')
 
 # SessionLocal is a class that can be used to create a database session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -95,24 +99,47 @@ async def create_user(user: SignUpUser):
             raise HTTPException(status_code=400, detail="Email already in use")
         
 
+def validate_username(username):
+    # Define username constraints
+    MIN_LENGTH = 3
+    MAX_LENGTH = 30
+    RESERVED_USERNAMES = {'admin', 'user', 'root'}
+    NONO_WORDS = {}
+
+    # Check length constraints
+    if not (MIN_LENGTH <= len(username) <= MAX_LENGTH):
+        return False
+
+    # Regular expression for validation
+    # Starts with an alphabet, followed by alphanumeric or underscores, no consecutive underscores
+    if not re.match(r'^[A-Za-z]\w*(?:_?\w+)*$', username):
+        return False
+
+    # Check for reserved words
+    if username.lower() in RESERVED_USERNAMES:
+        return False
+    
+    if username.lower() in NONO_WORDS:
+        return False
+
+    return True
+
 @app.get("/check-username", response_model=UsernameAvailability)
-async def check_username(username: Optional[str] = None):
+async def check_username(username: str = Query(..., description="The username to check for availability")):
     session = SessionLocal()
 
-    if username:
-        # Query your database to check if the username exists
-        
-        user = session.query(User).filter(User.account_name == username).first()
+    try:
+        if not validate_username(username):
+            raise HTTPException(status_code=400, detail="Invalid username")
 
-        if user:
-            session.close()
+        user_exists = session.query(session.query(User).filter(User.account_name == username).exists()).scalar()
+
+        if user_exists:
             return {"available": False}
         else:
-            session.close()
             return {"available": True}
-    else:
+    finally:
         session.close()
-        raise HTTPException(status_code=400, detail="Username must be provided")
 
 @app.post("/auth")
 async def authenticate_user(auth_details: AuthDetails):
