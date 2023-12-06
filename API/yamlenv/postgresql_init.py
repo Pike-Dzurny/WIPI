@@ -35,8 +35,8 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    account_name = Column(String)
 
+    account_name = Column(String)
     display_name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
 
@@ -66,6 +66,7 @@ class Post(Base):
     poster = relationship("User", back_populates="posts")
         
     reply_to = Column(Integer, ForeignKey('posts.id'))  # New field
+
     replies = relationship('Post', backref=backref('parent', remote_side=[id]))
 
 
@@ -73,21 +74,23 @@ class Post(Base):
 
 
 post_likes = Table(
-    'post_likes',
+    'post_likes', # The name of the association table
     Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id')),
-    Column('post_id', Integer, ForeignKey('posts.id'))
+    Column('user_id', Integer, ForeignKey('users.id')), # The left side of the association table is a foreign key to the users table
+    Column('post_id', Integer, ForeignKey('posts.id')) # The right side of the association table is a foreign key to the posts table
 )
 
 User.liked_posts = relationship(
-    "Post",
-    secondary=post_likes,
-    lazy='dynamic'
+    "Post", # T
+    secondary=post_likes, # The association table is called post_likes and that should be used to join the User and Post tables
+    back_populates="liked_by", # The liked_by field in the Post class should be used to find the relationship
+    lazy='dynamic' # Means that the liked_posts field will return a query object rather than the results of a query
 )
 
 Post.liked_by = relationship(
     "User",
     secondary=post_likes,
+    back_populates="liked_posts",
     lazy='dynamic'
 )
 

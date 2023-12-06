@@ -78,8 +78,29 @@ class UserBase(BaseModel):
     account_name: str
 
 class UserPostBase(BaseModel):
+    """
+    Represents the structure of a user post.
+
+    Args:
+        username (str): The username of the user making the post.
+        post_content (str): The content of the post.
+        reply_to (Optional[int], optional): The ID of the post being replied to. Defaults to None.
+
+    Attributes:
+        username (str): The username of the user making the post.
+        post_content (str): The content of the post.
+        reply_to (Optional[int]): The ID of the post being replied to.
+
+    Example:
+        user_post = UserPostBase(username="john_doe", post_content="Hello world!", reply_to=1)
+        print(user_post.username)  # Output: "john_doe"
+        print(user_post.post_content)  # Output: "Hello world!"
+        print(user_post.reply_to)  # Output: 1
+    """
+
     username: str
     post_content: str
+    reply_to: Optional[int] = None
     
 
 class SignUpUser(BaseModel):
@@ -183,6 +204,7 @@ async def authenticate_user(auth_details: AuthDetails):
 
 @app.post("/post")
 def create_post(user_post: UserPostBase):
+    
     logger.info(logging.INFO, "Trying to create post")
     try:
         print(f"User: {user_post.username}")
@@ -194,7 +216,7 @@ def create_post(user_post: UserPostBase):
             return {"status": "error", "message": "User not found"}
 
         # Use the reply_to field when creating the Post object
-        db_post = Post(user=user, content=user_post.post_content, reply_to=user_post.reply_to)
+        db_post = Post(user_poster_id=user.id, content=user_post.post_content, reply_to=user_post.reply_to)
         session.add(db_post)
         session.commit()
         session.close()
@@ -202,25 +224,6 @@ def create_post(user_post: UserPostBase):
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
-@app.get("/post/{post_id}")
-def get_post(post_id: int, page: int = 1, per_page: int = 6):
-    offset = (page - 1) * per_page
-    session = SessionLocal()
-    post = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture, func.count(post_likes.c.post_id).label('likes_count'), func.array_agg(Comment.id).label('comment_ids'))
-            .join(User, Post.user_poster_id == User.id)  # Join the User table
-            .outerjoin(post_likes, Post.id == post_likes.c.post_id)  # Join the post_likes table
-            .outerjoin(Comment, Post.id == Comment.post_id)  # Join the Comment table
-            .filter(Post.id == post_id)  # Filter by post_id
-            .group_by(Post.id, User.id)  # Group by Post.id and User.id
-            .order_by(desc(Post.date_of_post))
-            .offset(offset)
-            .limit(per_page)
-            .first())
-    session.close()
-    if post is None:
-        return {"status": "error", "message": "Post not found"}
-    post, account_name, bio, display_name, profile_picture, likes_count, comment_ids = post
-    return {"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}, "comment_ids": comment_ids}}
 
 @app.get("/post/{post_id}/comments")
 def read_comments(post_id: int, page: int = 1, per_page: int = 6):
@@ -287,6 +290,15 @@ def read_users():
     session.close()
     return users
 
+
+def build_reply_tree(posts_dict, post_id, max_depth=3, depth=0):
+    if depth > max_depth:
+        return []
+    post = posts_dict[post_id]
+    post.replies = [build_reply_tree(posts_dict, reply_id, max_depth, depth + 1) for reply_id in post.replies]
+    return post
+
+
 @app.get("/posts")
 def read_posts(page: int = 1, per_page: int = 6):
     offset = (page - 1) * per_page
@@ -294,6 +306,7 @@ def read_posts(page: int = 1, per_page: int = 6):
     posts = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture, func.count(post_likes.c.post_id).label('likes_count'))
             .join(User, Post.user_poster_id == User.id)  # Join the User table
             .outerjoin(post_likes, Post.id == post_likes.c.post_id)  # Assuming Like has a post_id field
+            .filter(Post.reply_to == None)  # Only get posts without any comments
             .group_by(Post.id, Post.user_poster_id, Post.date_of_post, Post.content, Post.reply_to, User.account_name, User.bio, User.display_name, User.profile_picture)  # Group by all non-aggregated columns
             .order_by(desc(Post.date_of_post))
             .offset(offset)
@@ -301,6 +314,141 @@ def read_posts(page: int = 1, per_page: int = 6):
             .all())
     session.close()
     return [{"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for post, account_name, bio, display_name, profile_picture, likes_count in posts]
+
+@app.get("/posts/{post_id}/comments")
+def read_post_comments(post_id: int, page: int = 1, per_page: int = 6):
+    offset = (page - 1) * per_page
+    session = SessionLocal()
+    post = session.query(Post).get(post_id)
+    posts = session.query(Post).filter(Post.reply_to == post_id).offset(offset).limit(per_page).all()
+    posts_dict = {post.id: post for post in posts}
+    reply_tree = build_reply_tree(posts_dict, post.id, max_depth=3)
+    session.close()
+    return reply_tree
+
+
+def get_comments_recursive(post_id, parent_id=None):
+    session = SessionLocal()
+    post = session.query(Post).get(post_id)
+    comments = session.query(Post).filter(Post.reply_to == post_id).all()
+
+    # Convert the post and its comments to dictionaries
+    post_dict = post.__dict__
+    comments_dict = [comment.__dict__ for comment in comments]
+
+    # Add a 'replies' field to each comment
+    for comment in comments_dict:
+        if comment['id'] != parent_id:
+            replies = session.query(Post).filter(Post.reply_to == comment['id']).all()
+            if replies:
+                comment['replies'] = [reply.__dict__ for reply in replies]
+                for reply in comment['replies']:
+                    reply_replies = session.query(Post).filter(Post.reply_to == reply['id']).all()
+                    if reply_replies:
+                        reply['replies'] = get_comments_recursive(reply['id'], comment['id'])
+                    else:
+                        reply['replies'] = []
+            else:
+                comment['replies'] = []
+
+    # Add the comments to the post
+    post_dict['comments'] = comments_dict
+
+    session.close()
+
+    return post_dict
+
+@app.get("/posts/{post_id}/all_comments")
+def read_all_post_comments(post_id: int):
+    return get_comments_recursive(post_id)
+
+from typing import List, Dict
+
+def fetch_replies(comment_id: int, session, depth: int, max_depth: int) -> List[Dict]:
+    if depth >= max_depth:
+        return []
+    
+    replies = session.query(Post).filter(Post.reply_to == comment_id).all()
+    replies_dict = [reply.__dict__ for reply in replies]
+
+    for reply in replies_dict:
+        reply['replies'] = fetch_replies(reply['id'], session, depth + 1, max_depth)
+
+    return replies_dict
+
+def get_comments_limited(post_id, top_level_limit=3, depth=1, max_depth=3):
+    session = SessionLocal()
+    post = session.query(Post).get(post_id)
+    comments = session.query(Post).filter(Post.reply_to == post_id).limit(top_level_limit).all()
+
+    post_dict = post.__dict__
+    comments_dict = [comment.__dict__ for comment in comments]
+
+    for comment in comments_dict:
+        comment['replies'] = fetch_replies(comment['id'], session, depth, max_depth)
+
+    post_dict['comments'] = comments_dict
+    session.close()
+
+    return post_dict
+
+@app.get("/posts/{post_id}/post_comments")
+def read_post_comments(post_id: int):
+    return get_comments_limited(post_id)
+
+# def get_comments_limited(post_id, depth=1, max_depth=3, top_level_limit=5):
+#     """
+#     post_id: An integer representing the ID of the post for which comments are to be retrieved.
+#     depth (optional): An integer representing the current depth of recursion (default is 1).
+#     max_depth (optional): An integer representing the maximum depth of recursion (default is 3).
+#     top_level_limit (optional): An integer representing the maximum number of top-level comments to retrieve (default is 5).
+#     """
+
+#     if depth > max_depth:
+#         return []
+
+#     session = SessionLocal()
+#     post = session.query(Post).get(post_id)
+#     comments = session.query(Post).filter(Post.reply_to == post_id).limit(top_level_limit).all()
+#     session.close()
+
+#     # Convert the post and its comments to dictionaries
+#     post_dict = post.__dict__
+#     comments_dict = [comment.__dict__ for comment in comments]
+
+#     # Add a 'replies' field to each comment
+#     for comment in comments_dict:
+#         comment['replies'] = get_comments_limited(comment['id'], depth + 1)
+
+#     # Add the comments to the post
+#     post_dict['comments'] = comments_dict
+
+#     return post_dict
+
+# @app.get("/posts/{post_id}/limited_comments")
+# def read_limited_post_comments(post_id: int):
+#     return get_comments_limited(post_id)
+
+# @app.get("/post/{post_id}")
+# def get_post(post_id: int, page: int = 1, per_page: int = 6):
+#     offset = (page - 1) * per_page
+#     session = SessionLocal()
+#     post = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture, func.count(post_likes.c.post_id).label('likes_count'), func.array_agg(Comment.id).label('comment_ids'))
+#             .join(User, Post.user_poster_id == User.id)  # Join the User table
+#             .outerjoin(post_likes, Post.id == post_likes.c.post_id)  # Join the post_likes table
+#             .outerjoin(Comment, Post.id == Comment.post_id)  # Join the Comment table
+#             .filter(Post.id == post_id)  # Filter by post_id
+#             .group_by(Post.id, User.id)  # Group by Post.id and User.id
+#             .order_by(desc(Post.date_of_post))
+#             .offset(offset)
+#             .limit(per_page)
+#             .first())
+#     session.close()
+#     if post is None:
+#         return {"status": "error", "message": "Post not found"}
+#     post, account_name, bio, display_name, profile_picture, likes_count, comment_ids = post
+#     return {"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}, "comment_ids": comment_ids}}
+
 
 @app.get("/user/{user_id}/posts")
 def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
