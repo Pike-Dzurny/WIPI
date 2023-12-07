@@ -1,14 +1,8 @@
 "use client";
 
 import './../globals.css'
-import { Sidebar } from '../../components/Sidebar/Sidebar';
-
 import AuthProvider from '../../components/AuthProvider';
-
-
-
 import { QueryClient, QueryClientProvider } from 'react-query';
-
 import Head from 'next/head';
 
 import { Inter } from 'next/font/google'
@@ -26,6 +20,7 @@ function RootLayout({
 
     <QueryClientProvider client={queryClient}>
     <Head>
+      
     </Head>
     <html lang="en">
       <AuthProvider>
