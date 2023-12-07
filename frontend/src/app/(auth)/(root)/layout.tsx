@@ -71,9 +71,12 @@ function RootLayout({
 
       const data = await response.json();
 
-      console.log(data);
+      console.log('Data status:', data.status);
       if (data.status === 'success') {
         // Handle success (e.g., clear the textarea and close the overlay)
+
+        // here the post should be sent to page.tsx and it be animated.
+
         setPostContent('');
         setIsOverlayOpen(false);
       } else {
@@ -107,48 +110,53 @@ function RootLayout({
           <div className="hidden md:block md:col-span-1"></div>
           <div className="col-span-full md:col-span-1">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
-              <div className="flex border-l border-r shrink-0 shadow-inner min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-slate-50">
+              <div className="flex border-l border-r rounded-3xl shrink-0 shadow-inner min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-slate-50">
                 <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                   {children}
                 </OverlayContext.Provider>
               </div>
             </div>
           </div>
-          <div className="hidden md:block md:col-span-1">
-            <div className="relative justify-start">
-              <div
-                className={`fixed p-8 bottom-0 mb-4 mr-4 transition-all duration-500 ease-in-out ${
-                  isScrolled ? 'expanded' : ''
-                }`}
-              >
-                <div className="circle shadow-xl p-2 bg-slate-50 rounded-full flex flex-row items-center gap-x-2 overflow-hidden">
-                  <Image
-                    className="shadow-inner rounded-full w-full h-full object-cover"
-                    alt="Icon"
-                    src="https://img1.cgtrader.com/items/2870638/80931d2ba4/large/smiley-ball-3d-model-obj-blend.jpg"
-                    width={60} // Add the width property
-                    height={60} // Add the height property
-                  />
-                  <div className={`icon1 transition-all duration-500 ease-in-out transform ${isScrolled ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
-                    {iconstuff}
-                  </div>
-                  <div className={`icon2 transition-all duration-500 ease-in-out transform ${isScrolled ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
-                    {/* Icon 2 here */}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
         <Overlay isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(!isOverlayOpen)}>
-          <button className="absolute top-0 left-0 m-2" onClick={() => setIsOverlayOpen(!isOverlayOpen)}>
-            X
-          </button>
-          <textarea className="w-full h-full p-2 mb-4 resize-none" value={postContent} onChange={(e) => setPostContent(e.target.value)}></textarea>
-          <button className="absolute bottom-0 right-0 m-2 bg-sky-500 text-white rounded-md px-4 py-2" onClick={handleSubmit}>
-            Submit
-          </button>
-        </Overlay>
+            <button className="absolute top-0 left-0 m-2" onClick={() => setIsOverlayOpen(!isOverlayOpen)}>
+              X
+            </button>
+            <div className="flex items-start space-x-4">
+              {/* ... */}
+              <div className="min-w-0 flex-1">
+                <form action="#" className="relative" onSubmit={handleSubmit}>
+                  <div className="overflow-hidden rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                    <label htmlFor="comment" className="sr-only">
+                      Add your comment
+                    </label>
+                    <textarea
+                      rows={3}
+                      name="comment"
+                      id="comment"
+                      className="block w-full resize-none border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      placeholder="Add your comment..."
+                      value={postContent}
+                      onChange={(e) => setPostContent(e.target.value)}
+                    />
+                    {/* ... */}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
+                    {/* ... */}
+                    <div className="flex-shrink-0">
+                      <button
+                        type="submit"
+                        className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </Overlay>
       </body>
     );
   }

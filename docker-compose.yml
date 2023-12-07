@@ -30,7 +30,7 @@ services:
 
   db:
     image: postgres:latest
-    network_mode: "host"  # Delete in production
+    #network_mode: "host"  # Delete in production
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/postgresql_init.sql:/docker-entrypoint-initdb.d/postgresql_init.sql

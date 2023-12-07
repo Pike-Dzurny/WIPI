@@ -40,10 +40,23 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [isChangeCircle, setIsChangeCircle] = useState(false);
   let post = postObject.post;
   const [likes_count, setLikesCount] = useState(post.likes_count);
+  const [copySuccess, setCopySuccess] = useState('');
+
 
   const someUserId = id;
 
   console.log(id);
+
+  const handleCopyClick = async () => {
+    const textToCopy = `http://localhost:3000/${post.id}`; // Replace with the actual link
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopySuccess('Link copied!');
+    } catch (err) {
+      setCopySuccess('Failed to copy text');
+    }
+  };
+  
 
   useEffect(() => {
     // Fetch the likes count
@@ -161,6 +174,14 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
             <span 
               className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
               style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
+              onClick={
+                (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCopyClick()
+                }
+                
+                }
             >
               ios_share
             </span>
