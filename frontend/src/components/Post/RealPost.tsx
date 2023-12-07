@@ -45,7 +45,6 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
   const someUserId = id;
 
-  console.log(id);
 
   const handleCopyClick = async () => {
     const textToCopy = `http://localhost:3000/${post.id}`; // Replace with the actual link
@@ -56,22 +55,25 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
       setCopySuccess('Failed to copy text');
     }
   };
-  
+
+
+
 
   useEffect(() => {
-    // Fetch the likes count
-    //fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/likes_count`)
-    //  .then(response => response.json())
-    //  .then(data => setLikesCount(data.likes_count));
-  
     // Check if the user has liked the post
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/is_liked_by/${someUserId}`)
+
+    if (!id) {
+      console.error('ID is undefined');
+      return;
+    }
+    
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/is_liked_by/${id}`)
       .then(response => response.json())
       .then(data => setIsFavorite(data.isLiked));
-  }, [post.id]);
+  }, [post.id]); 
 
   function toggleLike() {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${someUserId}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

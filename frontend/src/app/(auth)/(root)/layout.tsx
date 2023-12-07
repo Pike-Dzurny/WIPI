@@ -3,10 +3,7 @@
 import { Roboto } from 'next/font/google';
 import './../../globals.css';
 
-import Image from 'next/image';
-
 import { useRef, useEffect, useState } from 'react';
-
 
 const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
@@ -36,7 +33,8 @@ function RootLayout({
     console.error(errorMessage);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!session) {
       handleError('No active session');
       return;
@@ -71,7 +69,6 @@ function RootLayout({
 
       const data = await response.json();
 
-      console.log('Data status:', data.status);
       if (data.status === 'success') {
         // Handle success (e.g., clear the textarea and close the overlay)
 
@@ -103,12 +100,36 @@ function RootLayout({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (status === 'authenticated' || status === 'loading') {
+  if (status === 'authenticated') {
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
-        <div className={`grid grid-cols-1 md:grid-cols-3 ${isOverlayOpen ? 'blur-sm' : ''}`}>
-          <div className="hidden md:block md:col-span-1"></div>
-          <div className="col-span-full md:col-span-1">
+        <div className={`grid grid-cols-1 md:grid-cols-12 ${isOverlayOpen ? 'blur-sm' : ''}`}>
+          <div className="hidden md:block md:col-span-3 justify-center items-center">
+
+          <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
+            <button
+            type="button"
+            className="rounded-full bg-transparent px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+            <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+            <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+
+          </div>
+
+          </div>
+          <div className="col-span-full md:col-span-5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
               <div className="flex border-l border-r rounded-3xl shrink-0 shadow-inner min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-slate-50">
                 <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
@@ -124,26 +145,22 @@ function RootLayout({
               X
             </button>
             <div className="flex items-start space-x-4">
-              {/* ... */}
               <div className="min-w-0 flex-1">
                 <form action="#" className="relative" onSubmit={handleSubmit}>
-                  <div className="overflow-hidden rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
-                    <label htmlFor="comment" className="sr-only">
-                      Add your comment
+                  <div className="overflow-hidden rounded-lg shadow-sm ring-1 pl-3 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 focus:outline-none focus:border-none">
+                    <label className="sr-only">
+                      Make a post!
                     </label>
                     <textarea
                       rows={3}
-                      name="comment"
-                      id="comment"
-                      className="block w-full resize-none border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                      placeholder="Add your comment..."
+                      className="block w-full resize-none border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 focus:outline-none focus:border-none"
+                      placeholder="Make a post!"
                       value={postContent}
                       onChange={(e) => setPostContent(e.target.value)}
                     />
-                    {/* ... */}
+                    
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
-                    {/* ... */}
+                  <div className="absolute inset-x-0 bottom-0 flex justify-end py-2 pl-3 pr-2">
                     <div className="flex-shrink-0">
                       <button
                         type="submit"
