@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import Session
 
+from sqlalchemy import inspect
 
 
 import os
@@ -50,6 +51,9 @@ class User(Base):
     # Define relationships
 
     posts = relationship("Post", back_populates="poster")
+
+    def to_dict(self):
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
 
 
