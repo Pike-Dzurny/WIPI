@@ -38,7 +38,6 @@ export default function Home() {
   const { isOverlayOpen, setIsOverlayOpen } = context;
 
   const { data: session } = useSession();
-  console.log(session);
 
 
 
@@ -72,6 +71,17 @@ export default function Home() {
   };
 
   useEffect(() => {
+
+    const hash = window.location.hash;
+    if (hash) {
+      console.log("hash is: " + hash);
+      const id = hash.replace('#', ''); // Remove the '#' from the hash
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
@@ -117,13 +127,14 @@ export default function Home() {
                 <React.Fragment key={i}>
                   {page.map((post: Post, index: number) => {
                     const postElement = (
-                      <div className="h-100" key={post.id}>
+                      <div className="h-100" key={post.post.id} id={post.post.id}>
                         <RealPost postObject={post} id={session?.user.id} />
                       </div>
                     );
 
                     // If it's the last post of the last page, attach the ref for intersection observer
                     if (i === data.pages.length - 1 && index === page.length - 1) {
+                      console.log();
                       return <div ref={ref} key={post.id}>{postElement}</div>;
                     }
 

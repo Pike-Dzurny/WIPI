@@ -3,16 +3,15 @@
 import { Roboto } from 'next/font/google';
 import './../../globals.css';
 
-import Image from 'next/image';
-
 import { useRef, useEffect, useState } from 'react';
-
 
 const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
 import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
+import Image from 'next/image'
+
 
 interface UserPostBase {
   username: string;
@@ -36,7 +35,8 @@ function RootLayout({
     console.error(errorMessage);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!session) {
       handleError('No active session');
       return;
@@ -74,9 +74,6 @@ function RootLayout({
       console.log('Data status:', data.status);
       if (data.status === 'success') {
         // Handle success (e.g., clear the textarea and close the overlay)
-
-        // here the post should be sent to page.tsx and it be animated.
-
         setPostContent('');
         setIsOverlayOpen(false);
       } else {
@@ -106,18 +103,66 @@ function RootLayout({
   if (status === 'authenticated' || status === 'loading') {
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
-        <div className={`grid grid-cols-1 md:grid-cols-3 ${isOverlayOpen ? 'blur-sm' : ''}`}>
-          <div className="hidden md:block md:col-span-1"></div>
-          <div className="col-span-full md:col-span-1">
+        <div className={`flex flex-col md:flex-row ${isOverlayOpen ? 'blur-sm' : ''}`}>
+          <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
+
+          <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
+            <button
+            type="button"
+            className="rounded-full bg-transparent px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+            <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+            <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+
+          </div>
+
+          </div>
+          <div className="flex-grow basis-3/12 md:x-12">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
-              <div className="flex border-l border-r rounded-3xl shrink-0 shadow-inner min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-slate-50">
+              <div className="flex border-l border-r shrink-0 shadow-inner min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-slate-50">
                 <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                   {children}
                 </OverlayContext.Provider>
               </div>
             </div>
           </div>
+          <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
 
+          <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
+            <button
+            type="button"
+            className="rounded-full bg-transparent px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+            <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+            <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+            Messages
+            </button>
+
+          </div>
+
+          </div>
         </div>
         <Overlay isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(!isOverlayOpen)}>
             <button className="absolute top-0 left-0 m-2" onClick={() => setIsOverlayOpen(!isOverlayOpen)}>

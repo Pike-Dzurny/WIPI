@@ -45,7 +45,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
   const someUserId = id;
 
-  console.log(id);
+  //console.log(id);
 
   const handleCopyClick = async () => {
     const textToCopy = `http://localhost:3000/${post.id}`; // Replace with the actual link
