@@ -11,6 +11,7 @@ import axios from 'axios';
 
 import { parseISO, differenceInMinutes, differenceInHours, differenceInDays, differenceInMonths, differenceInYears } from 'date-fns';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 // Define the type for a comment
 type Comment = {
@@ -33,9 +34,21 @@ type Post = {
   comments: Comment[];
 };
 
+interface UserPostBase {
+  username: string;
+  post_content: string;
+  reply_to: number;
+}
+
 export default function Page({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
   const colors = ['black', 'red', 'blue', 'green', 'purple'];
+  const { status } = useSession();
+  const { data: session } = useSession();
+  const [postContent, setPostContent] = useState('');
+
+
+
 
   const router = useRouter();
 
@@ -70,7 +83,6 @@ export default function Page({ params }: { params: { id: string } }) {
   };
 
 
-
   // Fetch the post and its comments when the component mounts
   useEffect(() => {
     if (!post) {
@@ -95,16 +107,66 @@ const renderComment = (comment: Comment, depth = 0) => (
   </div>
 );
 
+const handleSubmit = async (event: React.FormEvent) => {
+  event.preventDefault();
+  if (!session) {
+    console.log('No active session');
+    return;
+  }
+
+  console.log('Trying to pass!'); // The authenticated user
+  if (!session.user || !session.user.name) {
+    console.log('User or username is not defined');
+    return;
+  }
+
+  // Create an instance of UserPostBase
+  const userPost: UserPostBase = {
+    username: session.user.name, // replace with the actual username
+    post_content: postContent,
+    reply_to: Number(post.id),
+  };
+
+  console.log(userPost);
+
+  try {
+    const response = await fetch(`http://localhost:8000/post`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userPost),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    console.log('Data status:', data.status);
+    if (data.status === 'success') {
+      // Handle success (e.g., clear the textarea)
+      setPostContent('');
+    } else {
+    // Handle error
+          console.error('Failed to create post');
+        }
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+    };
+
   return (
     <div className='w-full'>
       <div className="relative rounded-t-2xl">
         <div className="flex pl-4 pr-4 rounded-t-2xl">
-          <div className="relative flex flex-row rounded-3xl">
+          <div className="relative flex flex-row rounded-3xl p-4">
           {post && (
           <>
             {/* Profile Picture Column */}
             <div className="flex flex-col justify-start items-center mr-4">
-              <img className="rounded-full h-12 w-12 shadow-sm mb-4" src={`http://localhost:8000/user/${post.user_poster_id}/profile_picture`} alt="Author" />
+              <img className="rounded-full h-20 w-20 shadow-sm mb-4" src={`http://localhost:8000/user/${post.user_poster_id}/profile_picture`} alt="Author" />
             </div>
 
             {/* Content and Buttons Column */}
@@ -153,6 +215,56 @@ const renderComment = (comment: Comment, depth = 0) => (
             </Link>
           </div>
         </div>
+        </div>
+        {/* Reply box */}
+        <div className="p-8 border-b">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <img className="inline-block h-10 w-10 rounded-full" src='http://localhost:8000/user/1/profile_picture' alt=""/> {// TODO: Replace with profile picture of use}
+}
+            </div>
+            <div className="min-w-0 flex-1">
+              <form action="#" className="relative">
+                <div className="overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600">
+                  <label className="sr-only">Add your comment</label>
+                  <textarea name="comment" id="comment" className="block w-full resize-none border-0 bg-transparent outline-none py-1.5 px-2 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 ring-0" 
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  placeholder="Reply"></textarea>
+
+                  <div className="py-2 px-4" aria-hidden="true">
+                    <div className="py-px">
+                      <div className="h-9 px-8"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
+                  <div className="flex items-center space-x-5">
+                    <div className="flex items-center">
+                      <button type="button" className="-m-2.5 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:text-gray-500">
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clipRule="evenodd" />
+                        </svg>
+                        <span className="sr-only">Attach a file</span>
+                      </button>
+                    </div>
+                    <div className="flex items-center">
+                      <div>
+            
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit}>Post</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+        <div>
         </div>
         <div>
         {post && post.comments.map((comment, index) => (

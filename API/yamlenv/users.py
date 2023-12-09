@@ -191,3 +191,11 @@ def get_profile_picture(user_id: int):
     #    return FileResponse('./defaultpfp.png', media_type='image/png')
     #else:
     #    return FileResponse('./' + key, media_type='image/png')
+
+@router.get("/user/{user_id}/username")
+def get_username(user_id: int):
+    session = SessionLocal()
+    user = session.query(User).get(user_id)
+    session.close()
+    return {"username": user.account_name}
+
