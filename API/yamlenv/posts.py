@@ -102,14 +102,9 @@ def is_liked_by(post_id: int, user_id: int):
 def build_reply_tree(posts_dict, post_id, max_depth=3, depth=0):
     if depth > max_depth:
         return []
-    
-    post = posts_dict.get(post_id, None)
-    if not post:
-        return []
-
-    post['replies'] = [build_reply_tree(posts_dict, reply_id, max_depth, depth + 1) for reply_id in post.get('replies', [])]
+    post = posts_dict[post_id]
+    post.replies = [build_reply_tree(posts_dict, reply_id, max_depth, depth + 1) for reply_id in post.replies]
     return post
-
 
 
 @router.get("/posts")
@@ -133,15 +128,8 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 6):
     offset = (page - 1) * per_page
     session = SessionLocal()
     post = session.query(Post).get(post_id)
-    replies = session.query(Post).filter(Post.reply_to == post_id).offset(offset).limit(per_page).all()
-    posts_dict = {}
-    for reply in replies:
-        user = session.query(User).get(reply.user_poster_id)
-        reply_data = {**reply.__dict__, "user": user.account_name}
-        reply_data['replies'] = [reply.id for reply in session.query(Post).filter(Post.reply_to == reply.id).all()]
-        posts_dict[reply.id] = reply_data
-
-
+    posts = session.query(Post).filter(Post.reply_to == post_id).offset(offset).limit(per_page).all()
+    posts_dict = {post.id: post for post in posts}
     reply_tree = build_reply_tree(posts_dict, post.id, max_depth=3)
     session.close()
     return reply_tree
