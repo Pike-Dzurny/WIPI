@@ -176,10 +176,19 @@ input:-webkit-autofill:active {
   padding:0 5px 0 5px;
   color: #0c4a6e;
 }
+.reply-box {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  max-height: 0;
+}
 
+.reply-box-active {
+  max-height: 1000px; /* This should be large enough to fit the content */
+}
 
 body {
   transition: all 0.05s ease;
 
 }
+
 

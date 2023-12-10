@@ -96,15 +96,106 @@ def is_liked_by(post_id: int, user_id: int):
     session.close()
     return {"isLiked": is_liked}
 
+logger = logging.getLogger("uvicorn")
 
+def check_for_more_replies(session, post_id, max_depth):
+    # Check for existence of further replies beyond max_depth
+    replies_exist = session.query(Post.id).filter(Post.reply_to == post_id).first() is not None
+    return replies_exist if max_depth > 0 else False
 
-
-def build_reply_tree(posts_dict, post_id, max_depth=3, depth=0):
+def build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, depth=0, liked_posts_by_user=None):
     if depth > max_depth:
         return []
+
+
+    if post_id not in posts_dict:
+        return []  # or some other placeholder value
+
     post = posts_dict[post_id]
-    post.replies = [build_reply_tree(posts_dict, reply_id, max_depth, depth + 1) for reply_id in post.replies]
-    return post
+
+
+
+    user = users_dict.get(post.user_poster_id)
+
+    try:
+        is_liked = post in liked_posts_by_user
+    except:
+        is_liked = False
+    user_display_name = user.display_name if user else 'Unknown User'
+
+    post_data = {
+        'id': post.id,
+        'content': post.content,
+        'user_display_name': user_display_name,
+        'date_of_post': post.date_of_post,
+        'reply_to': post.reply_to,
+        'likes_count': post.likes_count,
+        'user_poster_id': post.user_poster_id,
+        'is_liked': is_liked,
+        'hasChildren': len(post.replies) > 0,
+        'replies': [build_reply_tree(posts_dict, users_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
+    }
+    return post_data
+
+
+@router.get("/posts/{post_id}/comments")
+def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_depth=3, user_id: int = None):
+    offset = (page - 1) * per_page
+    session = SessionLocal()
+
+    # Fetch the initial post
+    initial_post = session.query(Post).get(post_id)
+
+    # Fetch the user who is viewing the post
+    user_looking_at_post = session.query(User).get(user_id)
+    try:
+        liked_posts_by_user = user_looking_at_post.liked_posts
+    except AttributeError:
+        liked_posts_by_user = []
+
+    # Fetch all replies for the post, including nested replies
+    # Pagination is applied at the top level of replies
+    all_posts = [initial_post] if initial_post else []
+    current_replies = [initial_post] if initial_post else []
+    for depth in range(max_depth):
+        if depth == 0:
+            # Apply pagination only at the first level of replies
+            next_replies = (session.query(Post, User)
+                            .join(User, Post.user_poster_id == User.id)
+                            .filter(Post.reply_to == post_id)
+                            .order_by(Post.date_of_post)  # Order by date_of_post
+                            .offset(offset)
+                            .limit(per_page)
+                            .all())
+        else:
+            # Fetch all nested replies for the current set of replies
+            next_replies = (session.query(Post, User)
+                            .join(User, Post.user_poster_id == User.id)
+                            .filter(Post.reply_to.in_([post.id for post in current_replies]))
+                            .all())
+        # Check if there are more replies for each post in next_replies
+        for post, _ in next_replies:
+            post.more_replies = check_for_more_replies(session, post.id, max_depth - 1 - depth)
+
+        current_replies = [post for post, _ in next_replies]
+        all_posts.extend(current_replies)
+
+    # Assuming all_posts is a list of Post objects
+    posts_dict = {post.id: post for post in all_posts}
+
+    # Fetch user data for all posts and create users_dict
+    user_ids = {post.user_poster_id for post in all_posts}
+    users = session.query(User).filter(User.id.in_(user_ids)).all()
+    users_dict = {user.id: user for user in users}
+
+    reply_tree = build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, liked_posts_by_user=liked_posts_by_user)
+    
+    # Adds a flag to the top-level post indicating if there are more top-level comments
+    has_more_top_level_comments = session.query(Post.id).filter(Post.reply_to == post_id).offset(offset + per_page).limit(1).scalar() is not None
+    reply_tree['has_more_top_level_comments'] = has_more_top_level_comments
+    
+    session.close()
+    return reply_tree
 
 
 @router.get("/posts")
@@ -123,16 +214,7 @@ def read_posts(page: int = 1, per_page: int = 6):
     session.close()
     return [{"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for post, account_name, bio, display_name, profile_picture, likes_count in posts]
 
-@router.get("/posts/{post_id}/comments")
-def read_post_comments(post_id: int, page: int = 1, per_page: int = 6):
-    offset = (page - 1) * per_page
-    session = SessionLocal()
-    post = session.query(Post).get(post_id)
-    posts = session.query(Post).filter(Post.reply_to == post_id).offset(offset).limit(per_page).all()
-    posts_dict = {post.id: post for post in posts}
-    reply_tree = build_reply_tree(posts_dict, post.id, max_depth=3)
-    session.close()
-    return reply_tree
+
 
 def get_comments_recursive(post_id, parent_id=None):
     session = SessionLocal()

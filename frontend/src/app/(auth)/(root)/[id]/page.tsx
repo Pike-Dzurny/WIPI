@@ -3,7 +3,11 @@
 import { Dropdown } from '../../../../components/Dropdown/Dropdown';
 import { useRouter } from 'next/navigation'
 
+import clsx from 'clsx';
+
+
 import { PFP } from '../../../../components/pfp';
+
 
 import React, { useEffect, useState } from 'react';
 
@@ -16,6 +20,19 @@ import { useSession } from 'next-auth/react';
 // Define the type for a comment
 type Comment = {
   user_poster_id: number;
+  user_display_name: string;
+  content: string;
+  likes_count: number;
+  date_of_post: string;
+  id: number;
+  reply_to: number | null;
+  replies: Comment[];
+  hasChildren: boolean;
+};
+
+type Post = {
+  user_poster_id: number;
+  user_display_name: string;
   content: string;
   likes_count: number;
   date_of_post: string;
@@ -24,24 +41,24 @@ type Comment = {
   replies: Comment[];
 };
 
-type Post = {
-  user_poster_id: number;
-  content: string;
-  likes_count: number;
-  date_of_post: string;
-  id: number;
-  reply_to: number | null;
-  comments: Comment[];
-};
-
 interface UserPostBase {
   username: string;
   post_content: string;
   reply_to: number;
 }
 
+
 export default function Page({ params }: { params: { id: string } }) {
-  const [post, setPost] = useState<Post | null>(null);
+  const [post, setPost] = useState<Post | null>({
+    user_poster_id: 0,
+    user_display_name: '',
+    content: '',
+    likes_count: 0,
+    date_of_post: '',
+    id: 0,
+    reply_to: null,
+    replies: [],
+  });  
   const colors = ['black', 'red', 'blue', 'green', 'purple'];
   const { status } = useSession();
   const { data: session } = useSession();
@@ -55,6 +72,8 @@ export default function Page({ params }: { params: { id: string } }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isChatBubble, setIsChatBubble] = useState(false);
   const [isChangeCircle, setIsChangeCircle] = useState(false);
+
+  
 
 
   const formatRelativeTime = (dateString: string) => {
@@ -82,30 +101,142 @@ export default function Page({ params }: { params: { id: string } }) {
     return relativeTime;
   };
 
+  const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+
+  const handleReplyClick = (commentId: number) => {
+    setActiveReplyId(commentId);
+  };
+
+  const handleReplySubmit = (replyContent: string, replyToId: number) => {
+    console.log("Reply Content:", replyContent);
+    console.log("Replying to Comment ID:", replyToId);
+    // Add your logic to submit the reply
+    setActiveReplyId(null); // Reset the active reply ID after submitting
+  };
 
   // Fetch the post and its comments when the component mounts
   useEffect(() => {
-    if (!post) {
-      axios.get(`http://localhost:8000/posts/${params.id}/post_comments`)
-        .then(response => setPost(response.data))
-        .catch(error => console.error(error));
-    }
-    console.log(post);
-  }, [params.id, post]);
+    axios.get(`http://localhost:8000/posts/${params.id}/comments`)
+      .then(response => {
+        console.log(response.data); // Log to check the response structure
+        setPost(response.data);
+      })
+      .catch(error => console.error(error));
+  }, [params.id]);
 
-// Recursive function to render a comment and its replies
-const renderComment = (comment: Comment, depth = 0) => (
-  <div key={comment.id} style={{ marginLeft: `${depth * 20}px`, paddingLeft: '10px', borderLeft: depth > 0 ? `1px solid ${colors[depth % colors.length]}` : 'none' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span>{comment.user_poster_id}</span>
-        <p>{comment.content}</p>
+  const loadMoreComments = async (commentId: number) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/posts/${commentId}/comments`);
+      if (response.status === 200 && response.data && Array.isArray(response.data.replies)) {
+        const newComments = response.data.replies.map(comment => ({
+          ...comment,
+          hasChildren: comment.hasChildren // Assuming the API provides this information
+        }));
+  
+        setPost(prevState => {
+          if (prevState) {
+            const updatedReplies = addCommentsToTree(prevState.replies, commentId, newComments, false);
+            return { ...prevState, replies: updatedReplies };
+          }
+          return null;
+        });
+      }
+    } catch (error) {
+      console.error('Error loading more comments:', error);
+    }
+  };
+  
+  const addCommentsToTree = (comments: Comment[], parentId: number, newComments: Comment[], updateHasChildren: boolean): Comment[] => {
+    return comments.map(comment => {
+      if (comment.id === parentId) {
+        return { 
+          ...comment, 
+          replies: [...(comment.replies ?? []), ...newComments],
+          hasChildren: updateHasChildren ? false : comment.hasChildren
+        };
+      } else if (comment.replies) {
+        return { 
+          ...comment, 
+          replies: addCommentsToTree(comment.replies, parentId, newComments, updateHasChildren) 
+        };
+      } else {
+        return comment;
+      }
+    });
+  };
+  
+  
+  
+
+  // Recursive function to render a comment and its replies
+  const renderComment = (comment: Comment, depth = 0) => (
+    <div 
+      key={comment.id} 
+      className={clsx(
+        'pt-2 pl-2 border-l ', 
+        { 'ml-[20px]': depth > 0, 'border-gray-500': depth > 0 },
+        { 'bg-white': depth % 2 === 0, 'bg-slate-100': depth % 2 !== 0 }
+      )}
+    >
+    <div className="flex items-start space-x-4">
+      <div className="flex-shrink-0">
+        <img className="inline-block h-10 w-10 rounded-full" src='http://localhost:8000/user/1/profile_picture' alt="Profile" />
       </div>
-      <div>{formatRelativeTime(comment.date_of_post)}</div>
+      <div className="flex-1 min-w-0">
+        <div className='flex flex-col'>
+          <div className='flex flex-row gap-x-1'>
+            <p className='font-medium'>{comment.user_display_name}</p>
+            <div className='' title={comment.date_of_post}>{formatRelativeTime(comment.date_of_post)}</div>
+          </div>
+
+            <div className='border-l border-t border-b p-2 rounded-l-lg'>
+            <p>{comment.content}</p>
+            </div>
+        </div>
+        <button className="font-mono" onClick={() => handleReplyClick(comment.id)}>Reply</button>
+      </div>
+      </div>
+      {activeReplyId === comment.id && (
+        <div className="p-4 transition">
+          {/* Flex container for PFP and the form */}
+          <div className="flex items-start space-x-4">
+            {/* PFP Column */}
+            <div className="flex-shrink-0">
+              <img className="inline-block h-10 w-10 rounded-full" src='http://localhost:8000/user/1/profile_picture' alt="Profile" />
+            </div>
+
+            {/* Form Column */}
+            <div className="flex-1 min-w-0">
+              <form action="#" className="h-[v30]">
+                {/* Textarea container */}
+                <div className="overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600">
+                  <textarea name="reply" id="reply" className="block w-full resize-none border-0 bg-transparent outline-none py-1.5 px-2 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 ring-0" 
+                  placeholder="Write a reply..."></textarea>
+                </div>
+
+                {/* Button Container */}
+                <div className="flex justify-end py-2">
+                  <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit}>Post</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      )}
+      {comment.replies && comment.replies.map(reply => renderComment(reply, depth + 1))}
+      
+    {/* Load More Comments Button */}
+    {comment.hasChildren && (
+      <button 
+        className="text-blue-500 hover:text-blue-700 text-sm font-semibold"
+        onClick={() => loadMoreComments(comment.id)}>
+        Load More Comments
+      </button> )}
+
     </div>
-    {comment.replies && comment.replies.map(reply => renderComment(reply, depth + 1))}
-  </div>
-);
+  );
+  
 
 const handleSubmit = async (event: React.FormEvent) => {
   event.preventDefault();
@@ -172,7 +303,7 @@ const handleSubmit = async (event: React.FormEvent) => {
             {/* Content and Buttons Column */}
             <div className="flex flex-col justify-start">
               <div className="mb-4">
-                <div className="font-medium">{post.user_poster_id}</div>
+                <div className="font-medium">{post.user_display_name}</div>
                 <p className="hyphens-auto">{post.content}</p>
               </div>
               <div className="flex">
@@ -267,10 +398,10 @@ const handleSubmit = async (event: React.FormEvent) => {
         <div>
         </div>
         <div>
-        {post && post.comments.map((comment, index) => (
+        {post && post.replies.map((comment, index) => (
           <div key={comment.id}>
             {renderComment(comment)}
-            {index < post.comments.length - 1 && <hr />}
+            {index < post.replies.length - 1 && <hr />}
           </div>
         ))}
       </div>
@@ -278,3 +409,4 @@ const handleSubmit = async (event: React.FormEvent) => {
     </div>
   );
 }
+
