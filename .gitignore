@@ -16,13 +16,13 @@
 /frontend/public/
 /frontend/static/
 
-/API/yamlenv/__pycache__/
-/API/yamlenv/Scripts/
-/API/yamlenv/pfp_*
-/API/yamlenv/pyvenv.cfg
-/API/yamlenv/venv/
-/API/yamlenv/Lib/
-/API/yamlenv/Include/
+/API/__pycache__/
+/API/Scripts/
+/API/pfp_*
+/API/pyvenv.cfg
+/API/venv/
+/API/Lib/
+/API/Include/
 
 
 # production
