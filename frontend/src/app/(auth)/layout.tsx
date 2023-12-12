@@ -25,8 +25,6 @@ function RootLayout({
   return (
 
     <QueryClientProvider client={queryClient}>
-    <Head>
-    </Head>
     <html lang="en">
       <AuthProvider>
         {children}
