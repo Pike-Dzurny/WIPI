@@ -1,11 +1,11 @@
 import logging
 from fastapi import APIRouter, logger
 from sqlalchemy import desc, func
-from postgresql_init import Post, User, post_likes
-from models import UserPostBase
+from database.database_initializer import Post, User, post_likes
+from api_models import UserPostBase
 from typing import List, Dict
 
-from db import SessionLocal
+from database.database_session import SessionLocal
 
 def get_db():
     db = SessionLocal()

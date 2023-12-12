@@ -7,13 +7,13 @@ from fastapi.responses import FileResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_400_BAD_REQUEST
-from models import AuthDetails, SignUpUser, UsernameAvailability
+from api_models import AuthDetails, SignUpUser, UsernameAvailability
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 import re
 
-from db import SessionLocal
+from database.database_initializer import User, Post
+from database.database_session import SessionLocal
 
-from postgresql_init import User, Post
 
 
 def get_db():

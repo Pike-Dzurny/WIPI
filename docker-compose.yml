@@ -16,7 +16,7 @@ services:
 
   api:
     build: ./API
-    command: uvicorn script:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - '8000:8000'
     expose:

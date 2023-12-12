@@ -22,11 +22,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 
 # models and postgresql_init are in the same directory as this script
-from models import AuthDetails, SignUpUser, UserPostBase, UsernameAvailability
-from postgresql_init import Post, User, post_likes
+from api_models import AuthDetails, SignUpUser, UserPostBase, UsernameAvailability
+from database.database_initializer import Post, User, post_likes
 
-from users import router as user_router
-from posts import router as posts_router
+from endpoints.users import router as user_router
+from endpoints.posts import router as posts_router
 
 # The declarative_base() function returns a class that is used as a base class for our models
 Base = declarative_base()
