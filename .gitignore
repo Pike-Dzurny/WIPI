@@ -8,6 +8,11 @@
 
 # testing
 /frontend/coverage
+*.pyc
+*.cpython-38.pyc
+*/__pycache__/*
+*/__pycache__/
+
 
 # next.js
 /frontend/.next/

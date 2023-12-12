@@ -48,12 +48,13 @@ def read_users(db: Session = Depends(get_db)):
 
 
 @router.post("/signup")
-async def create_user(user: SignUpUser):
+async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
     """
     Creates a new user in the database if the provided email is not already in use.
 
     Args:
         user (SignUpUser): A SignUpUser object containing the email and password of the user to be created.
+        db (Session): The database session.
 
     Returns:
         dict: A dictionary containing the ID of the newly created user.
@@ -61,21 +62,19 @@ async def create_user(user: SignUpUser):
     Raises:
         HTTPException: If a user with the same email already exists in the database.
     """
-    with SessionLocal() as session:
-        existing_user = session.query(User).filter(User.email == user.email).first()
-        if existing_user is not None:
-            raise HTTPException(status_code=400, detail="Email already in use")
-        try:
-            db_user = User(**user.dict())    
-            session.add(db_user)
-            session.commit()
-            session.refresh(db_user)
-            logging.info(f"Created user with username {db_user.account_name}")
-            logging.info("Created user")
-            return {"id": db_user.id}
-        except IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Email already in use")
+    existing_user_email = db.query(User.email).filter(User.email == user.email).first()
+    if existing_user_email is not None:
+        raise HTTPException(status_code=400, detail="Email already in use")
+    try:
+        db_user = User(**user.dict())    
+        db.add(db_user)
+        db.flush()
+        db.commit()
+        logging.info(f"Created user with username {db_user.account_name} and created user")
+        return {"id": db_user.id}
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Email already in use")
  
 def validate_username(username):
     # Define username constraints
