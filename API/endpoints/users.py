@@ -64,9 +64,9 @@ async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
     """
     existing_user_email = db.query(User.email).filter(User.email == user.email).first()
     if existing_user_email is not None:
-        raise HTTPException(status_code=400, detail="Email already in use")
+        raise HTTPException(status_code=421, detail="Email already in use")
     try:
-        db_user = User(**user.dict())    
+        db_user = User(**user.model_dump())    
         db.add(db_user)
         db.flush()
         db.commit()
@@ -74,7 +74,7 @@ async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
         return {"id": db_user.id}
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Email already in use")
+        raise HTTPException(status_code=444, detail="Email already in use")
  
 def validate_username(username):
     # Define username constraints

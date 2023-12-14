@@ -8,10 +8,39 @@
 
 # testing
 /frontend/coverage
+
+# general python ignores
 *.pyc
-*.cpython-38.pyc
-*/__pycache__/*
-*/__pycache__/
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# cpython byte-code files
+__pycache__/
+
+# testing
+/frontend/coverage
+
+# specific Python files
+*/database_session.cpython-38.pyc
+
 
 
 # next.js
@@ -59,3 +88,5 @@ node_modules
 */*.env*
 */*.env
 */env.local
+API/database/__pycache__/database_session.cpython-38.pyc
+API/endpoints/__pycache__/users.cpython-38.pyc

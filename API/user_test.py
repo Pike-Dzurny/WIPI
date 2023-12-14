@@ -1,31 +1,20 @@
-from fastapi.testclient import TestClient
-from app import app  # Import the FastAPI app
+import uuid
+from app import app
 from endpoints.users import *
-
-from unittest.mock import MagicMock, AsyncMock
-
-
-
 import pytest
 
-# Assuming your main FastAPI application instance is named `app`
-client = TestClient(app)
 
 print("Testing")
 
-print(client)
-# Fixture for test client
-@pytest.fixture
-def test_client():
-    return client
-
-# Global variable to hold the mock database session
-db_mock = MagicMock()
-db_mock.query = AsyncMock()  # Mock async database operations as needed
 
 
-def mock_get_db():
-    yield db_mock
+
+# @pytest.fixture()
+# def test_db():
+#     Base.metadata.create_all(bind=engine)
+#     yield
+#     Base.metadata.drop_all(bind=engine)
+
 
 class TestReadUsers:
 
@@ -111,41 +100,28 @@ class TestCreateUser:
 
     # Creating a new user with unique email should return a dictionary containing the ID of the newly created user.
     @pytest.mark.asyncio
-    async def test_unique_email_returns_id(self, mocker):
+    async def test_unique_email_returns_id(self, client):
+        user_data = {
+            "account_name": "test_user",
+            "display_name": "Test User",
+            "email": "naaaaa@gmail.com",
+            "password_hash": "password_hash",
+            "iterations": 1000,
+            "salt": "salt"
+        }
 
-        # Create a mock database session
-        mock_db = MagicMock()
-
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
-
-        # Create a SignUpUser object with unique email
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User",
-            email="test@example.com",
-            password_hash="password_hash",
-            iterations=1000,
-            salt="salt"
-        )
-
-        # Call the create_user function
-        response = await create_user(user)
-
-        # Assert that the response contains the ID of the newly created user
-        assert "id" in response
+        response = client.post("/signup", json=user_data)
+        assert response.status_code == 200
+        assert "id" in response.json()
 
     # Creating a new user with unique email should add the user to the database.
     @pytest.mark.asyncio
-    async def test_unique_email_adds_user_to_database(self, mocker):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
-
+    async def test_unique_email_adds_user_to_database(self, client):
         # Create a SignUpUser object with unique email
         user = SignUpUser(
             account_name="test_user",
             display_name="Test User",
-            email="test@example.com",
+            email="bingdabing@gmail.com",
             password_hash="password_hash",
             iterations=1000,
             salt="salt"
@@ -155,129 +131,88 @@ class TestCreateUser:
         await create_user(user)
 
         # Assert that the add method of the database session is called with the correct user object
-        db_mock.return_value.add.assert_called_once_with(User(**user.dict()))
+        client.add.assert_called_once_with(User(**user.dict()))
 
     # Creating a new user with unique email should log the creation of the user.
     @pytest.mark.asyncio
-    async def test_unique_email_logs_user_creation(self, mocker, caplog):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
+    async def test_unique_email_adds_user_to_database(self, client, session):
+        user_data = {
+            "account_name": "test_user",
+            "display_name": "Test User",
+            "email": "bingdabing@gmail.com",
+            "password_hash": "password_hash",
+            "iterations": 1000,
+            "salt": "salt"
+        }
 
-        # Create a SignUpUser object with unique email
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User",
-            email="test@example.com",
-            password_hash="password_hash",
-            iterations=1000,
-            salt="salt"
-        )
+        # Make a request to the signup endpoint
+        response = client.post("/signup", json=user_data)
+        assert response.status_code == 200
 
-        # Call the create_user function
-        await create_user(user)
-
-        # Assert that the log message contains the username and "created user"
-        assert "Created user with username test_user" in caplog.text
-
-    @pytest.mark.asyncio
-    async def test_empty_email_raises_exception(self, mocker):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
-
-        # Create a SignUpUser object with an empty email
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User",
-            email="",
-            password_hash="password_hash",
-            iterations=1000,
-            salt="salt"
-        )
-
-        # Call the create_user function and assert that it raises an exception
-        with pytest.raises(Exception):
-            await create_user(user)
+        # Query the database to check if the user was added
+        db_user = session.query(User).filter(User.email == user_data["email"]).first()
+        assert db_user is not None
+        assert db_user.email == user_data["email"]
 
     @pytest.mark.asyncio
-    async def test_unique_account_name_returns_id(self, mocker):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
+    async def test_empty_email_raises_exception(self, client):
+        user = {
+            "account_name": "test_user",
+            "display_name": "Test User",
+            "email": "",
+            "password_hash": "password_hash",
+            "iterations": 1000,
+            "salt": "salt"
+        }
 
-        # Create a SignUpUser object with a unique account name
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User",
-            email="test@example.com",
-            password_hash="password_hash",
-            iterations=1000,
-            salt="salt"
-        )
-
-        # Call the create_user function
-        response = await create_user(user)
-
-        # Assert that the response contains the ID of the newly created user
-        assert "id" in response
-
-    # Creating a new user with a password that does not meet the minimum requirements should raise an exception.
-    @pytest.mark.asyncio
-    async def test_weak_password_raises_exception(self, mocker):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
-
-        # Create a SignUpUser object with a weak password
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User",
-            email="test@example.com",
-            password_hash="weak_password",
-            iterations=1000,
-            salt="salt"
-        )
-
-        # Call the create_user function and assert that it raises an exception
-        with pytest.raises(Exception):
-            await create_user(user)
+        response = client.post("/signup", json=user)
+        assert response.status_code == 400  # Assuming 400 for invalid input
 
     @pytest.mark.asyncio
-    async def test_unique_display_name_adds_user_to_database(self, mocker):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
+    async def test_unique_account_name_returns_id(self, client):
+        random_email = f"test_{uuid.uuid4()}@example.com"
+        user = {
+            "account_name": "test_user",
+            "display_name": "Test User",
+            "email": random_email,
+            "password_hash": "password_hash",
+            "iterations": 1000,
+            "salt": "salt"
+        }
 
-        # Create a SignUpUser object with a unique display name
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User",
-            email="test@example.com",
-            password_hash="password_hash",
-            iterations=1000,
-            salt="salt"
-        )
-
-        # Call the create_user function
-        await create_user(user)
-
-        # Assert that the add method of the database session is called with the correct user object
-        db_mock.return_value.add.assert_called_once_with(User(**user.dict()))
+        response = client.post("/signup", json=user)
+        assert response.status_code == 200
+        assert "id" in response.json()
 
     @pytest.mark.asyncio
-    async def test_long_display_name_raises_exception(self, mocker):
-        # Mock the get_db function
-        mocker.patch("endpoints.users.get_db", side_effect=mock_get_db)
+    async def test_weak_password_raises_exception(self, client):
+        random_email = f"test_{uuid.uuid4()}@example.com"
+        user = {
+            "account_name": "test_user",
+            "display_name": "Test User",
+            "email": random_email,
+            "password_hash": "weak",
+            "iterations": 1000,
+            "salt": "salt"
+        }
 
-        # Create a SignUpUser object with a display name longer than 50 characters
-        user = SignUpUser(
-            account_name="test_user",
-            display_name="Test User with a very long display name that exceeds 50 characters",
-            email="test@example.com",
-            password_hash="password_hash",
-            iterations=1000,
-            salt="salt"
-        )
+        response = client.post("/signup", json=user)
+        assert response.status_code == 400  # Assuming 400 for weak password
 
-        # Call the create_user function and assert that it raises an exception
-        with pytest.raises(Exception):
-            await create_user(user)
+    @pytest.mark.asyncio
+    async def test_long_display_name_raises_exception(self, client):
+        random_email = f"test_{uuid.uuid4()}@example.com"
+        user = {
+            "account_name": "test_user",
+            "display_name": "Test User with a very long display name that exceeds 50 characters",
+            "email": random_email,
+            "password_hash": "password_hash",
+            "iterations": 1000,
+            "salt": "salt"
+        }
+
+        response = client.post("/signup", json=user)
+        assert response.status_code == 400  # Assuming 400 for long display name
 
         
 
