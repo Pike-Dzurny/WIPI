@@ -62,9 +62,23 @@ async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
     Raises:
         HTTPException: If a user with the same email already exists in the database.
     """
+
+    """
+    Username constraints:
+    2 < length < 30
+    Starts with an alphabet, followed by alphanumeric or underscores, no consecutive underscores
+    Not a reserved word
+    """
     existing_user_email = db.query(User.email).filter(User.email == user.email).first()
     if existing_user_email is not None:
-        raise HTTPException(status_code=421, detail="Email already in use")
+        raise HTTPException(status_code=421, detail="Invalid details")
+    if user.email == "":
+        raise HTTPException(status_code=400, detail="Invalid details")  
+    if not validate_username(user.account_name):
+        raise HTTPException(status_code=400, detail="Invalid details")
+    if not validate_username(user.display_name):
+        raise HTTPException(status_code=400, detail="Invalid details")
+    
     try:
         db_user = User(**user.model_dump())    
         db.add(db_user)
@@ -74,14 +88,14 @@ async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
         return {"id": db_user.id}
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=444, detail="Email already in use")
+        raise HTTPException(status_code=444, detail="Invalid details")
  
 def validate_username(username):
     # Define username constraints
     MIN_LENGTH = 3
     MAX_LENGTH = 30
-    RESERVED_USERNAMES = {'admin', 'user', 'root'}
-    NONO_WORDS = {}
+    RESERVED_USERNAMES = ['admin', 'user', 'root']
+    NONO_WORDS = []
 
     # Check length constraints
     if not (MIN_LENGTH <= len(username) <= MAX_LENGTH):
@@ -90,6 +104,9 @@ def validate_username(username):
     # Regular expression for validation
     # Starts with an alphabet, followed by alphanumeric or underscores, no consecutive underscores
     if not re.match(r'^[A-Za-z]\w*(?:_?\w+)*$', username):
+        return False
+    
+    if '__' in username:
         return False
 
     # Check for reserved words
@@ -102,56 +119,48 @@ def validate_username(username):
     return True
 
 @router.get("/check-username", response_model=UsernameAvailability)
-async def check_username(username: str = Query(..., description="The username to check for availability")):
-    session = SessionLocal()
-
+async def check_username(username: str = Query(..., description="The username to check for availability"), session: Session = Depends(get_db)):
     try:
         if not validate_username(username):
             raise HTTPException(status_code=400, detail="Invalid username")
 
-        user_exists = session.query(session.query(User).filter(User.account_name == username).exists()).scalar()
+        user_exists = session.query(User.account_name).filter(User.account_name == username).first()
 
         if user_exists:
             return {"available": False}
         else:
             return {"available": True}
-    finally:
-        session.close()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error querying the database") from e
 
 @router.post("/auth")
-async def authenticate_user(auth_details: AuthDetails):
-    logging.info(logging.INFO, "Creating an instance of AuthDetails")
-    session = SessionLocal()
+async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
+    try:
+        # Fetch the user from the database
+        db_user = db.query(User).filter(User.account_name == auth_details.username).first()
 
-    # Fetch the user from the database
-    db_user = session.query(User).filter(User.account_name == auth_details.username).first()
+        # If the user doesn't exist, raise an HTTPException
+        if not db_user:
+            raise HTTPException(status_code=400, detail="Does not exist")
 
-    # If the user doesn't exist, raise an HTTPException
-    if not db_user:
-        session.close()
-        raise HTTPException(status_code=400, detail="Does not exist")
+        # Verify the password
+        salt = db_user.salt.encode('utf-8')  # Ensure that the salt is encoded to bytes
+        hashed_password = hashlib.pbkdf2_hmac(
+            'sha512',
+            auth_details.password.encode('utf-8'),  # Ensure that the password is encoded to bytes
+            salt,
+            db_user.iterations
+        )
 
-    # Verify the password
-    salt = db_user.salt.encode('utf-8')  # Ensure that the salt is encoded to bytes
-    hashed_password = hashlib.pbkdf2_hmac(
-        'sha512',
-        auth_details.password.encode('utf-8'),  # Ensure that the password is encoded to bytes
-        salt,
-        db_user.iterations
-    )
+        hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')  # Convert to hex for comparison
+        # If the password is incorrect, raise an HTTPException
+        if hashed_password_hex != db_user.password_hash:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')  # Convert to hex for comparison
-    logging.info(f"Hashed password: {hashed_password_hex}")
-    logging.info(f"Database password: {db_user.password_hash}")
-    logging.info(f"Salt: {db_user.salt}")
-    logging.info(f"Iterations: {db_user.iterations}")
-    logging.info(f"Password: {auth_details.password}")
-    # If the password is incorrect, raise an HTTPException
-    if hashed_password_hex != db_user.password_hash:
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-
-    # If the username and password are correct, return the user details
-    return {"id": db_user.id, "name": db_user.display_name, "email": db_user.email}
+        # If the username and password are correct, return the user details
+        return {"id": db_user.id, "name": db_user.display_name, "email": db_user.email}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error querying the database") from e
 
 @router.get("/user/{user_id}/posts")
 def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
