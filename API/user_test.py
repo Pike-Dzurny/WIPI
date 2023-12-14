@@ -1,5 +1,7 @@
 import os
 import uuid
+
+from httpx import patch
 from app import app
 from endpoints.users import *
 import pytest
@@ -22,6 +24,19 @@ def hash_password(password):
     hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')
 
     return hashed_password_hex, salt_hex
+
+def createUser(client):
+    user_data = {
+        "account_name": "test_user",
+        "display_name": "iamauser",
+        "email": "naaaaa@gmail.com",
+        "password_hash": "password_hash",
+        "iterations": 1000,
+        "salt": "salt"
+        }
+
+    response = client.post("/signup", json=user_data)
+    return response.json.get("id")
 
 
 
@@ -368,3 +383,39 @@ class TestAuthenticateUser:
 
         response = client.post("/auth", json=auth_details)
         assert response.status_code == 500
+
+
+class TestProfilePicture:
+
+    @pytest.mark.asyncio
+    async def test_upload_profile_picture(self, client):
+        # test user with user_id = 1
+        user_id = 2
+        file_path = 'static/defaultpfp.png'
+
+        with open(file_path, 'rb') as file:
+            response = client.post(f"/user/{user_id}/profile_picture", files={"file": file})
+            print(response.json())
+            assert response.status_code == 200
+            assert response.json() == {"message": "Upload successful", "file_name": f"profile_pictures/{user_id}.png"}
+            
+
+    @pytest.mark.asyncio
+    async def test_get_profile_picture(self, client):
+        user_id = 1  # Assuming this user has an uploaded profile picture
+
+        # Mock S3 client's head_object and generate_presigned_url methods
+        with patch('your_module.s3_client.head_object'), patch('your_module.s3_client.generate_presigned_url', return_value='mocked_url'):
+            response = client.get(f"/user/{user_id}/profile_picture")
+            assert response.status_code == 200
+            assert response.json() == {"url": "mocked_url"}
+
+    @pytest.mark.asyncio
+    async def test_get_default_profile_picture(self, client):
+        user_id = 9999  # Assuming this user doesn't have a profile picture
+
+        # Mock S3 client's head_object to raise an exception
+        with patch('your_module.s3_client.head_object', side_effect=Exception):
+            response = client.get(f"/user/{user_id}/profile_picture")
+            assert response.status_code == 200
+            # Add further checks to validate the default picture is returned

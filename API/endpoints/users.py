@@ -1,8 +1,9 @@
 import binascii
 import hashlib
+import io
 import json
 import logging
-from fastapi import Depends, HTTPException, APIRouter, Depends, Query
+from fastapi import Depends, File, HTTPException, APIRouter, Depends, Query, UploadFile
 from fastapi.responses import FileResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
@@ -11,10 +12,28 @@ from api_models import AuthDetails, SignUpUser, UsernameAvailability
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 import re
 
+from PIL import Image
+
 from database.database_initializer import User, Post
 from database.database_session import SessionLocal
 
+import boto3
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv('varsfordb.env')  
+
+aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key
+)
+bucket_name = os.getenv('BUCKET_NAME')
 
 def get_db():
     db = SessionLocal()
@@ -180,30 +199,55 @@ def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
     session.close()
     return posts
 
-def get_s3_object(bucket, key):
-    return 
-    #s3 = boto3.client('s3')
+@router.post("/user/{user_id}/profile_picture")
+async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
+    try:
+        # Read the image file into a PIL Image object
+        image = Image.open(file.file)
 
-    #try:
-    #    s3.download_file(bucket, key, './' + key)
-    #except botocore.exceptions.ClientError as e:
-    #    print(f"Error getting object {key} from bucket {bucket}. Make sure they exist and your bucket is in the same region as this function.")
-    #    print(e)
-    #    return {"error": "Could not download file"}
+        # Convert to RGB if the image has an alpha channel (as webp supports alpha channel in lossless mode)
+        if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
+            image = image.convert('RGBA')
+        else:
+            image = image.convert('RGB')
+
+        # Prepare the file to save
+        in_mem_file = io.BytesIO()
+
+        # Save the image to the in-memory file in webp format
+        image.save(in_mem_file, format='webp')
+        in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
+
+        # Define the S3 key (filename) with the .webp extension
+        s3_key = f"profile_pictures/{user_id}.webp"
+
+        # Upload the in-memory file to S3
+        s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "Upload successful", "file_name": s3_key}
+
 
 @router.get("/user/{user_id}/profile_picture")
 def get_profile_picture(user_id: int):
-    #if user_id == 0:
-    #if user_id:
-    return FileResponse('./defaultpfp.png', media_type='image/png')
-    #bucket = "yamlpfps111"  # replace with your bucket name
-    #key = f"pfp_{user_id}.png"  # replace with your key pattern
-    #result = get_s3_object(bucket, key)
-    
-    #if "error" in result:
-    #    return FileResponse('./defaultpfp.png', media_type='image/png')
-    #else:
-    #    return FileResponse('./' + key, media_type='image/png')
+    s3_key = f"profile_pictures/{user_id}.png"  # Assuming PNG format
+
+    # Check if the file exists in S3
+    try:
+        s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+        print("File found in S3")
+    except:
+        # Return a default image if the specific user's image doesn't exist
+        return FileResponse('../static/defaultpfp.png', media_type='image/png')
+
+    # Generate a presigned URL for the S3 object
+    presigned_url = s3_client.generate_presigned_url('get_object', 
+                                                     Params={'Bucket': bucket_name, 'Key': s3_key}, 
+                                                     ExpiresIn=3600)
+
+    return {"url": presigned_url}
 
 @router.get("/user/{user_id}/username")
 def get_username(user_id: int):

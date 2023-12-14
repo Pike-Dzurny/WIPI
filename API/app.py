@@ -10,6 +10,8 @@ from sqlalchemy.orm import declarative_base
 from endpoints.users import router as user_router
 from endpoints.posts import router as posts_router
 
+import boto3
+
 # The declarative_base() function returns a class that is used as a base class for our models
 Base = declarative_base()
 
@@ -35,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 
 
 logger = logging.getLogger("uvicorn")
