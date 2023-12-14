@@ -294,8 +294,6 @@ class TestCheckUsername:
 # Tests for the authenticate_user function ie the /auth endpoint
 class TestAuthenticateUser:
 
-
-
     # Authenticating a user with correct username and password
     @pytest.mark.asyncio
     async def test_authenticate_user_correct_credentials(self, client):
