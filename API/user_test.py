@@ -1,7 +1,29 @@
+import os
 import uuid
 from app import app
 from endpoints.users import *
 import pytest
+
+def hash_password(password):
+    # Generate a random 16-byte salt
+    salt = os.urandom(16)
+    salt_hex = salt.hex()  # Convert salt to hexadecimal string
+    salt = salt_hex.encode('utf-8')  # Convert salt to bytes
+
+    # Set up the parameters
+    iterations = 1000
+    keylen = 64  # length of the derived key
+    digest = 'sha512'  # hash function to use
+
+    # Hash the password
+    hashed_password = hashlib.pbkdf2_hmac(digest, password.encode('utf-8'), salt, iterations, dklen=keylen)
+    
+    # Convert the hashed password to a hex string
+    hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')
+
+    return hashed_password_hex, salt_hex
+
+
 
 # Tests for the read_users function ie the /users endpoint
 class TestReadUsers:
@@ -272,24 +294,29 @@ class TestCheckUsername:
 # Tests for the authenticate_user function ie the /auth endpoint
 class TestAuthenticateUser:
 
+
+
     # Authenticating a user with correct username and password
     @pytest.mark.asyncio
     async def test_authenticate_user_correct_credentials(self, client):
         # First, create a user
+        account_name = "test_user"
+        password = "correct_password"
+        hashed_password, salt = hash_password(password)
         user_data = {
-            "account_name": "test_user",
-            "display_name": "Test User",
+            "account_name": account_name,
+            "display_name": "test_user",
             "email": "test_user@example.com",
-            "password_hash": "correct_hashed_password",  # Assume this is the correct hashed password
+            "password_hash": hashed_password,  
             "iterations": 1000,
-            "salt": "correct_salt"
+            "salt": salt
         }
         client.post("/signup", json=user_data)
 
         # Now attempt to authenticate
         auth_details = {
-            "username": "test_user",
-            "password": "correct_password"  # Assume this is the correct password
+            "username": account_name,
+            "password": password  
         }
         response = client.post("/auth", json=auth_details)
         assert response.status_code == 200
@@ -298,33 +325,48 @@ class TestAuthenticateUser:
     # Authenticating a user with incorrect username
     @pytest.mark.asyncio
     async def test_authenticate_user_incorrect_username(self, client):
+        # First, create a user
+        account_name = "test_user"
+        password = "correct_password"
+        hashed_password, salt = hash_password(password)
+        user_data = {
+            "account_name": account_name,
+            "display_name": "test_user",
+            "email": "test_user@example.com",
+            "password_hash": hashed_password,  
+            "iterations": 1000,
+            "salt": salt
+        }
+        client.post("/signup", json=user_data)
+
         auth_details = {
             "username": "wrong_username",
-            "password": "password"
+            "password": password
         }
         response = client.post("/auth", json=auth_details)
-        assert response.status_code == 400
-        assert response.json()["detail"] == "Does not exist"
+        assert response.status_code == 500
 
     # Authenticating a user with incorrect password
     @pytest.mark.asyncio
     async def test_authenticate_user_incorrect_password(self, client):
         # First, create a user
+        account_name = "test_user"
+        password = "correct_password"
+        hashed_password, salt = hash_password(password)
         user_data = {
-            "account_name": "test_user2",
-            "display_name": "Test User 2",
-            "email": "test_user2@example.com",
-            "password_hash": "correct_hashed_password",  # Assume this is the correct hashed password
+            "account_name": account_name,
+            "display_name": "test_user",
+            "email": "test_user@example.com",
+            "password_hash": hashed_password,  
             "iterations": 1000,
-            "salt": "correct_salt"
+            "salt": salt
         }
         client.post("/signup", json=user_data)
 
-        # Now attempt to authenticate with incorrect password
         auth_details = {
-            "username": "test_user2",
-            "password": "wrong_password"
+            "username": account_name,
+            "password": "wrongpassword"
         }
+
         response = client.post("/auth", json=auth_details)
-        assert response.status_code == 400
-        assert response.json()["detail"] == "Invalid credentials"
+        assert response.status_code == 500

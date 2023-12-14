@@ -136,6 +136,7 @@ async def check_username(username: str = Query(..., description="The username to
 @router.post("/auth")
 async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
     try:
+        print("1")
         # Fetch the user from the database
         db_user = db.query(User).filter(User.account_name == auth_details.username).first()
 
@@ -153,8 +154,12 @@ async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get
         )
 
         hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')  # Convert to hex for comparison
+
         # If the password is incorrect, raise an HTTPException
+        print(hashed_password_hex)
+        print(db_user.password_hash)
         if hashed_password_hex != db_user.password_hash:
+            print("6")
             raise HTTPException(status_code=400, detail="Invalid credentials")
 
         # If the username and password are correct, return the user details
