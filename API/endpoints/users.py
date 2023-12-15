@@ -1,3 +1,4 @@
+from fastapi import Response, status
 import binascii
 import hashlib
 import io
@@ -232,7 +233,7 @@ async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
 
 @router.get("/user/{user_id}/profile_picture")
 def get_profile_picture(user_id: int):
-    s3_key = f"profile_pictures/{user_id}.png"  # Assuming PNG format
+    s3_key = f"profile_pictures/{user_id}.webp"  # Assuming webp format
 
     # Check if the file exists in S3
     try:
@@ -240,7 +241,7 @@ def get_profile_picture(user_id: int):
         print("File found in S3")
     except:
         # Return a default image if the specific user's image doesn't exist
-        return FileResponse('../static/defaultpfp.png', media_type='image/png')
+        return FileResponse('static\defaultpfp.png', media_type='image/png')
 
     # Generate a presigned URL for the S3 object
     presigned_url = s3_client.generate_presigned_url('get_object', 
@@ -250,9 +251,17 @@ def get_profile_picture(user_id: int):
     return {"url": presigned_url}
 
 @router.get("/user/{user_id}/username")
-def get_username(user_id: int):
-    session = SessionLocal()
-    user = session.query(User).get(user_id)
-    session.close()
-    return {"username": user.account_name}
+def get_username(user_id: int, db: Session = Depends(get_db)):
+    try:
+        print("1")
+        user = db.query(User).get(user_id)
+        print("2")
+        if user is None:
+            print("3")
+            raise HTTPException(status_code=404, detail=str(e)) 
+        else:
+            print("4")
+            return {"username": user.display_name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
 

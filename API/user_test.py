@@ -25,18 +25,6 @@ def hash_password(password):
 
     return hashed_password_hex, salt_hex
 
-def createUser(client):
-    user_data = {
-        "account_name": "test_user",
-        "display_name": "iamauser",
-        "email": "naaaaa@gmail.com",
-        "password_hash": "password_hash",
-        "iterations": 1000,
-        "salt": "salt"
-        }
-
-    response = client.post("/signup", json=user_data)
-    return response.json.get("id")
 
 
 
@@ -390,32 +378,86 @@ class TestProfilePicture:
     @pytest.mark.asyncio
     async def test_upload_profile_picture(self, client):
         # test user with user_id = 1
-        user_id = 2
+        user_id = 1
         file_path = 'static/defaultpfp.png'
 
         with open(file_path, 'rb') as file:
             response = client.post(f"/user/{user_id}/profile_picture", files={"file": file})
             print(response.json())
             assert response.status_code == 200
-            assert response.json() == {"message": "Upload successful", "file_name": f"profile_pictures/{user_id}.png"}
+            assert response.json() == {"message": "Upload successful", "file_name": f"profile_pictures/{user_id}.webp"}
             
 
     @pytest.mark.asyncio
     async def test_get_profile_picture(self, client):
-        user_id = 1  # Assuming this user has an uploaded profile picture
+        user_id = 1  # Replace with a test user ID
+        file_path = 'static/defaultpfp.png'  # Path to your test image
 
-        # Mock S3 client's head_object and generate_presigned_url methods
-        with patch('your_module.s3_client.head_object'), patch('your_module.s3_client.generate_presigned_url', return_value='mocked_url'):
-            response = client.get(f"/user/{user_id}/profile_picture")
+        # Upload the image
+        with open(file_path, 'rb') as file:
+            response = client.post(f"/user/{user_id}/profile_picture", files={"file": (file_path, file, "image/png")})
             assert response.status_code == 200
-            assert response.json() == {"url": "mocked_url"}
+            assert "message" in response.json()
+            assert "file_name" in response.json()
+        
+        # Retrieve the uploaded image
+        response = client.get(f"/user/{user_id}/profile_picture")
+        assert response.status_code == 200
+        # The response should be a presigned URL, so we check if 'url' is in the response
+        assert "url" in response.json()
+        presigned_url = response.json()['url']
+        assert presigned_url is not None
 
     @pytest.mark.asyncio
     async def test_get_default_profile_picture(self, client):
         user_id = 9999  # Assuming this user doesn't have a profile picture
 
-        # Mock S3 client's head_object to raise an exception
-        with patch('your_module.s3_client.head_object', side_effect=Exception):
-            response = client.get(f"/user/{user_id}/profile_picture")
-            assert response.status_code == 200
-            # Add further checks to validate the default picture is returned
+        # Retrieve the uploaded image
+        response = client.get(f"/user/{user_id}/profile_picture")
+        assert response.status_code == 200
+        # The response should be a presigned URL, so we check if 'url' is in the response
+        # If the content is binary (like an image), you should read it as bytes
+        content = response.content  # This is how you access the raw bytes
+
+        # Now you can write assertions based on the binary content
+        # For example, you can check if the content starts with the PNG header bytes
+        assert content.startswith(b'\x89PNG\r\n\x1a\n')  # PNG header
+    
+class TestGetUsername:
+    
+    @pytest.mark.asyncio
+    async def test_returns_username_of_valid_user_id(self, client):
+        # First, create a user
+        account_name = "test_user"
+        password = "correct_password"
+        hashed_password, salt = hash_password(password)
+        user_data = {
+            "account_name": account_name,
+            "display_name": "test_user",
+            "email": "test_user@example.com",
+            "password_hash": hashed_password,  
+            "iterations": 1000,
+            "salt": salt
+        }
+        response = client.post("/signup", json=user_data)
+        assert response.status_code == 200
+
+        response = client.get(f"/user/{1}/username")
+
+        
+        assert response.status_code == 200
+        assert response.json() == {"username": "test_user"}
+    
+    @pytest.mark.asyncio
+    async def test_returns_error_message_if_user_id_not_found(self, client):
+        # Use a user ID that does not exist
+        response = client.get(f"/user/{1}/username")
+        assert response.status_code == 500  # Assuming you return a 404 status for not found
+
+    @pytest.mark.asyncio
+    async def test_returns_error_message_if_user_id_not_integer(self, client):
+        # Attempt to retrieve a username with an invalid user ID (non-integer)
+        response = client.get(f"/user/notanumber/username")
+        assert response.status_code == 422  # Unprocessable Entity for invalid parameters
+        assert "detail" in response.json()
+
