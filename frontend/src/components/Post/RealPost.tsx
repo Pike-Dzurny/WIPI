@@ -25,6 +25,7 @@ interface Post {
   content: string;
   user_poster_id: number;
   user: User;
+  post: Post;
 }
 
 

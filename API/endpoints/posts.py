@@ -1,13 +1,19 @@
+from bleach import clean
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
 import logging
 from fastapi import APIRouter, logger
 from sqlalchemy import desc, func
-from postgresql_init import Post, User, post_likes
-from models import UserPostBase
+from database.database_initializer import Post, User, post_likes
+from api_models import UserPostBase
 from typing import List, Dict
 
-from db import SessionLocal
+from database.database_session import SessionLocal
 
-def get_db():
+def get_db() -> Session:
+    """
+    Get a database session using dependency injection.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -16,41 +22,43 @@ def get_db():
 
 router = APIRouter()
 
+
 @router.post("/post")
-def create_post(user_post: UserPostBase):
-    
-    logging.info("Trying to create post")
+def create_post(user_post: UserPostBase, db: Session = Depends(get_db)):
+    """
+    Create a post for a user.
+    """
     try:
-        print(f"User: {user_post.username}")
-        print(f"Post: {user_post.post_content}")
-
-        session = SessionLocal()
-        user = session.query(User).filter(User.account_name == user_post.username).first()
-        if user is None:
-            return {"status": "error", "message": "User not found"}
-
+        sanitized_content = clean(user_post.post_content)
+        user = db.query(User).filter(User.id == user_post.user_poster_id).first()
+        print(user)
+        if user is None or sanitized_content is None or sanitized_content == "":
+            return HTTPException(status_code=500, detail="failed")
+        print(user.account_name)
         # Use the reply_to field when creating the Post object
-        db_post = Post(user_poster_id=user.id, content=user_post.post_content, reply_to=user_post.reply_to)
-        session.add(db_post)
-        session.commit()
-        session.close()
+        db_post = Post(user_poster_id=user.id, content=sanitized_content, reply_to=user_post.reply_to)
+        db.add(db_post)
+        db.commit()
         return {"status": "success"}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        return HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/post/{post_id}/comments")
-def read_comments(post_id: int, page: int = 1, per_page: int = 6):
-    offset = (page - 1) * per_page
-    session = SessionLocal()
-    comments = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture)
-                .join(User, Post.user_poster_id == User.id)  # Join the User table
-                .filter(Post.reply_to == post_id)  # Filter by reply_to field
-                .order_by(desc(Post.date_of_post))
-                .offset(offset)
-                .limit(per_page)
-                .all())
-    session.close()
-    return [{"comment": {**comment.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for comment, account_name, bio, display_name, profile_picture in comments]
+def read_comments(post_id: int, page: int = 1, per_page: int = 6, db: Session = Depends(get_db)):
+    try:
+        offset = (page - 1) * per_page
+        comments = (db.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture)
+                    .join(User, Post.user_poster_id == User.id)  # Join the User table
+                    .filter(Post.reply_to == post_id)  # Filter by reply_to field
+                    .order_by(desc(Post.date_of_post))
+                    .offset(offset)
+                    .limit(per_page)
+                    .all())
+        return [{"comment": {**comment.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for comment, account_name, bio, display_name, profile_picture in comments]
+    except Exception as e:
+        return HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/post/{post_id}/likes_count")
 def get_likes_count(post_id: int): 

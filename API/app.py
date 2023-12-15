@@ -1,32 +1,16 @@
-import json
-from sqlalchemy.orm import Session
-import binascii
-import hashlib
 import logging
-import os
-import re
-# import boto3
-# import botocore
-# from botocore.exceptions import NoCredentialsError, ClientError
-#import pytest
-from sqlite3 import IntegrityError
-from typing import Optional
 
 # fastapi imports
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from sqlalchemy import create_engine, desc, func
+
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
+from sqlalchemy.orm import declarative_base
 
-# models and postgresql_init are in the same directory as this script
-from models import AuthDetails, SignUpUser, UserPostBase, UsernameAvailability
-from postgresql_init import Post, User, post_likes
+from endpoints.users import router as user_router
+from endpoints.posts import router as posts_router
 
-from users import router as user_router
-from posts import router as posts_router
+import boto3
 
 # The declarative_base() function returns a class that is used as a base class for our models
 Base = declarative_base()
@@ -53,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 
 
 logger = logging.getLogger("uvicorn")

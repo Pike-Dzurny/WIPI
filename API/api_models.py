@@ -6,23 +6,17 @@ class UserPostBase(BaseModel):
     Represents the structure of a user post.
 
     Args:
-        username (str): The username of the user making the post.
+        user_poster_id (int): The UID of the user making the post.
         post_content (str): The content of the post.
         reply_to (Optional[int], optional): The ID of the post being replied to. Defaults to None.
 
-    Attributes:
-        username (str): The username of the user making the post.
-        post_content (str): The content of the post.
-        reply_to (Optional[int]): The ID of the post being replied to.
-
     Example:
-        user_post = UserPostBase(username="john_doe", post_content="Hello world!", reply_to=1)
-        print(user_post.username)  # Output: "john_doe"
+        user_post = UserPostBase(user_poster_id=3, post_content="Hello world!", reply_to=1)
         print(user_post.post_content)  # Output: "Hello world!"
         print(user_post.reply_to)  # Output: 1
     """
 
-    username: str
+    user_poster_id: int
     post_content: str
     reply_to: Optional[int] = None
     
