@@ -22,7 +22,7 @@ services:
     expose:
       - '8000'
     volumes:
-      - ./api:/app
+      - ./API:/app
     depends_on:
       - db
     environment:
