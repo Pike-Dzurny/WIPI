@@ -98,3 +98,4 @@ node_modules
 */env.local
 API/database/__pycache__/database_session.cpython-38.pyc
 API/endpoints/__pycache__/users.cpython-38.pyc
+.vscode/settings.json
