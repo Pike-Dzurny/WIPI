@@ -58,6 +58,12 @@ __pycache__/
 /API/Lib/
 /API/Include/
 
+/.vscode/*
+.vscode
+.vscode/*
+.vscode/
+.vscode/settings.json
+
 
 # production
 /frontend/build
