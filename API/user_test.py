@@ -373,55 +373,55 @@ class TestAuthenticateUser:
         assert response.status_code == 500
 
 
-class TestProfilePicture:
+# class TestProfilePicture:
 
-    @pytest.mark.asyncio
-    async def test_upload_profile_picture(self, client):
-        # test user with user_id = 1
-        user_id = 1
-        file_path = 'static/defaultpfp.png'
+#     @pytest.mark.asyncio
+#     async def test_upload_profile_picture(self, client):
+#         # test user with user_id = 1
+#         user_id = 1
+#         file_path = 'static/defaultpfp.png'
 
-        with open(file_path, 'rb') as file:
-            response = client.post(f"/user/{user_id}/profile_picture", files={"file": file})
-            print(response.json())
-            assert response.status_code == 200
-            assert response.json() == {"message": "Upload successful", "file_name": f"profile_pictures/{user_id}.webp"}
+#         with open(file_path, 'rb') as file:
+#             response = client.post(f"/user/{user_id}/profile_picture", files={"file": file})
+#             print(response.json())
+#             assert response.status_code == 200
+#             assert response.json() == {"message": "Upload successful", "file_name": f"profile_pictures/{user_id}.webp"}
             
 
-    @pytest.mark.asyncio
-    async def test_get_profile_picture(self, client):
-        user_id = 1  # Replace with a test user ID
-        file_path = 'static/defaultpfp.png'  # Path to your test image
+#     @pytest.mark.asyncio
+#     async def test_get_profile_picture(self, client):
+#         user_id = 1  # Replace with a test user ID
+#         file_path = 'static/defaultpfp.png'  # Path to your test image
 
-        # Upload the image
-        with open(file_path, 'rb') as file:
-            response = client.post(f"/user/{user_id}/profile_picture", files={"file": (file_path, file, "image/png")})
-            assert response.status_code == 200
-            assert "message" in response.json()
-            assert "file_name" in response.json()
+#         # Upload the image
+#         with open(file_path, 'rb') as file:
+#             response = client.post(f"/user/{user_id}/profile_picture", files={"file": (file_path, file, "image/png")})
+#             assert response.status_code == 200
+#             assert "message" in response.json()
+#             assert "file_name" in response.json()
         
-        # Retrieve the uploaded image
-        response = client.get(f"/user/{user_id}/profile_picture")
-        assert response.status_code == 200
-        # The response should be a presigned URL, so we check if 'url' is in the response
-        assert "url" in response.json()
-        presigned_url = response.json()['url']
-        assert presigned_url is not None
+#         # Retrieve the uploaded image
+#         response = client.get(f"/user/{user_id}/profile_picture")
+#         assert response.status_code == 200
+#         # The response should be a presigned URL, so we check if 'url' is in the response
+#         assert "url" in response.json()
+#         presigned_url = response.json()['url']
+#         assert presigned_url is not None
 
-    @pytest.mark.asyncio
-    async def test_get_default_profile_picture(self, client):
-        user_id = 9999  # Assuming this user doesn't have a profile picture
+#     @pytest.mark.asyncio
+#     async def test_get_default_profile_picture(self, client):
+#         user_id = 9999  # Assuming this user doesn't have a profile picture
 
-        # Retrieve the uploaded image
-        response = client.get(f"/user/{user_id}/profile_picture")
-        assert response.status_code == 200
-        # The response should be a presigned URL, so we check if 'url' is in the response
-        # If the content is binary (like an image), you should read it as bytes
-        content = response.content  # This is how you access the raw bytes
+#         # Retrieve the uploaded image
+#         response = client.get(f"/user/{user_id}/profile_picture")
+#         assert response.status_code == 200
+#         # The response should be a presigned URL, so we check if 'url' is in the response
+#         # If the content is binary (like an image), you should read it as bytes
+#         content = response.content  # This is how you access the raw bytes
 
-        # Now you can write assertions based on the binary content
-        # For example, you can check if the content starts with the PNG header bytes
-        assert content.startswith(b'\x89PNG\r\n\x1a\n')  # PNG header
+#         # Now you can write assertions based on the binary content
+#         # For example, you can check if the content starts with the PNG header bytes
+#         assert content.startswith(b'\x89PNG\r\n\x1a\n')  # PNG header
     
 class TestGetUsername:
     

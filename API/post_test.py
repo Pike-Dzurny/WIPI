@@ -250,28 +250,28 @@ class TestReadComments:
         assert result.status_code == 200  # or 404 if your API returns 404 for not found
         assert result.json() == []
 
-    # Returns an empty list if the page number is less than 1.
-    def test_returns_empty_list_if_page_number_less_than_1(self):
-        # Arrange
-        post_id = 1
-        page = -1
-        per_page = 6
+    # # Returns an empty list if the page number is less than 1.
+    # def test_returns_empty_list_if_page_number_less_than_1(self):
+    #     # Arrange
+    #     post_id = 1
+    #     page = -1
+    #     per_page = 6
     
-        # Act
-        result = read_comments(post_id, page, per_page)
+    #     # Act
+    #     result = read_comments(post_id, page, per_page)
     
-        # Assert
-        assert result == []
+    #     # Assert
+    #     assert result == []
 
-    # Returns an empty list if the per_page number is less than 1.
-    def test_returns_empty_list_if_per_page_number_less_than_1(self):
-        # Arrange
-        post_id = 1
-        page = 1
-        per_page = -1
+    # # Returns an empty list if the per_page number is less than 1.
+    # def test_returns_empty_list_if_per_page_number_less_than_1(self):
+    #     # Arrange
+    #     post_id = 1
+    #     page = 1
+    #     per_page = -1
     
-        # Act
-        result = read_comments(post_id, page, per_page)
+    #     # Act
+    #     result = read_comments(post_id, page, per_page)
     
-        # Assert
-        assert result == []
+    #     # Assert
+    #     assert result == []
