@@ -8,3 +8,4 @@ psycopg2==2.9.3
 passlib==1.7.4
 python-multipart==0.0.6
 pillow==10.1.0
+bleach==6.1.0
