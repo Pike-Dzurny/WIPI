@@ -1,4 +1,4 @@
-name: Python application test
+name: Python API testing
 
 on:
   pull_request:
@@ -6,17 +6,33 @@ on:
   push:
     branches: [ development ]
 
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: mydatabase
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v2
-
-
-    - name: List directory structure
-      run: ls -lR
     
     - name: Set up Python
       uses: actions/setup-python@v2
