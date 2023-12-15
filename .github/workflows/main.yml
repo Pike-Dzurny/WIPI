@@ -16,24 +16,15 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: pass
-          POSTGRES_DB: mydatabase
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - uses: actions/checkout@v2
     
+    - name: Set up Docker Compose
+      run: sudo apt-get update && sudo apt-get install docker-compose
+
+    - name: Build and run with Docker Compose
+      run: docker-compose up -d
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
