@@ -66,7 +66,6 @@ export default function Page({ params }: { params: { id: string } }) {
 
 
 
-
   const router = useRouter();
 
   const [isFavorite, setIsFavorite] = useState(false);
@@ -296,15 +295,15 @@ const handleSubmit = async (event: React.FormEvent) => {
           {post && (
           <>
             {/* Profile Picture Column */}
-            <div className="flex flex-col justify-start items-center mr-4">
-              <img className="rounded-full h-20 w-20 shadow-sm mb-4" src={`http://localhost:8000/user/${post.user_poster_id}/profile_picture`} alt="Author" />
+            <div className="flex flex-col justify-start items-center mr-4 flex-shrink-0">
+              <img className="rounded-full h-12 w-12 shadow-sm mb-4" src={`http://localhost:8000/user/${post.user_poster_id}/profile_picture`} alt="Author" />
             </div>
 
             {/* Content and Buttons Column */}
-            <div className="flex flex-col justify-start">
+            <div className="flex flex-col justify-start flex-grow">
               <div className="mb-4">
                 <div className="font-medium">{post.user_display_name}</div>
-                <div className='overflow-hidden overflow-wrap break-words w-full'>
+                <div className=''>
                   <p className="hyphens-auto break-all">{post.content}</p>
                 </div>
               </div>
@@ -341,7 +340,7 @@ const handleSubmit = async (event: React.FormEvent) => {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional" />
         <div className="flex justify-around items-center">
               <div className={`rounded-full hover:bg-slate-200`}>
-            <Link className={`flex flex-row items-center justify-center pl-4 pr-4 border-b-2 border-blue-500 hover:border-blue-300`} href={`/#${params.id}`} passHref>
+            <Link className={`flex flex-row items-center justify-center pl-4 pr-4 border-b-2 border-blue-500 hover:border-blue-300`} href={`/`} passHref>
               <span title="arrow_back" className="mb-2 mt-2 text-sky-900  material-symbols-sharp"   style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48" }}>
               arrow_back
               </span>

@@ -2,6 +2,8 @@
 
 import { useSession } from "next-auth/react";
 
+import { useRouter } from 'next/navigation'
+
 import React, { useEffect, useState, useContext } from 'react';
 import { PFP } from '../../../components/pfp';
 
@@ -48,7 +50,7 @@ export default function Home() {
     const baseUrl = `http://localhost:8000/posts/${userId}/`;
     const params = new URLSearchParams({
       page: pageParam.toString(),
-      per_page: '6'
+      per_page: '10'
     }).toString();
     const url = baseUrl + "?" + params;
   
@@ -69,6 +71,8 @@ export default function Home() {
   } = useInfiniteQuery('posts', fetchPosts, {
     getNextPageParam: (lastPage, allPages) => allPages.length + 1,
     enabled: !!session?.user?.id, // This will delay the query until the session ID is available
+    staleTime: Infinity, // Adjust according to your needs
+    cacheTime: 1000 * 60 * 60 * 24, // 24 hours, for example
   });
   const lastPostRef = React.useRef<HTMLDivElement>(null)
 
@@ -83,31 +87,35 @@ export default function Home() {
     }, [entry, fetchNextPage]);
 
     const _posts = data?.pages.flatMap((page) => page)
-    const [scrollPosition, setScrollPosition] = useState(0);
+    // const [scrollPosition, setScrollPosition] = useState(0);
 
-    const handleScroll = () => {
-      const position = window.pageYOffset;
-      setScrollPosition(position);
-    };
+    // const handleScroll = () => {
+    //   const position = window.pageYOffset;
+    //   setScrollPosition(position);
+    // };
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const hash = window.location.hash;
-    if (hash) {
-      console.log("hash is: " + hash);
-      const id = hash.replace('#', ''); // Remove the '#' from the hash
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+  //   const hash = window.location.hash;
+  //   if (hash) {
+  //     console.log("hash is: " + hash);
+  //     const id = hash.replace('#', ''); // Remove the '#' from the hash
+  //     const element = document.getElementById(id);
+  //     if (element) {
+  //       element.scrollIntoView({ behavior: 'smooth' });
+  //     }
+  //   }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+  //   window.addEventListener('scroll', handleScroll, { passive: true });
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [session]);
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, [session]);
+
+  // const [lastScrollTop, setLastScrollTop] = useState(0);
+
+
 
   useEffect(() => {
     console.log("Current session:", session);
@@ -160,12 +168,12 @@ export default function Home() {
               ))}
               {
 }
-              <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage} className="flex justify-center items-center w-full">
+              <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage} className="flex justify-center items-center w-full">
                 {
                   isFetchingNextPage
-                  ? <div className="loading-circle justify-center align-middle"></div>
-                  : (data?.pages.length ?? 0) < 6
-                  ? <SkeletonPost count={6} />
+                  ? <SkeletonPost count={4} />
+                  : !hasNextPage
+                  ? <SkeletonPost count={4} />
                   : 'Nothing more to load'
                 }
               </button>

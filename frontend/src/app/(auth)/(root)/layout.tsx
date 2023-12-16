@@ -108,7 +108,7 @@ function RootLayout({
           <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
 
           <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
-            <Sidebar />
+          <Sidebar />
           </div>
 
           </div>
