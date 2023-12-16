@@ -20,7 +20,7 @@ import { Dropdown } from '../../../components/Dropdown/Dropdown';
 import { QueryFunctionContext } from 'react-query';
 
 import { User, Post } from '../../../components/Modules'
-import { Skeletons } from '../../../components/Skeletons'
+import { SkeletonPost } from '../../../components/Skeletons'
 
 import { set } from "lodash";
 
@@ -174,7 +174,7 @@ export default function Home() {
                   isFetchingNextPage
                   ? <div className="loading-circle justify-center align-middle"></div>
                   : (data?.pages.length ?? 0) < 6
-                  ? <Skeletons />
+                  ? <SkeletonPost count={6} />
                   : 'Nothing more to load'
                 }
               </button>
