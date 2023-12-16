@@ -68,6 +68,14 @@ def get_likes_count(post_id: int):
     session.close()
     return {"likes_count": likes_count}
 
+@router.get("/post/{post_id}/comments_count")
+def get_likes_count(post_id: int): 
+    session = SessionLocal()
+    post = session.query(Post).get(post_id)
+    comment_count = post.replies.count()  # count the number of users who liked this post
+    session.close()
+    return {"comment_count": comment_count}
+
 @router.post("/post/{post_id}/toggle_like/{user_id}")  # include user_id in the path
 def toggle_like(post_id: int, user_id: int):
     session = SessionLocal()

@@ -19,6 +19,8 @@ import { Dropdown } from '../../../components/Dropdown/Dropdown';
 
 import { QueryFunctionContext } from 'react-query';
 
+import { User, Post } from '../../../components/Modules'
+
 const fetchPosts = async ({ pageParam = 1 }: QueryFunctionContext<'posts', number>) => {
   const url = `http://localhost:8000/posts?page=${pageParam}&per_page=6`;
   const response = await axios.get(url);
@@ -90,21 +92,7 @@ export default function Home() {
   }, []);
 
 
-  interface User {
-    account_name: string;
-    bio: string | null;
-    display_name: string;
-    profile_picture: string | null;
-  }
-  
-  interface Post {
-    date_of_post: string;
-    likes_count: number;
-    id: number;
-    content: string;
-    user_poster_id: number;
-    user: User;
-  }
+
   
   
   

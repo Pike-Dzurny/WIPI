@@ -8,26 +8,9 @@ import { differenceInMinutes } from 'date-fns/differenceInMinutes';
 import { differenceInHours } from 'date-fns/differenceInHours';
 import { differenceInDays } from 'date-fns/differenceInDays';
 import { differenceInMonths } from 'date-fns/differenceInMonths';import Link from 'next/link';
+import { formatCount } from '../formatCount';
 
-
-
-interface User {
-  account_name: string;
-  bio: string | null;
-  display_name: string;
-  profile_picture: string | null;
-}
-
-interface Post {
-  date_of_post: string;
-  likes_count: number;
-  id: number;
-  content: string;
-  user_poster_id: number;
-  user: User;
-  post: Post;
-}
-
+import { User, Post } from '../Modules'
 
 interface RealPostProps {
   postObject: Post;
@@ -41,6 +24,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [isChangeCircle, setIsChangeCircle] = useState(false);
   let post = postObject.post;
   const [likes_count, setLikesCount] = useState(post.likes_count);
+  const [comment_count, setCommentCount] = useState(post.comments_count);
   const [copySuccess, setCopySuccess] = useState('');
 
 
@@ -88,17 +72,6 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     });
   }
 
-  function formatLikesCount(count: number) {
-    if (count === 0) {
-      return '';
-    } else if (count <= 999) {
-      return count;
-    } else if (count <= 9999) {
-      return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    } else {
-      return Math.floor(count / 1000) + 'k';
-    }
-  }
 
   let paddingClass = 'pr-4 pb-2 pl-2';
 
@@ -157,7 +130,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
                 >
                   favorite
                 </span>
-                <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatLikesCount(likes_count)}</p>            </div>
+                <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(likes_count)}</p>            </div>
             <span 
               className={`material-symbols-sharp ${isChatBubble ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200 rounded-full p-2`} 
               style={isChatBubble ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
@@ -165,6 +138,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
             >
               chat_bubble
             </span>
+            <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(comment_count)}</p>
             <span 
               className={`material-symbols-sharp ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200 rounded-full p-2`} 
               style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
@@ -199,3 +173,5 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   </Link>
   );
 };
+
+

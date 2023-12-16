@@ -102,3 +102,5 @@ API/endpoints/__pycache__/users.cpython-38.pyc
 .vscode/*
 API/database/__pycache__/database_initializer.cpython-38.pyc
 API/database/__pycache__/database_session.cpython-38.pyc
+API/endpoints/__pycache__/posts.cpython-38.pyc
+API/endpoints/__pycache__/users.cpython-38.pyc
