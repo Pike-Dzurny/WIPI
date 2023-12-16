@@ -241,7 +241,7 @@ def get_profile_picture(user_id: int):
         print("File found in S3")
     except:
         # Return a default image if the specific user's image doesn't exist
-        return FileResponse('static\defaultpfp.png', media_type='image/png')
+        return FileResponse('static/defaultpfp.png', media_type='image/png')
 
     # Generate a presigned URL for the S3 object
     presigned_url = s3_client.generate_presigned_url('get_object', 
