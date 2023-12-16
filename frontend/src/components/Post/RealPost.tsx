@@ -19,7 +19,7 @@ interface RealPostProps {
 }
 
 export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(postObject.post.user_has_liked);
   const [isChatBubble, setIsChatBubble] = useState(false);
   const [isChangeCircle, setIsChangeCircle] = useState(false);
   let post = postObject.post;
@@ -44,19 +44,12 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   
 
   useEffect(() => {
-    // Fetch the likes count
-    //fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/likes_count`)
-    //  .then(response => response.json())
-    //  .then(data => setLikesCount(data.likes_count));
-  
     // Check if the user has liked the post
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/is_liked_by/${someUserId}`)
-      .then(response => response.json())
-      .then(data => setIsFavorite(data.isLiked));
+    setIsFavorite(post.id.is_liked_by);
   }, [post.id]);
 
   function toggleLike() {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${someUserId}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,12 +58,14 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     .then(response => response.json())
     .then(data => {
       if (data.status === 'success') {
-        setIsFavorite(prevIsFavorite => !prevIsFavorite);
-        setLikesCount(prevCount => prevCount + (isFavorite ? -1 : 1));
+        setIsFavorite((prevIsFavorite: boolean) => !prevIsFavorite);
+        setLikesCount((prevCount: number) => prevCount + (isFavorite ? -1 : 1));
       } else {
+        // Handle error
       }
     });
   }
+  
 
 
   let paddingClass = 'pr-4 pb-2 pl-2';
