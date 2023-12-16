@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
 import Image from 'next/image'
+import { Sidebar } from '@/components/Sidebar/Sidebar';
 
 
 interface UserPostBase {
@@ -107,25 +108,7 @@ function RootLayout({
           <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
 
           <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
-            <button
-            type="button"
-            className="rounded-full bg-transparent px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-            Messages
-            </button>
-            <button
-            type="button"
-            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-            Messages
-            </button>
-            <button
-            type="button"
-            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-            Messages
-            </button>
-
+            <Sidebar />
           </div>
 
           </div>
@@ -141,25 +124,6 @@ function RootLayout({
           <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
 
           <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
-            <button
-            type="button"
-            className="rounded-full bg-transparent px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-            Messages
-            </button>
-            <button
-            type="button"
-            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-            Messages
-            </button>
-            <button
-            type="button"
-            className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-            Messages
-            </button>
-
           </div>
 
           </div>

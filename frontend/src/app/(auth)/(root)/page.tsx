@@ -17,12 +17,9 @@ import axios from 'axios';
 
 import { Dropdown } from '../../../components/Dropdown/Dropdown';
 
-import { QueryFunctionContext } from 'react-query';
-
 import { User, Post } from '../../../components/Modules'
 import { SkeletonPost } from '../../../components/Skeletons'
 
-import { set } from "lodash";
 
 
 
@@ -128,12 +125,6 @@ export default function Home() {
     }
   }, [sessionID, queryClient]);
 
-
-
-  
-  
-  
-
   return (
     <div>
 
@@ -167,7 +158,7 @@ export default function Home() {
                   })}
                 </React.Fragment>
               ))}
-              {//<PostList data={data} ref={ref} />}
+              {
 }
               <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage} className="flex justify-center items-center w-full">
                 {

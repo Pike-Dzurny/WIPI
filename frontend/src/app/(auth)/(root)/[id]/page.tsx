@@ -173,7 +173,7 @@ export default function Page({ params }: { params: { id: string } }) {
     <div 
       key={comment.id} 
       className={clsx(
-        'pt-2 pl-2 border-l ', 
+        'pt-2 pl-2 border-l', 
         { 'ml-[20px]': depth > 0, 'border-gray-500': depth > 0 },
         { 'bg-white': depth % 2 === 0, 'bg-slate-100': depth % 2 !== 0 }
       )}
@@ -189,8 +189,8 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className='' title={comment.date_of_post}>{formatRelativeTime(comment.date_of_post)}</div>
           </div>
 
-            <div className='border-l border-t border-b p-2 rounded-l-lg'>
-            <p>{comment.content}</p>
+            <div className='border-l border-t border-b p-2 rounded-l-lg overflow-hidden overflow-wrap break-words'>
+            <p className='hyphens-auto'>{comment.content}</p>
             </div>
         </div>
         <button className="font-mono" onClick={() => handleReplyClick(comment.id)}>Reply</button>
@@ -304,7 +304,9 @@ const handleSubmit = async (event: React.FormEvent) => {
             <div className="flex flex-col justify-start">
               <div className="mb-4">
                 <div className="font-medium">{post.user_display_name}</div>
-                <p className="hyphens-auto">{post.content}</p>
+                <div className='overflow-hidden overflow-wrap break-words w-full'>
+                  <p className="hyphens-auto break-all">{post.content}</p>
+                </div>
               </div>
               <div className="flex">
                 {/* Favorite Icon */}
