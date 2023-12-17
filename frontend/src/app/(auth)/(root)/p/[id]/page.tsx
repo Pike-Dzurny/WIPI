@@ -59,7 +59,7 @@ export default function Page({ params }: { params: { id: string } }) {
     reply_to: null,
     replies: [],
   });  
-  const colors = ['black', 'red', 'blue', 'green', 'purple'];
+  const colors = ['indigo-500', 'red-500', 'blue-500', 'lime-500', 'purple-500'];
   const { status } = useSession();
   const { data: session } = useSession();
   const [postContent, setPostContent] = useState('');
@@ -178,8 +178,9 @@ export default function Page({ params }: { params: { id: string } }) {
       key={comment.id} 
       className={clsx(
         'pt-2 pl-2 border-l', 
-        { 'ml-[20px]': depth > 0, 'border-gray-500': depth > 0 },
-        { 'bg-white': depth % 2 === 0, 'bg-slate-100': depth % 2 !== 0 }
+        { 'ml-[20px]': depth > 0},
+        { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 },
+        { [`border-${colors[depth % colors.length]}`]: depth > 0 }
       )}
     >
     <div className="flex items-start space-x-4">
