@@ -4,32 +4,32 @@ import { usePathname } from 'next/navigation';
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const button_names = ['Messages', 'Profile', 'Settings'];
 
   return (
     <>
       <div
-        className={`fixed top-0 left-0 z-20 h-full bg-white transition-all duration-300 py-2 pl-1 ${
+        className={`fixed top-0 left-0 z-20 h-full bg-slate-50 shadow-sm transition-all duration-300 ${
           isOpen ? 'w-64' : 'w-16'
         }`}
       >
-        {/* Sidebar Content */}
         <div className="flex flex-col items-start h-full">
           <div className="flex-grow">
-            {['Icon 1', 'Icon 2', 'Icon 3'].map((icon, index) => (
+            {['chat_bubble', 'favorite', 'settings'].map((icon, index) => (
               <button
                 key={index}
-                className={`flex items-center justify-center w-14 h-14 mb-2 rounded-full bg-gray-200 transition-width duration-300 ${
-                  isOpen ? 'justify-start pl-4 w-full' : ''
-                }`}
+                className={`group flex items-center w-14 h-14 mb-2 px-4 rounded-full bg-gray-200 ${
+                  isOpen ? 'w-full' : ''
+                } transition-width duration-300`}
                 onClick={() => console.log(`Clicked ${icon}`)}
               >
-                <span>{icon}</span>
+                <span className="material-symbols-sharp flex-shrink-0">{icon}</span>
                 {isOpen && (
                   <span
-                    className="ml-4 opacity-0 transition-opacity duration-300 delay-300"
+                    className="ml-4 flex-grow transition-opacity duration-300 delay-300"
                     style={{ transitionDelay: `${isOpen ? '300ms' : '0ms'}` }}
                   >
-                    
+                    {button_names[index]}
                   </span>
                 )}
               </button>
