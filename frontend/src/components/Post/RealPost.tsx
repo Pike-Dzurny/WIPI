@@ -19,8 +19,8 @@ interface RealPostProps {
 }
 
 export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id }) => {
-  const [isFavorite, setIsFavorite] = useState(postObject.post.user_has_liked);
-  const [isChatBubble, setIsChatBubble] = useState(false);
+  const [hasLiked, setHasLiked] = useState(postObject.post.user_has_liked);
+  const [hasCommented, setHasCommented] = useState(postObject.post.user_has_commented);
   const [isChangeCircle, setIsChangeCircle] = useState(false);
   let post = postObject.post;
   const [likes_count, setLikesCount] = useState(post.likes_count);
@@ -33,7 +33,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   //console.log(id);
 
   const handleCopyClick = async () => {
-    const textToCopy = `http://localhost:3000/${post.id}`; // Replace with the actual link
+    const textToCopy = `http://localhost:3000/p/${post.id}`; // Replace with the actual link
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopySuccess('Link copied!');
@@ -44,9 +44,12 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   
 
   useEffect(() => {
-    // Check if the user has liked the post
-    setIsFavorite(post.id.is_liked_by);
-  }, [post.id]);
+    setHasLiked(postObject.post.user_has_liked);
+  }, [postObject.post.user_has_liked]);
+
+  useEffect(() => {
+    setHasCommented(postObject.post.user_has_commented);
+  }, [postObject.post.user_has_commented]);
 
   function toggleLike() {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${post.id}/toggle_like/${id}`, {
@@ -58,8 +61,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     .then(response => response.json())
     .then(data => {
       if (data.status === 'success') {
-        setIsFavorite((prevIsFavorite: boolean) => !prevIsFavorite);
-        setLikesCount((prevCount: number) => prevCount + (isFavorite ? -1 : 1));
+        setHasLiked((prevIsFavorite: boolean) => !prevIsFavorite);
+        setLikesCount((prevCount: number) => prevCount + (hasLiked ? -1 : 1));
       } else {
         // Handle error
       }
@@ -68,7 +71,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   
 
 
-  let paddingClass = 'pr-4 pb-2 pl-2';
+  let paddingClass = 'pr-2 pb-2 pl-2';
 
   if (post.content.length > 50) paddingClass = 'pr-4 pb-2 pl-2';
   if (post.content.length > 100) paddingClass = 'pr-4 pb-4 pl-2';
@@ -94,7 +97,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     relativeTime = `${years}y`;
   }
   return (
-    <Link href={`/${post.id}`}>
+    <Link href={`/p/${post.id}`}>
     <div className='hover:bg-slate-100 px-8 pt-4'>
       <div className={clsx(paddingClass, "pb-2 grid grid-cols-[auto,1fr] items-start  text-slate-700", className, " ")}>
 
@@ -112,49 +115,52 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
               <p className="hyphens-auto">{post.content}</p>
             </div>
           </div>
-          <div className="flex w-full justify-between">
+          <div className="flex w-full justify-between items-center">
             <div className="flex items-center">
+                  <span 
+                    className={`material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
+                    style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleLike();
+                    }}
+                  >
+                    favorite
+                  </span>
+                <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(likes_count)}</p>            
+              </div>
+              <div className="flex items-center">
                 <span 
-                  className={`material-symbols-sharp ${isFavorite ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200 rounded-full p-2`} 
-                  style={isFavorite ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
-                  onClick={(e) => {
+                  className={`material-symbols-sharp rounded-full p-2 ${hasCommented ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
+                  style={hasCommented ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                  onClick={() => setHasCommented(!hasCommented)}
+                >
+                  chat_bubble
+                </span>
+                <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(comment_count)}</p>
+              </div>
+              <span 
+                className={`material-symbols-sharp rounded-full p-2 ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
+                style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
+                onClick={() => setIsChangeCircle(!isChangeCircle)}
+              >
+                change_circle
+              </span>
+              <span 
+                className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
+                style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
+                onClick={
+                  (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    toggleLike();
-                  }}
-                >
-                  favorite
-                </span>
-                <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(likes_count)}</p>            </div>
-            <span 
-              className={`material-symbols-sharp ${isChatBubble ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200 rounded-full p-2`} 
-              style={isChatBubble ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
-              onClick={() => setIsChatBubble(!isChatBubble)}
-            >
-              chat_bubble
-            </span>
-            <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(comment_count)}</p>
-            <span 
-              className={`material-symbols-sharp ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200 rounded-full p-2`} 
-              style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
-              onClick={() => setIsChangeCircle(!isChangeCircle)}
-            >
-              change_circle
-            </span>
-            <span 
-              className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
-              style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
-              onClick={
-                (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleCopyClick()
-                }
-                
-                }
-            >
-              ios_share
-            </span>
+                    handleCopyClick()
+                  }
+                  
+                  }
+              >
+                ios_share
+              </span>
         </div>
 
       </div>

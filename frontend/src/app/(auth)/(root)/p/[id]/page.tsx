@@ -1,12 +1,12 @@
 "use client";
 
-import { Dropdown } from '../../../../components/Dropdown/Dropdown';
+import { Dropdown } from '../../../../../components/Dropdown/Dropdown';
 import { useRouter } from 'next/navigation'
 
 import clsx from 'clsx';
 
 
-import { PFP } from '../../../../components/pfp';
+import { PFP } from '../../../../../components/pfp';
 
 
 import React, { useEffect, useState } from 'react';
@@ -113,6 +113,11 @@ export default function Page({ params }: { params: { id: string } }) {
     setActiveReplyId(null); // Reset the active reply ID after submitting
   };
 
+  useEffect(() => {
+    // Scroll to top on page load
+    window.scrollTo(0, 0);
+  }, []);
+
   // Fetch the post and its comments when the component mounts
   useEffect(() => {
     axios.get(`http://localhost:8000/posts/${params.id}/comments`)
@@ -127,7 +132,7 @@ export default function Page({ params }: { params: { id: string } }) {
     try {
       const response = await axios.get(`http://localhost:8000/posts/${commentId}/comments`);
       if (response.status === 200 && response.data && Array.isArray(response.data.replies)) {
-        const newComments = response.data.replies.map(comment => ({
+        const newComments = response.data.replies.map((comment: { hasChildren: any; }) => ({
           ...comment,
           hasChildren: comment.hasChildren // Assuming the API provides this information
         }));
@@ -179,7 +184,7 @@ export default function Page({ params }: { params: { id: string } }) {
     >
     <div className="flex items-start space-x-4">
       <div className="flex-shrink-0">
-        <img className="inline-block h-10 w-10 rounded-full" src='http://localhost:8000/user/1/profile_picture' alt="Profile" />
+        <img className="inline-block h-10 w-10 rounded-full" src={`http://localhost:8000/user/${comment.user_poster_id}/profile_picture`} alt="Profile" />
       </div>
       <div className="flex-1 min-w-0">
         <div className='flex flex-col'>
@@ -254,7 +259,7 @@ const handleSubmit = async (event: React.FormEvent) => {
   const userPost: UserPostBase = {
     username: session.user.name, // replace with the actual username
     post_content: postContent,
-    reply_to: Number(post.id),
+    reply_to: Number(post?.id),
   };
 
   console.log(userPost);

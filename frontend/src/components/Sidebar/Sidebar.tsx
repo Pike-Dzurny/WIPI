@@ -4,7 +4,6 @@ import React, { useContext } from 'react';
 import { useState } from 'react';
 
 import clsx from 'clsx';
-import { SidebarButton } from './SidebarButtons'; // Import SidebarButton component
 import { usePathname } from 'next/navigation'
 
 
