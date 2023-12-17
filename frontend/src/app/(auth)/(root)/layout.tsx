@@ -107,8 +107,12 @@ function RootLayout({
         <div className={`flex flex-col md:flex-row ${isOverlayOpen ? 'blur-sm' : ''}`}>
           <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
 
-          <div className="flex flex-col items-end justify-center min-h-screen px-8 relative">
+          <div className="hidden md:flex">
+            <div className="relative">
+          <div className="fixed top-0 h-screen items-center flex justify-end justify-self-end">
           <Sidebar />
+          </div>
+          </div>
           </div>
 
           </div>

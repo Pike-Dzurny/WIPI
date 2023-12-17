@@ -1,59 +1,50 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+
+export const MainContent: React.FC = () => {
+  // Your main content component goes here
+  return <div className="flex-grow overflow-auto">Main Content</div>;
+};
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const button_names = ['Messages', 'Profile', 'Settings'];
+  const buttonInfo = [
+    { name: 'Home', icon: 'home', route: '/' },
+    { name: 'Explore', icon: 'search', route: '/explore' },
+  ];
 
   return (
-    <>
-      <div
-        className={`fixed top-0 left-0 z-20 h-full bg-slate-50 shadow-sm transition-all duration-300 ${
-          isOpen ? 'w-64' : 'w-16'
-        }`}
-      >
-        <div className="flex flex-col items-start h-full">
-          <div className="flex-grow">
-            {['chat_bubble', 'favorite', 'settings'].map((icon, index) => (
-              <button
-                key={index}
-                className={`group flex items-center w-14 h-14 mb-2 px-4 rounded-full bg-gray-200 ${
-                  isOpen ? 'w-full' : ''
-                } transition-width duration-300`}
-                onClick={() => console.log(`Clicked ${icon}`)}
-              >
-                <span className="material-symbols-sharp flex-shrink-0">{icon}</span>
-                {isOpen && (
-                  <span
-                    className="ml-4 flex-grow transition-opacity duration-300 delay-300"
-                    style={{ transitionDelay: `${isOpen ? '300ms' : '0ms'}` }}
-                  >
-                    {button_names[index]}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Hamburger Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center justify-center w-14 h-14 rounded-full bg-gray-200 mb-4"
+    <div className="flex flex-col justify-self-end">
+      <nav>
+        {buttonInfo.map((button, index) => (
+          <a
+            key={index}
+            href={button.route}
+            className={`flex items-center p-2 rounded-md ${
+              pathname === button.route ? 'bg-gray-300' : 'hover:bg-gray-200'
+            }`}
           >
-            <span className="text-xl">{isOpen ? '×' : '☰'}</span>
-          </button>
-        </div>
-      </div>
-
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-10 bg-black opacity-25"
-          onClick={() => setIsOpen(false)}
-        ></div>
-      )}
-    </>
+            <span className="material-symbols-rounded text-2xl mr-4">{button.icon}</span>
+            {button.name}
+          </a>
+        ))}
+      </nav>
+      <button
+        onClick={() => console.log('Profile menu clicked')}
+        className="mt-auto p-2"
+      >
+        <Image
+          src={"/images/profile.png"}
+          alt="Profile"
+          width={40}
+          height={40}
+          className="rounded-full"
+        />
+        {/* User's name or additional details can go here */}
+      </button>
+    </div>
   );
 };
 
-export default Sidebar;
+
