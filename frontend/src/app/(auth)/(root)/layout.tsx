@@ -109,16 +109,16 @@ function RootLayout({
 
           <div className="hidden md:flex">
             <div className="relative">
-          <div className="fixed top-0 h-screen items-center flex justify-end justify-self-end">
+          <div className="hidden sm:flex md:fixed md:top-0 md:h-screen items-center justify-end justify-self-end">
           <Sidebar />
           </div>
           </div>
           </div>
 
           </div>
-          <div className="flex-grow basis-3/12 md:x-12">
+          <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
-              <div className="flex border-l border-r shrink-0 shadow-inner min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-slate-50">
+              <div className="flex md:rounded-t-xl border-l border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
                 <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                   {children}
                 </OverlayContext.Provider>

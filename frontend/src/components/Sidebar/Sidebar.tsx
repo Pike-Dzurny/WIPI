@@ -11,6 +11,8 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const buttonInfo = [
     { name: 'Home', icon: 'home', route: '/' },
+    { name: 'Profile', icon: 'home', route: '/profile' },
+    { name: 'Settings', icon: 'settings', route: '/settings' },
     { name: 'Explore', icon: 'search', route: '/explore' },
   ];
 
@@ -21,11 +23,16 @@ export const Sidebar: React.FC = () => {
           <a
             key={index}
             href={button.route}
-            className={`flex items-center p-2 rounded-md ${
+            className={`flex items-center p-2 rounded-full border border-slate-50 my-2 ${
               pathname === button.route ? 'bg-gray-300' : 'hover:bg-gray-200'
             }`}
           >
-            <span className="material-symbols-rounded text-2xl mr-4">{button.icon}</span>
+            <span 
+              className="material-symbols-rounded text-2xl mr-4"
+              style={{fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"}}
+            >
+              {button.icon}
+            </span>
             {button.name}
           </a>
         ))}
@@ -34,6 +41,7 @@ export const Sidebar: React.FC = () => {
         onClick={() => console.log('Profile menu clicked')}
         className="mt-auto p-2"
       >
+      <hr className="border-slate-300 border-1" />
         <Image
           src={"/images/profile.png"}
           alt="Profile"

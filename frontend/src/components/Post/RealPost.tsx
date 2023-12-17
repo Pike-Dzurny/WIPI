@@ -98,7 +98,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   }
   return (
     <Link href={`/p/${post.id}`}>
-    <div className='hover:bg-slate-100 px-8 pt-4'>
+    <div className='hover:bg-slate-50 px-8 pt-4'>
       <div className={clsx(paddingClass, "pb-2 grid grid-cols-[auto,1fr] items-start  text-slate-700", className, " ")}>
 
         <div className="p-1 pr-2 flex items-center">
