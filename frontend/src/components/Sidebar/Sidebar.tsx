@@ -28,10 +28,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
     // Fetch the profile picture URL when the component mounts
     const fetchProfilePicture = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/user/1/profile_picture`);
-        const imageUrl = await response.url; // or process the response as needed
-        setProfilePictureUrl(imageUrl);
-        console.log('Profile picture URL:', imageUrl);
+        const response = await fetch(`http://localhost:8000/user/1/pfp`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json(); // Parse the JSON in the response
+        setProfilePictureUrl(data.url); // Set the image URL from the response data
+        console.log('Profile picture URL:', data.url);
       } catch (error) {
         console.error('Error fetching profile picture:', error);
         // Handle errors, e.g., set a default image
@@ -39,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
     };
   
     fetchProfilePicture();
-  }, [userId]);
+  }, []); // Empty dependency array to run only once when the component mounts
 
     const [userStatus, setUserStatus] = useState('online');
 

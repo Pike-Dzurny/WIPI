@@ -231,7 +231,7 @@ async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
     return {"message": "Upload successful", "file_name": s3_key}
 
 
-@router.get("/user/{user_id}/profile_picture")
+@router.get("/user/{user_id}/pfp")
 def get_profile_picture(user_id: int):
     s3_key = f"profile_pictures/{user_id}.webp"  # Assuming webp format
 
@@ -247,7 +247,7 @@ def get_profile_picture(user_id: int):
     presigned_url = s3_client.generate_presigned_url('get_object', 
                                                      Params={'Bucket': bucket_name, 'Key': s3_key}, 
                                                      ExpiresIn=3600)
-
+    print(presigned_url)
     return {"url": presigned_url}
 
 @router.get("/user/{user_id}/username")
