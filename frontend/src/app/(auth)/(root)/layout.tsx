@@ -109,8 +109,8 @@ function RootLayout({
 
           <div className="hidden md:flex">
             <div className="relative">
-          <div className="hidden sm:flex md:fixed md:top-0 md:h-screen items-center justify-end justify-self-end">
-          <Sidebar />
+          <div className="hidden sm:flex md:fixed md:top-0 md:h-screen items-center justify-end justify-self-end z-10">
+          <Sidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} />
           </div>
           </div>
           </div>

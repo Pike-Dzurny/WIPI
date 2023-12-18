@@ -17,11 +17,11 @@ export const Dropdown: React.FC = () => {
     <>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional" />
     <div className="flex justify-around items-center">
-      <DropdownButton icon="mail" name="Messages" path="/messages" selected={pathname === '/messages'} />
+      <div className="flex flex-col justify-center items-center"/>
       <DropdownButton icon="person" name="Profile" path="/profile" selected={pathname === '/profile'} />
       <DropdownButton icon="home" name="Home" path="/" selected={pathname === '/'} />
       <DropdownButton icon="local_fire_department" name="Trending" path="/trending" selected={pathname === '/trending'} />
-      <DropdownButton icon="settings" name="Settings" path="/settings" selected={pathname === '/settings'} />
+      <div className="flex flex-col justify-center items-center"/>
     </div>
     </>
   );
