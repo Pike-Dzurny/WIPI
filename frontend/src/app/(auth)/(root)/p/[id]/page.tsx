@@ -346,11 +346,11 @@ const handleSubmit = async (event: React.FormEvent) => {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional" />
         <div className="flex justify-around items-center">
               <div className={`rounded-full hover:bg-slate-200`}>
-            <Link className={`flex flex-row items-center justify-center pl-4 pr-4 border-b-2 border-blue-500 hover:border-blue-300`} href={`/`} passHref>
+            <button className={`flex flex-row items-center justify-center pl-4 pr-4 border-b-2 border-blue-500 hover:border-blue-300`} onClick={() => router.back()}>
               <span title="arrow_back" className="mb-2 mt-2 text-sky-900  material-symbols-sharp"   style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48" }}>
               arrow_back
               </span>
-            </Link>
+            </button>
           </div>
         </div>
         </div>
