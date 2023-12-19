@@ -250,6 +250,37 @@ def get_profile_picture(user_id: int):
     print(presigned_url)
     return {"url": presigned_url}
 
+
+@router.post("/user/{user_id}/pfp")
+async def upload_image(file: UploadFile = File(...)):
+    try:
+        # Read the image file into a PIL Image object
+        image = Image.open(file.file)
+
+        # Convert to RGB if the image has an alpha channel
+        if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
+            image = image.convert('RGBA')
+        else:
+            image = image.convert('RGB')
+
+        # Prepare the file to save
+        in_mem_file = io.BytesIO()
+
+        # Save the image to the in-memory file in webp format
+        image.save(in_mem_file, format='webp')
+        in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
+
+        # Define the S3 key (filename) with the .webp extension
+        s3_key = f"{file.filename}.webp"
+
+        # Upload the in-memory file to S3
+        s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "Upload successful", "file_name": s3_key}
+
 @router.get("/user/{user_id}/username")
 def get_username(user_id: int, db: Session = Depends(get_db)):
     try:
