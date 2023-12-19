@@ -12,6 +12,7 @@ import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
 import Image from 'next/image'
 import { Sidebar } from '@/components/Sidebar/Sidebar';
+import { MobileSidebar } from '@/components/Sidebar/MobileSidebar';
 
 
 interface UserPostBase {
@@ -105,16 +106,16 @@ function RootLayout({
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
         <div className={`flex flex-col md:flex-row ${isOverlayOpen ? 'blur-sm' : ''}`}>
-          <div className="hidden md:flex justify-center items-center flex-none md:flex-grow">
-
-          <div className="hidden md:flex">
-            <div className="relative">
-          <div className="hidden sm:flex md:fixed md:top-0 md:h-screen items-center justify-end justify-self-end z-10">
-          <Sidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} />
+          <div className="hidden md:block md:flex-grow ">
+            <div className="flex flex-row h-screen fixed w-1/4 p-4">
+              <div className='basis-1/2' />
+              <div className='flex basis-1/2 items-center justify-center justify-items-center'>
+                <Sidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} />
+              </div>
+            </div>
           </div>
-          </div>
-          </div>
-
+          <div className='md:hidden block backdrop-blur-sm	fixed bottom-0 w-screen h-14 z-20 border-t border-slate-100 border-2'>
+            <MobileSidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} />
           </div>
           <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">

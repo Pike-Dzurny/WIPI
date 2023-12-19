@@ -84,15 +84,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
                 </div>
                 <div className='flex basis-1/2 justify-end justify-items-end'>
                   <span
-                    className={`material-symbols-outlined text-2xl justify-end text-sky-900
-                ${pathname === button.route ? 'filled-icon ' : ''}`}
-                    style={{
-                      fontVariationSettings: pathname === button.route
-                        ? " 'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48"
-                        : " 'FILL' 0, 'wght' 500, 'GRAD' -25, 'opsz' 48"
-                    }}
+                  className={`material-symbols-outlined text-2xl justify-end text-sky-900
+                  ${pathname === button.route ? 'filled-icon ' : ''}`}
+                  style={{
+                    fontVariationSettings: pathname === button.route
+                      ? " 'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48"
+                      : " 'FILL' 0, 'wght' 500, 'GRAD' -25, 'opsz' 48"
+                  }}
                   >
-                    {button.icon}
+                  {button.icon}
                   </span>
                 </div>
               </div>
