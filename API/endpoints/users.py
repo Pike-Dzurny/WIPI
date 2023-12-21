@@ -247,31 +247,42 @@ def get_profile_picture(user_id: int):
     presigned_url = s3_client.generate_presigned_url('get_object', 
                                                      Params={'Bucket': bucket_name, 'Key': s3_key}, 
                                                      ExpiresIn=3600)
-    print(presigned_url)
     return {"url": presigned_url}
 
 
 @router.post("/user/{user_id}/pfp")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(user_id: int, file: UploadFile = File(...)):
     try:
         # Read the image file into a PIL Image object
         image = Image.open(file.file)
 
         # Convert to RGB if the image has an alpha channel
         if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
-            image = image.convert('RGBA')
-        else:
-            image = image.convert('RGB')
+            base = Image.new('RGB', image.size, 'white')  # Create a white rgb image
+            image = Image.alpha_composite(base, image.convert('RGBA')).convert('RGB')
+
+
+        # Resize the image to 256x256
+        image = image.resize((256, 256))
 
         # Prepare the file to save
         in_mem_file = io.BytesIO()
 
         # Save the image to the in-memory file in webp format
         image.save(in_mem_file, format='webp')
+
+        # Check the size of the in-memory file
+        in_mem_file.seek(0, 2)  # Go to the end of the in-memory file
+        size_in_kb = in_mem_file.tell() / 1024  # Get the size in kilobytes
+        if size_in_kb > 1000:  # Replace 100 with your desired size limit in kilobytes
+            raise HTTPException(status_code=400, detail="File size exceeds 1000 KB. Please select a smaller file.")
+
+        in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
+
         in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
 
         # Define the S3 key (filename) with the .webp extension
-        s3_key = f"{file.filename}.webp"
+        s3_key = f"profile_pictures/{user_id}.webp"
 
         # Upload the in-memory file to S3
         s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)

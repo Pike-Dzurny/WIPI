@@ -25,24 +25,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
 
   const [profilePictureUrl, setProfilePictureUrl] = useState('');
   useEffect(() => {
-    // Fetch the profile picture URL when the component mounts
-    const fetchProfilePicture = async () => {
+    const fetchPfpUrl = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/user/1/pfp`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        // Use session.user.id to fetch the profile picture URL
+        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+        if (response.ok) {
+          const data = await response.json();
+          setProfilePictureUrl(data.url); // Use the URL of the response
+          console.log('Got profile picture URL: ', data.url)
+        } else {
+          console.error('Failed to fetch profile picture URL');
         }
-        const data = await response.json(); // Parse the JSON in the response
-        setProfilePictureUrl(data.url); // Set the image URL from the response data
-        console.log('Profile picture URL:', data.url);
       } catch (error) {
-        console.error('Error fetching profile picture:', error);
-        // Handle errors, e.g., set a default image
+        console.error('Failed to fetch profile picture URL:', error);
       }
     };
   
-    fetchProfilePicture();
-  }, []); // Empty dependency array to run only once when the component mounts
+    if (session?.user?.id) {
+      fetchPfpUrl();
+    }
+  }, [session?.user?.id]);
 
     const [userStatus, setUserStatus] = useState('online');
 

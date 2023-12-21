@@ -102,6 +102,30 @@ function RootLayout({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+
+  const [pfpUrl, setPfpUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPfpUrl = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+        if (response.ok) {
+          const data = await response.json();
+          setPfpUrl(data.url);
+        } else {
+          console.error('Failed to fetch profile picture URL');
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile picture URL:', error);
+      }
+    };
+
+    if (session?.user?.id) {
+      fetchPfpUrl();
+    }
+  }, [session?.user?.id]);
+
   if (status === 'authenticated' || status === 'loading') {
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
@@ -110,12 +134,12 @@ function RootLayout({
             <div className="flex flex-row h-screen fixed w-1/4 p-4">
               <div className='basis-1/2' />
               <div className='flex basis-1/2 items-center justify-center justify-items-center'>
-                <Sidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} />
+                <Sidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} pfp={pfpUrl} />
               </div>
             </div>
           </div>
           <div className='md:hidden block backdrop-blur-sm	fixed bottom-0 w-screen h-14 z-20 border-t border-slate-100 border-2'>
-            <MobileSidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} />
+            <MobileSidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} pfp={pfpUrl} />
           </div>
           <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
