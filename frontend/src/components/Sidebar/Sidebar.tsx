@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 
 interface SidebarProps {
@@ -75,10 +76,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
       <div className="flex flex-col justify-self-end z-50 w-full">
         <div>
           {buttonInfo.map((button, index) => (
-            <a
+            <Link
               key={index}
               href={button.route}
-              className={`flex items-center p-2 rounded-full    mt-2 w-full ${pathname === button.route ? 'hover:bg-slate-200' : ' hover:bg-slate-200 '}`}
+              className={`flex items-center p-2 rounded-full mt-2 w-full ${pathname === button.route ? 'hover:bg-slate-200' : ' hover:bg-slate-200 '}`}
             >
               <div className='flex flex-row w-full'>
                 <div className='basis-1/2'>
@@ -99,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
                 </div>
               </div>
 
-            </a>
+            </Link>
 
           ))}
         </div>
