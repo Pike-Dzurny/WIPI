@@ -25,22 +25,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
   };
 
   const [profilePictureUrl, setProfilePictureUrl] = useState('');
-  useEffect(() => {
-    const fetchPfpUrl = async () => {
-      try {
-        // Use session.user.id to fetch the profile picture URL
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-        if (response.ok) {
-          const data = await response.json();
-          setProfilePictureUrl(data.url); // Use the URL of the response
-          console.log('Got profile picture URL: ', data.url)
-        } else {
-          console.error('Failed to fetch profile picture URL');
-        }
-      } catch (error) {
-        console.error('Failed to fetch profile picture URL:', error);
+  const fetchPfpUrl = async () => {
+    try {
+      // Use session.user.id to fetch the profile picture URL
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+      if (response.ok) {
+        const data = await response.json();
+        setProfilePictureUrl(data.url); // Use the URL of the response
+        console.log('Got profile picture URL: ', data.url)
+      } else {
+        console.error('Failed to fetch profile picture URL');
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch profile picture URL:', error);
+    }
+  };
+
+  useEffect(() => {
+
   
     if (session?.user?.id) {
       fetchPfpUrl();
@@ -53,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
     const pathname = usePathname();
     const buttonInfo = [
       { name: 'home', icon: 'home', route: '/' },
-      { name: 'profile', icon: 'person', route: '/profile' },
+      { name: 'profile', icon: 'account_box', route: '/profile' },
       { name: 'messages', icon: 'mail', route: '/messages' },
       { name: 'settings', icon: 'settings', route: '/settings' },
     ];
@@ -174,10 +176,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
             </div>
             <div className='flex flex-grow items-center justify-end'>
               <span
-                className="material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48" }}
+                className="material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1 select-none"
+                style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}
+                onClick={() => console.log('Logout clicked')}
               >
-                settings
+                logout
               </span>
             </div>
           </div>

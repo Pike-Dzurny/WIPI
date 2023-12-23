@@ -2,7 +2,7 @@
 import { OverlayContext } from '@/components/OverlayContext';
 import { useSession } from 'next-auth/react';
 import React, { useState, useEffect, useContext, useRef } from 'react';
-
+import Image from 'next/image';
 
 
 
@@ -31,23 +31,24 @@ export default function AboutPage() {
     }
   }, [session]);
 
+  const fetchPfpUrl = async () => {
+    try {
+      // Use session.user.id to fetch the profile picture URL
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+      if (response.ok) {
+        const data = await response.json();
+        setProfilePictureURL(data.url); // Use the URL of the response
+        console.log('Got profile picture URL: ', data.url)
+      } else {
+        console.error('Failed to fetch profile picture URL');
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile picture URL:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchPfpUrl = async () => {
-      try {
-        // Use session.user.id to fetch the profile picture URL
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-        if (response.ok) {
-          const data = await response.json();
-          setProfilePictureURL(data.url); // Use the URL of the response
-          console.log('Got profile picture URL: ', data.url)
-        } else {
-          console.error('Failed to fetch profile picture URL');
-        }
-      } catch (error) {
-        console.error('Failed to fetch profile picture URL:', error);
-      }
-    };
+
   
     if (session?.user?.id) {
       fetchPfpUrl();
@@ -92,6 +93,7 @@ export default function AboutPage() {
         }
         setMessage('Upload successful');
         console.log('Upload successful');
+        fetchPfpUrl();
       } catch (error: any) {
         setMessage(`Upload failed: ${error.message}`);
       }
@@ -140,16 +142,18 @@ export default function AboutPage() {
               </div>
               <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
               <div className='mb-4 flex-col'>
-                    <img 
-                      src={ProfilePictureURL} 
-                      width={80} 
-                      height={80} 
-                      className='rounded-full cursor-pointer' 
-                      alt="Preview" 
-                      onClick={handleImageClick}
-                      onDragOver={handleDragOver}
-                      onDrop={handleDrop}
-                    />
+                    {ProfilePictureURL && (
+                      <Image 
+                        src={ProfilePictureURL} 
+                        width={80} 
+                        height={80} 
+                        className='rounded-full cursor-pointer hover:bg-gray-700/90' 
+                        alt="Preview" 
+                        onClick={handleImageClick}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                      />
+                    )}
                     <input 
                       id="fileInput" 
                       type="file" 

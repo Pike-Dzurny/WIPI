@@ -200,35 +200,35 @@ def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
     session.close()
     return posts
 
-@router.post("/user/{user_id}/profile_picture")
-async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
-    try:
-        # Read the image file into a PIL Image object
-        image = Image.open(file.file)
+# @router.post("/user/{user_id}/profile_picture")
+# async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
+#     try:
+#         # Read the image file into a PIL Image object
+#         image = Image.open(file.file)
 
-        # Convert to RGB if the image has an alpha channel (as webp supports alpha channel in lossless mode)
-        if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
-            image = image.convert('RGBA')
-        else:
-            image = image.convert('RGB')
+#         # Convert to RGB if the image has an alpha channel (as webp supports alpha channel in lossless mode)
+#         if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
+#             image = image.convert('RGBA')
+#         else:
+#             image = image.convert('RGB')
 
-        # Prepare the file to save
-        in_mem_file = io.BytesIO()
+#         # Prepare the file to save
+#         in_mem_file = io.BytesIO()
 
-        # Save the image to the in-memory file in webp format
-        image.save(in_mem_file, format='webp')
-        in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
+#         # Save the image to the in-memory file in webp format
+#         image.save(in_mem_file, format='webp')
+#         in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
 
-        # Define the S3 key (filename) with the .webp extension
-        s3_key = f"profile_pictures/{user_id}.webp"
+#         # Define the S3 key (filename) with the .webp extension
+#         s3_key = f"profile_pictures/{user_id}.webp"
 
-        # Upload the in-memory file to S3
-        s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
+#         # Upload the in-memory file to S3
+#         s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "Upload successful", "file_name": s3_key}
+#     return {"message": "Upload successful", "file_name": s3_key}
 
 
 @router.get("/user/{user_id}/pfp")
@@ -241,7 +241,8 @@ def get_profile_picture(user_id: int):
         print("File found in S3")
     except:
         # Return a default image if the specific user's image doesn't exist
-        return FileResponse('static/defaultpfp.png', media_type='image/png')
+        #return FileResponse('static/defaultpfp.png', media_type='image/png')
+        raise HTTPException(status_code=404, detail="File not found")
 
     # Generate a presigned URL for the S3 object
     presigned_url = s3_client.generate_presigned_url('get_object', 
@@ -253,13 +254,21 @@ def get_profile_picture(user_id: int):
 @router.post("/user/{user_id}/pfp")
 async def upload_image(user_id: int, file: UploadFile = File(...)):
     try:
-        # Read the image file into a PIL Image object
+        # Image processing steps
         image = Image.open(file.file)
+        # Log after opening the image
+        print("Image opened successfully")
 
         # Convert to RGB if the image has an alpha channel
-        if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
-            base = Image.new('RGB', image.size, 'white')  # Create a white rgb image
-            image = Image.alpha_composite(base, image.convert('RGBA')).convert('RGB')
+        if image.mode != 'RGB':
+            if image.mode == 'RGBA':
+                base = Image.new('RGB', image.size, 'white')
+                image = Image.alpha_composite(base, image.convert('RGBA'))
+            elif image.mode in ['LA', 'L']:
+                image = image.convert('RGB')
+            else:
+                # For other modes like 'P', 'CMYK', etc., convert directly to RGB
+                image = image.convert('RGB')
 
 
         # Resize the image to 256x256
@@ -283,11 +292,18 @@ async def upload_image(user_id: int, file: UploadFile = File(...)):
 
         # Define the S3 key (filename) with the .webp extension
         s3_key = f"profile_pictures/{user_id}.webp"
-
-        # Upload the in-memory file to S3
-        s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
+        print(f"Uploading to S3 with key: {s3_key}")
+        try:
+            in_mem_file.seek(0)  # Ensure the file is at the beginning
+            s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
+            print("Upload to S3 attempted successfully")
+        except Exception as e:
+            print("S3 upload failed: ", e)
+            raise
+        print("Upload to S3 attempted")
 
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Upload successful", "file_name": s3_key}
