@@ -1,0 +1,106 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/frontend/node_modules
+/frontend/.pnp
+/frontend/.pnp.js
+/frontend/.yarn/install-state.gz
+
+# testing
+/frontend/coverage
+
+# general python ignores
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# cpython byte-code files
+__pycache__/
+
+# testing
+/frontend/coverage
+
+# specific Python files
+*/database_session.cpython-38.pyc
+
+
+
+# next.js
+/frontend/.next/
+/frontend/out/
+
+/frontend/public/
+/frontend/static/
+
+/API/__pycache__/
+/API/Scripts/
+/API/pfp_*
+/API/pyvenv.cfg
+/API/venv/
+/API/Lib/
+/API/Include/
+
+/.vscode/*
+.vscode
+.vscode/*
+.vscode/
+.vscode/settings.json
+
+
+# production
+/frontend/build
+
+# misc
+/frontend/.DS_Store
+/frontend/*.pem
+
+# debug
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+/frontend/.vercel
+
+# typescript
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+node_modules
+/node_modules/*
+/node_modules/
+/frontend/API
+
+*.env
+
+*/*.env*
+*/*.env
+*/env.local
+API/database/__pycache__/database_session.cpython-38.pyc
+API/endpoints/__pycache__/users.cpython-38.pyc
+.vscode/settings.json
+.vscode/*
+API/database/__pycache__/database_initializer.cpython-38.pyc
+API/database/__pycache__/database_session.cpython-38.pyc
+API/endpoints/__pycache__/posts.cpython-38.pyc
+API/endpoints/__pycache__/users.cpython-38.pyc
