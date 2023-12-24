@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 
@@ -41,10 +41,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
     }
   };
 
+
+const [username, setName] = useState('');
+const fetchusername = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`);
+    if (response.ok) {
+      const data = await response.json();
+      setName(data.username);
+    } else {
+      console.error('Failed to fetch username');
+    }
+  } catch (error) {
+    console.error('Failed to fetch username:', error);
+  }
+}
+
+
   useEffect(() => {
 
   
     if (session?.user?.id) {
+      fetchusername();
       fetchPfpUrl();
     }
   }, [session?.user?.id]);
@@ -73,6 +91,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
 
 
 
+
+    function signOutOfApp(): React.MouseEventHandler<HTMLSpanElement> | undefined {
+      return () => {
+        signOut();
+      };
+    }
 
     return (
       <div className="flex flex-col justify-self-end z-50 w-full">
@@ -117,8 +141,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
             <Image
               src={profilePictureUrl}
               alt="Profile"
-              width={70}
-              height={70}
+              width={80}
+              height={80}
               className="rounded-full" />
             <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white group-hover:animate-ping ${userStatus === 'online' ? 'bg-green-500' :
               userStatus === 'offline' ? 'bg-gray-400' :
@@ -169,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
           </div>
           <div className='flex w-full'>
             <div className='flex flex-col ml-1 leading-snug justify-start line-clamp-1'>
-              <p className='font-semibold lowercase'>{name}</p>
+              <p className='font-semibold lowercase'>{username}</p>
               <div>
                 <p className='text-sm font-normal font-mono lowercase'>@name</p>
               </div>
@@ -178,7 +202,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
               <span
                 className="material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1 select-none"
                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}
-                onClick={() => console.log('Logout clicked')}
+                onClick={signOutOfApp()}
               >
                 logout
               </span>
@@ -189,5 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
       </div>
     );
   };
+
+
 
 

@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_400_BAD_REQUEST
-from api_models import AuthDetails, SignUpUser, UsernameAvailability
+from api_models import AuthDetails, SignUpUser, UpdateUsernameRequest, UsernameAvailability
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 import re
 
@@ -241,8 +241,8 @@ def get_profile_picture(user_id: int):
         print("File found in S3")
     except:
         # Return a default image if the specific user's image doesn't exist
-        #return FileResponse('static/defaultpfp.png', media_type='image/png')
-        raise HTTPException(status_code=404, detail="File not found")
+        s3_key = f"profile_pictures/defaultpfp.webp"  # Assuming webp format 
+        s3_client.head_object(Bucket=bucket_name, Key=s3_key)       
 
     # Generate a presigned URL for the S3 object
     presigned_url = s3_client.generate_presigned_url('get_object', 
@@ -322,4 +322,24 @@ def get_username(user_id: int, db: Session = Depends(get_db)):
             return {"username": user.display_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
+    
+@router.post("/user/{user_id}/username")
+def update_username(user_id: int, request: UpdateUsernameRequest, db: Session = Depends(get_db)):
+    print(user_id, request.username)
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.display_name = request.username
+    db.commit()
+    return {"message": "Username updated successfully"}
+
+
+@router.post("/user/{user_id}/email")
+def update_email(user_id: int, new_email: str, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.email = new_email
+    db.commit()
+    return {"message": "Email updated successfully"}
 

@@ -9,7 +9,16 @@ import Image from 'next/image';
 export default function AboutPage() {
 
   const [ProfilePictureURL, setProfilePictureURL] = useState<string | undefined>(undefined);
-  const [message, setMessage] = useState<string | null>(null);
+  const [pfpmessage, setPFPMessage] = useState<string | null>(null);
+
+  const [username, setUsername] = useState('');
+  const [usernamemessage, setUsernameMessage] = useState<string | null>(null);
+
+  const [email, setEmail] = useState('');
+  const [emailmessage, setEmailMessage] = useState<string | null>(null);
+
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const context = useContext(OverlayContext);
   if (!context) {
@@ -69,15 +78,17 @@ export default function AboutPage() {
           };
           reader.readAsDataURL(file);
         } else {
-          setMessage('File size exceeds 1 MB. Please select a smaller file.');
+          setPFPMessage('File size exceeds 1 MB. Please select a smaller file.');
         }
       } else {
-        setMessage('Invalid file type. Please select a JPEG, PNG, or WEBP file.');
+        setPFPMessage('Invalid file type. Please select a JPEG, PNG, or WEBP file.');
       }
     }
   };
 
   const handleUpload = async () => {
+
+    // Profile Picture
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     const file = fileInput.files?.[0];
     if (file) {
@@ -90,14 +101,55 @@ export default function AboutPage() {
         });
         if (!response.ok) {
           throw new Error('Upload failed');
+          return;
         }
-        setMessage('Upload successful');
+        setPFPMessage('Upload successful');
         console.log('Upload successful');
         fetchPfpUrl();
       } catch (error: any) {
-        setMessage(`Upload failed: ${error.message}`);
+        setPFPMessage(`Upload failed: ${error.message}`);
+        return;
       }
     }
+
+    // Username
+    console.log("Username:", username);
+    if (username) {
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+      } else {
+        throw new Error('Failed to update username');
+      }
+    }
+
+    // Email
+    if (email) {
+      const formData = new FormData();
+      formData.append('email', email);
+      try {
+        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/email`, {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+        setEmailMessage('Upload successful');
+        console.log('Upload successful');
+      } catch (error: any) {
+        setEmailMessage(`Upload failed: ${error.message}`);
+      }
+    }
+
   };
 
   const handleImageClick = () => {
@@ -161,15 +213,16 @@ export default function AboutPage() {
                       ref={fileInputRef}
                       className="hidden" // Hide the input
                     />
-                    {message && <b className='text-red-500'>{message}</b>}
+                    {pfpmessage && <b className='text-red-500'>{pfpmessage}</b>}
                 </div>
                 <div className='mb-4'>
                   <p>Change User Name</p>
-                  <input type="text" placeholder="New User Name" />
+                  <input type="text" placeholder="New User Name" value={username} onChange={(e) => setUsername(e.target.value)} />
+                  {usernamemessage && <b className='text-red-500'>{usernamemessage}</b>}
                 </div>
                 <div className='mb-4'>
                   <p>Change Email Address</p>
-                  <input type="email" placeholder="New Email Address" />
+                  <input type="email" placeholder="New Email Address" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className=''>
                   <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handleUpload}>Save Changes</button>
