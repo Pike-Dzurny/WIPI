@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  # Next.js service definition
+  frontend:
+    build: ./frontend
+    environment:
+      - BACKEND_URL=http://api:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - '3000:3000'
+    expose:
+      - '3000'
+
+  api:
+    build: ./API
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - '8000:8000'
+    expose:
+      - '8000'
+    volumes:
+      - ./API:/app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:pass@db:5432/mydatabase
+
+  db:
+    image: postgres:latest
+    #network_mode: "host"  # Delete in production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/postgresql_init.sql:/docker-entrypoint-initdb.d/postgresql_init.sql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydatabase
+    ports:
+      - '5432:5432'
+
+volumes:
+  postgres_data: # Named volume to persist PostgreSQL data
