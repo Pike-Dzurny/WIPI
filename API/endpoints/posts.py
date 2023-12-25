@@ -33,17 +33,16 @@ def create_post(user_post: UserPostBase, db: Session = Depends(get_db)):
     try:
         sanitized_content = clean(user_post.post_content)
         user = db.query(User).filter(User.id == user_post.user_poster_id).first()
-        print(user)
-        if user is None or sanitized_content is None or sanitized_content == "":
-            return HTTPException(status_code=500, detail="failed")
-        print(user.account_name)
-        # Use the reply_to field when creating the Post object
+        if user is None or sanitized_content == "":
+            raise HTTPException(status_code=400, detail="Invalid user or content")
+
         db_post = Post(user_poster_id=user.id, content=sanitized_content, reply_to=user_post.reply_to)
         db.add(db_post)
         db.commit()
         return {"status": "success"}
     except Exception as e:
-        return HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @router.get("/post/{post_id}/comments")

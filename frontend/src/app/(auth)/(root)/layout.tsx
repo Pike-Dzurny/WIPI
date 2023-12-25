@@ -16,7 +16,7 @@ import { MobileSidebar } from '@/components/Sidebar/MobileSidebar';
 
 
 interface UserPostBase {
-  username: string;
+  user_poster_id: Number;
   post_content: string;
 }
 
@@ -32,33 +32,29 @@ function RootLayout({
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [postContent, setPostContent] = useState('');
 
-  const handleError = (errorMessage: string) => {
-    // Handle error using a proper error handling mechanism or library
-    console.error(errorMessage);
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!session) {
-      handleError('No active session');
+      console.log('No active session');
       return;
     }
 
     console.log('Trying to pass!'); // The authenticated user
     if (!session.user || !session.user.name) {
-      handleError('User or username is not defined');
+      console.log('User or username is not defined');
       return;
     }
 
     // Create an instance of UserPostBase
     const userPost: UserPostBase = {
-      username: session.user.name, // replace with the actual username
+      user_poster_id: session.user.id, // replace with the actual username
       post_content: postContent,
     };
 
     console.log(userPost);
-
+    console.log('Trying to post!'); // The authenticated user
     try {
+      console.log('Trying to wait for response!'); // The authenticated user
       const response = await fetch(`http://localhost:8000/post`, {
         method: 'POST',
         headers: {
@@ -66,23 +62,29 @@ function RootLayout({
         },
         body: JSON.stringify(userPost),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      console.log('Trying to wait for data pt 2!'); // The authenticated user
+      console.log(response.status);
 
+      console.log(response);
       const data = await response.json();
-
-      console.log('Data status:', data.status);
       if (data.status === 'success') {
+        console.log('it worked!')
         // Handle success (e.g., clear the textarea and close the overlay)
         setPostContent('');
         setIsOverlayOpen(false);
       } else {
+        console.log('it didnt work!')
         // Handle error
         console.error('Failed to create post');
-      }
-    } catch (error) {
+      console.log('Post creation status:', data.status);
+      // Handle post creation success
+    } 
+    }
+    catch (error) {
       console.error('An error occurred:', error);
     }
   };

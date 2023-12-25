@@ -42,7 +42,7 @@ type Post = {
 };
 
 interface UserPostBase {
-  username: string;
+  user_poster_id: Number;
   post_content: string;
   reply_to: number;
 }
@@ -207,7 +207,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="flex items-start space-x-4">
             {/* PFP Column */}
             <div className="flex-shrink-0">
-              <img className="inline-block h-10 w-10 rounded-full" src='http://localhost:8000/user/1/profile_picture' alt="Profile" />
+              <img className="inline-block h-10 w-10 rounded-full" src={`http://localhost:8000/user/${comment.id}/pfp`} alt="Profile" />
             </div>
 
             {/* Form Column */}
@@ -221,7 +221,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
                 {/* Button Container */}
                 <div className="flex justify-end py-2">
-                  <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit}>Post</button>
+                  <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit(comment.id)}>Post</button>
                 </div>
               </form>
             </div>
@@ -243,7 +243,7 @@ export default function Page({ params }: { params: { id: string } }) {
   );
   
 
-const handleSubmit = async (event: React.FormEvent) => {
+const handleSubmit = async (event: React.FormEvent, postID: number) => {
   event.preventDefault();
   if (!session) {
     console.log('No active session');
@@ -258,14 +258,15 @@ const handleSubmit = async (event: React.FormEvent) => {
 
   // Create an instance of UserPostBase
   const userPost: UserPostBase = {
-    username: session.user.name, // replace with the actual username
+    user_poster_id: session.user.id, // replace with the actual username
     post_content: postContent,
-    reply_to: Number(post?.id),
+    reply_to: postID,
   };
 
   console.log(userPost);
 
   try {
+    console.log('Trying to wait for response!'); // The authenticated user
     const response = await fetch(`http://localhost:8000/post`, {
       method: 'POST',
       headers: {
@@ -277,18 +278,24 @@ const handleSubmit = async (event: React.FormEvent) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+    console.log('Trying to wait for data pt 2!'); // The authenticated user
+    console.log(response.status);
 
+    console.log(response);
     const data = await response.json();
-
-    console.log('Data status:', data.status);
     if (data.status === 'success') {
-      // Handle success (e.g., clear the textarea)
+      console.log('it worked!')
+      // Handle success (e.g., clear the textarea and close the overlay)
       setPostContent('');
     } else {
-    // Handle error
-          console.error('Failed to create post');
-        }
-      } catch (error) {
+      console.log('it didnt work!')
+      // Handle error
+      console.error('Failed to create post');
+    console.log('Post creation status:', data.status);
+    // Handle post creation success
+  } 
+  }
+   catch (error) {
         console.error('An error occurred:', error);
       }
     };
@@ -394,7 +401,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit}>Post</button>
+                    <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit(post.id)}>Post</button>
                   </div>
                 </div>
               </form>

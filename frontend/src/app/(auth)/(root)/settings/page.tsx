@@ -232,14 +232,49 @@ export default function AboutPage() {
           </div>
           <hr className=''/>
           {/* Change Password */}
-          <div className='flex flex-col justify-center items-center'>
-            asfsdf
+          <div className='flex flex-col pl-12 pt-12 pb-12'>
+            <div className='flex flex-row'>
+              <div className='flex flex-col basis-1/3 py-4'>
+                <p>Password Managment</p>
+                <p className='text-sm text-sky-900'>Edit your password</p>
+              </div>
+              <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
+                <div className='mb-4'>
+                  <p className='mb-4'>Change Password</p>
+                  <input className='mb-4' type="text" placeholder="Old password" value={username} onChange={(e) => setUsername(e.target.value)} />
+                  {usernamemessage && <b className='text-red-500'>{usernamemessage}</b>}
+                  <p/>
+                  <input className='' type="email" placeholder="New password" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div className=''>
+                  <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handleUpload}>Save Changes</button>
+                </div>
+              </div>
+            </div>
           </div>
           <hr className=''/>
           {/* Delete Account/Log out Account Management */}
-          <div className='flex flex-col justify-center items-center'>
-            asfsdf
-          </div>          
+          <div className='flex flex-col pl-12 pt-12 pb-12'>
+            <div className='flex flex-row'>
+              <div className='flex flex-col basis-1/3 py-4'>
+                <p>Account Managment</p>
+                <p className='text-sm text-sky-900'>Delete your account</p>
+              </div>
+              <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
+                <div className='mb-4'>
+                  <p className=''>Delete your account</p>
+                  <p className='mb-4 text-red-400'>This will permanently delete your account. T</p>
+                  <input className='mb-4' type="text" placeholder="Old password" value={username} onChange={(e) => setUsername(e.target.value)} />
+                  {usernamemessage && <b className='text-red-500'>{usernamemessage}</b>}
+                  <p/>
+                  <input className='' type="email" placeholder="New password" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div className=''>
+                  <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handleUpload}>Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>      
         </div>
       </main>
     </div>
