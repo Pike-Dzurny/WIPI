@@ -200,36 +200,6 @@ def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
     session.close()
     return posts
 
-# @router.post("/user/{user_id}/profile_picture")
-# async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
-#     try:
-#         # Read the image file into a PIL Image object
-#         image = Image.open(file.file)
-
-#         # Convert to RGB if the image has an alpha channel (as webp supports alpha channel in lossless mode)
-#         if image.mode in ['RGBA', 'LA'] or (image.mode == 'P' and 'transparency' in image.info):
-#             image = image.convert('RGBA')
-#         else:
-#             image = image.convert('RGB')
-
-#         # Prepare the file to save
-#         in_mem_file = io.BytesIO()
-
-#         # Save the image to the in-memory file in webp format
-#         image.save(in_mem_file, format='webp')
-#         in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
-
-#         # Define the S3 key (filename) with the .webp extension
-#         s3_key = f"profile_pictures/{user_id}.webp"
-
-#         # Upload the in-memory file to S3
-#         s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
-
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-#     return {"message": "Upload successful", "file_name": s3_key}
-
 
 @router.get("/user/{user_id}/pfp")
 def get_profile_picture(user_id: int):
