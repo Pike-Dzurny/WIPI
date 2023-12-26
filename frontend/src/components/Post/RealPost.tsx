@@ -28,6 +28,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [likes_count, setLikesCount] = useState(post.likes_count);
   const [comment_count, setCommentCount] = useState(post.comments_count);
   const [copySuccess, setCopySuccess] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
 
 
 
@@ -41,6 +42,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopySuccess('Link copied!');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 6000); // Hide the popup after 3 seconds
     } catch (err) {
       setCopySuccess('Failed to copy text');
     }
@@ -174,6 +177,14 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
     </div>
     <hr className="border-slate-300 border-1" />
+    {showPopup && (
+        <div className="flex flex-row fixed bottom-0 bg-violet-400 border-2 border-violet-500 bg-opacity-90 rounded-full text-white p-4 left-1/2 transform -translate-x-1/2 mb-20 md:mb-4 select-none">
+          <div className="">
+            <span className="material-symbols-sharp text-xl">check_circle</span>
+          </div>
+          {copySuccess}
+        </div>
+      )}
 
   </Link>
   );
