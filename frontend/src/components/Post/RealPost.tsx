@@ -178,11 +178,19 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     </div>
     <hr className="border-slate-300 border-1" />
     {showPopup && (
-        <div className="flex flex-row fixed bottom-0 bg-violet-400 border-2 border-violet-500 bg-opacity-90 rounded-full text-white p-4 left-1/2 transform -translate-x-1/2 mb-20 md:mb-4 select-none">
-          <div className="">
-            <span className="material-symbols-sharp text-xl">check_circle</span>
+        <div className="flex flex-row fixed bottom-0 bg-violet-400 border-2 border-violet-500 bg-opacity-90 rounded-full text-white px-4 left-1/2 transform -translate-x-1/2 mb-20 md:mb-4 select-none">
+          <div className=' i mr-4'>
+            {copySuccess}
           </div>
-          {copySuccess}
+          <div className='items-end justify-end'>
+            <span 
+              className="material-symbols-sharp text-white hover:text-white hover:bg-violet-500 rounded-full p-2" 
+              style={{fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
+              onClick={() => setShowPopup(false)}
+            >
+              close
+            </span>
+            </div>
         </div>
       )}
 
