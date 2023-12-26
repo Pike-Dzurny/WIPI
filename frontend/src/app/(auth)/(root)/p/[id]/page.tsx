@@ -28,6 +28,7 @@ type Comment = {
   reply_to: number | null;
   replies: Comment[];
   hasChildren: boolean;
+  profile_picture: string;
 };
 
 type Post = {
@@ -185,7 +186,7 @@ export default function Page({ params }: { params: { id: string } }) {
     >
     <div className="flex items-start space-x-4">
       <div className="flex-shrink-0">
-        <img className="inline-block h-10 w-10 rounded-full" src={`http://localhost:8000/user/${comment.user_poster_id}/profile_picture`} alt="Profile" />
+        <img className="inline-block h-10 w-10 rounded-full" src={comment.profile_picture} alt="Profile" />
       </div>
       <div className="flex-1 min-w-0">
         <div className='flex flex-col'>
@@ -244,7 +245,7 @@ export default function Page({ params }: { params: { id: string } }) {
   
 
 const handleSubmit = async (event: React.FormEvent, postID: number) => {
-  event.preventDefault();
+  //event.preventDefault();
   if (!session) {
     console.log('No active session');
     return;

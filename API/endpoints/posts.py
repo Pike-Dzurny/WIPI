@@ -7,6 +7,7 @@ from sqlalchemy import desc, exists, func
 from database.database_initializer import Post, User, post_likes
 from api_models import UserPostBase
 from typing import List, Dict
+from .users import get_profile_picture
 
 from database.database_session import SessionLocal
 
@@ -150,6 +151,7 @@ def build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, depth=0, like
         'user_poster_id': post.user_poster_id,
         'is_liked': is_liked,
         'hasChildren': len(post.replies) > 0,
+        'profile_picture': get_profile_picture(post.id)['url'],
         'replies': [build_reply_tree(posts_dict, users_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
     }
     return post_data
