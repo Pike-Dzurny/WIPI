@@ -262,7 +262,7 @@ def read_posts(user_id: int, page: int = 1, per_page: int = 6):
                     "account_name": account_name,
                     "bio": bio,
                     "display_name": display_name,
-                    "profile_picture": profile_picture
+                    "profile_picture": get_profile_picture(post.user_poster_id)['url'] if profile_picture is None else profile_picture
                 },
                 "likes_count": likes_count,
                 "comments_count": comments_count,

@@ -30,23 +30,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [copySuccess, setCopySuccess] = useState('');
 
 
-  const [profilePictureUrl, setProfilePictureUrl] = useState('');
-  const fetchPfpUrl = async () => {
-    try {
-      // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${id}/pfp`);
-      if (response.ok) {
-        const data = await response.json();
-        setProfilePictureUrl(data.url); // Use the URL of the response
-        console.log('Got profile picture URL: ', data.url)
-      } else {
-        console.error('Failed to fetch profile picture URL');
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile picture URL:', error);
-    }
-  };
-  fetchPfpUrl();
+
 
   const someUserId = id;
 
@@ -122,7 +106,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
       <div className={clsx(paddingClass, "pb-2 grid grid-cols-[auto,1fr] items-start  text-slate-700", className, " ")}>
 
         <div className="p-1 pr-2 flex items-center">
-          <Image className="rounded-full h-12 w-12 shadow-sm" src={profilePictureUrl} alt="Author" height={20} width={20} />
+          <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={20} width={20} />
         </div>
         
         <div className="flex flex-col justify-between overflow-hidden">
