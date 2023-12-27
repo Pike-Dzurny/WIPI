@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export async function hashPassword(password: string): Promise<string> {
+export async function hashPassword(password: string): Promise<{ salt: string, hashedPassword: string }> {
   const salt = crypto.randomBytes(16).toString('hex');
   const iterations = 1000;
   const keylen = 64; // length of the derived key
@@ -13,5 +13,5 @@ export async function hashPassword(password: string): Promise<string> {
     });
   });
 
-  return hashedPassword;
+  return { salt, hashedPassword };
 }

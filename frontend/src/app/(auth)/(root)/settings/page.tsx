@@ -1,8 +1,12 @@
 "use client";
+import clsx from 'clsx';
+
+
 import { OverlayContext } from '@/components/OverlayContext';
 import { useSession } from 'next-auth/react';
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import Image from 'next/image';
+import { hashPassword } from '@/components/hashPassword';
 
 
 
@@ -20,6 +24,9 @@ export default function AboutPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const [isSuccessful, setIsSuccessful] = useState(false);
+
+
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
@@ -35,22 +42,28 @@ export default function AboutPage() {
   const [passwordMessage, setPasswordMessage] = useState('');
 
   const handlePasswordChange = async () => {
-    const response = await fetch('http://localhost:8000/passwordchange', {
+    const newPasswordHash = await hashPassword(newPassword);
+  
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/passwordchange`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        id: session?.user?.id,
         oldPassword: oldPassword,
-        newPassword: newPassword,
+        newPasswordHash: newPasswordHash.hashedPassword,
+        newPasswordSalt: newPasswordHash.salt,
       }),
     });
-
+  
+    const data = await response.json();
+  
     if (response.ok) {
-      setPasswordMessage('Password changed successfully');
+      setPasswordMessage(data.message);
+      setIsSuccessful(true);
     } else {
-      setPasswordMessage('Failed to change password');
+      setPasswordMessage(data.detail);
+      setIsSuccessful(false);
     }
   };
 
@@ -272,7 +285,12 @@ export default function AboutPage() {
                   <input className='' type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                 </div>
                 <div className=''>
-                  {passwordmessage && <b className='text-red-500'>{passwordmessage}</b>}
+                  <div className={clsx('flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner', {
+                    'border-green-500': isSuccessful,
+                    'border-red-500': !isSuccessful,
+                  })}>
+                  {passwordMessage && <>{passwordMessage}</>}
+                  </div>
                   <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handlePasswordChange}>Save Changes</button>
                 </div>
               </div>

@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_400_BAD_REQUEST
-from api_models import AuthDetails, SignUpUser, UpdateUsernameRequest, UsernameAvailability
+from api_models import AuthDetails, SignUpUser, UpdateUsernameRequest, UsernameAvailability, PasswordChangeRequest
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 import re
 
@@ -312,4 +312,47 @@ def update_email(user_id: int, new_email: str, db: Session = Depends(get_db)):
     user.email = new_email
     db.commit()
     return {"message": "Email updated successfully"}
+
+
+
+
+@router.post("/user/{user_id}/passwordchange")
+def change_password(user_id: int, request: PasswordChangeRequest, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Verify the old password
+    salt = user.salt.encode('utf-8')
+    hashed_old_password = hashlib.pbkdf2_hmac(
+        'sha512',
+        request.oldPassword.encode('utf-8'),
+        salt,
+        user.iterations
+    )
+    hashed_old_password_hex = binascii.hexlify(hashed_old_password).decode('utf-8')
+
+    if hashed_old_password_hex != user.password_hash:
+        raise HTTPException(status_code=400, detail="Old password is incorrect")
+
+    # Hash the new password
+    new_salt = hashlib.pbkdf2_hmac(
+        'sha512',
+        request.newPasswordSalt.encode('utf-8'),
+        salt,
+        user.iterations
+    )
+    hashed_new_password = hashlib.pbkdf2_hmac(
+        'sha512',
+        request.newPasswordHash.encode('utf-8'),
+        new_salt,
+        user.iterations
+    )
+    hashed_new_password_hex = binascii.hexlify(hashed_new_password).decode('utf-8')
+
+    # Update the user's password in the database
+    user.password_hash = hashed_new_password_hex
+    db.commit()
+
+    return {"message": "Password changed successfully"}
 

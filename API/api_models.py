@@ -100,3 +100,8 @@ class PostBase(BaseModel):
 
 class UpdateUsernameRequest(BaseModel):
     username: str
+
+class PasswordChangeRequest(BaseModel):
+    oldPassword: str
+    newPasswordHash: str
+    newPasswordSalt: str
