@@ -30,6 +30,32 @@ export default function AboutPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: session } = useSession();
 
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+
+  const handlePasswordChange = async () => {
+    const response = await fetch('http://localhost:8000/passwordchange', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: session?.user?.id,
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      }),
+    });
+
+    if (response.ok) {
+      setPasswordMessage('Password changed successfully');
+    } else {
+      setPasswordMessage('Failed to change password');
+    }
+  };
+
+
+
   useEffect(() => {
     console.log("Current session:", session);
     if (session?.user?.id) {
@@ -241,13 +267,13 @@ export default function AboutPage() {
               <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
                 <div className='mb-4'>
                   <p className='mb-4'>Change Password</p>
-                  <input className='mb-4' type="text" placeholder="Old password" value={username} onChange={(e) => setUsername(e.target.value)} />
-                  {usernamemessage && <b className='text-red-500'>{usernamemessage}</b>}
+                  <input className='' type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
                   <p/>
-                  <input className='' type="email" placeholder="New password" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <input className='' type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                 </div>
                 <div className=''>
-                  <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handleUpload}>Save Changes</button>
+                  {passwordmessage && <b className='text-red-500'>{passwordmessage}</b>}
+                  <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handlePasswordChange}>Save Changes</button>
                 </div>
               </div>
             </div>
