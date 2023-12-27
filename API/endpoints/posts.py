@@ -3,12 +3,15 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 import logging
 from fastapi import APIRouter, logger
-from sqlalchemy import desc, func
+from sqlalchemy import desc, exists, func
 from database.database_initializer import Post, User, post_likes
 from api_models import UserPostBase
 from typing import List, Dict
+from .users import get_profile_picture
 
 from database.database_session import SessionLocal
+
+from sqlalchemy.sql.functions import coalesce
 
 def get_db() -> Session:
     """
@@ -31,17 +34,16 @@ def create_post(user_post: UserPostBase, db: Session = Depends(get_db)):
     try:
         sanitized_content = clean(user_post.post_content)
         user = db.query(User).filter(User.id == user_post.user_poster_id).first()
-        print(user)
-        if user is None or sanitized_content is None or sanitized_content == "":
-            return HTTPException(status_code=500, detail="failed")
-        print(user.account_name)
-        # Use the reply_to field when creating the Post object
+        if user is None or sanitized_content == "":
+            raise HTTPException(status_code=400, detail="Invalid user or content")
+
         db_post = Post(user_poster_id=user.id, content=sanitized_content, reply_to=user_post.reply_to)
         db.add(db_post)
         db.commit()
         return {"status": "success"}
     except Exception as e:
-        return HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @router.get("/post/{post_id}/comments")
@@ -67,6 +69,14 @@ def get_likes_count(post_id: int):
     likes_count = post.liked_by.count()  # count the number of users who liked this post
     session.close()
     return {"likes_count": likes_count}
+
+@router.get("/post/{post_id}/comments_count")
+def get_comments_count(post_id: int): 
+    session = SessionLocal()
+    post = session.query(Post).get(post_id)
+    comment_count = post.replies.count()  # count the number of users who liked this post
+    session.close()
+    return {"comment_count": comment_count}
 
 @router.post("/post/{post_id}/toggle_like/{user_id}")  # include user_id in the path
 def toggle_like(post_id: int, user_id: int):
@@ -141,6 +151,7 @@ def build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, depth=0, like
         'user_poster_id': post.user_poster_id,
         'is_liked': is_liked,
         'hasChildren': len(post.replies) > 0,
+        'profile_picture': get_profile_picture(post.id)['url'],
         'replies': [build_reply_tree(posts_dict, users_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
     }
     return post_data
@@ -206,22 +217,61 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
     return reply_tree
 
 
-@router.get("/posts")
-def read_posts(page: int = 1, per_page: int = 6):
+@router.get("/posts/{user_id}/")
+def read_posts(user_id: int, page: int = 1, per_page: int = 6):
     offset = (page - 1) * per_page
     session = SessionLocal()
-    posts = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture, func.count(post_likes.c.post_id).label('likes_count'))
-            .join(User, Post.user_poster_id == User.id)  # Join the User table
-            .outerjoin(post_likes, Post.id == post_likes.c.post_id)  # Assuming Like has a post_id field
-            .filter(Post.reply_to == None)  # Only get posts without any comments
-            .group_by(Post.id, Post.user_poster_id, Post.date_of_post, Post.content, Post.reply_to, User.account_name, User.bio, User.display_name, User.profile_picture)  # Group by all non-aggregated columns
+
+    # Subquery to check if the user has liked each post
+    user_liked_subquery = (session.query(post_likes.c.post_id)
+                           .filter(post_likes.c.user_id == user_id)
+                           .subquery())
+
+    # Subquery to check if the user has commented on each post
+    user_commented_subquery = (session.query(Post.id)
+                               .filter(Post.user_poster_id == user_id, Post.reply_to != None)
+                               .subquery())
+
+    # Subquery to count comments for each post
+    comments_subquery = (session.query(Post.reply_to.label('post_id'), func.count('*').label('comments_count'))
+                        .group_by(Post.reply_to)
+                        .subquery())
+
+    # Main query
+    posts = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture,
+                           func.count(post_likes.c.post_id).label('likes_count'),
+                           coalesce(func.max(comments_subquery.c.comments_count), 0).label('comments_count'),
+                           exists().where(Post.id == user_liked_subquery.c.post_id).label('user_has_liked'),
+                           exists().where(Post.id == user_commented_subquery.c.id).label('user_has_commented'))
+            .join(User, Post.user_poster_id == User.id)
+            .outerjoin(post_likes, Post.id == post_likes.c.post_id)
+            .outerjoin(comments_subquery, Post.id == comments_subquery.c.post_id)
+            .filter(Post.reply_to == None)
+            .group_by(Post.id, User.id)
             .order_by(desc(Post.date_of_post))
             .offset(offset)
             .limit(per_page)
             .all())
-    session.close()
-    return [{"post": {**post.__dict__, "user": {"account_name": account_name, "bio": bio, "display_name": display_name, "profile_picture": profile_picture}}} for post, account_name, bio, display_name, profile_picture, likes_count in posts]
 
+    session.close()
+    return [
+        {
+            "post": {
+                **post.__dict__,
+                "user": {
+                    "account_name": account_name,
+                    "bio": bio,
+                    "display_name": display_name,
+                    "profile_picture": get_profile_picture(post.user_poster_id)['url'] if profile_picture is None else profile_picture
+                },
+                "likes_count": likes_count,
+                "comments_count": comments_count,
+                "user_has_liked": user_has_liked,
+                "user_has_commented": user_has_commented
+            }
+        }
+        for post, account_name, bio, display_name, profile_picture, likes_count, comments_count, user_has_liked, user_has_commented in posts
+    ]
 
 
 def get_comments_recursive(post_id, parent_id=None):

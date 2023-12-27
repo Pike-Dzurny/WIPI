@@ -34,7 +34,10 @@ const config: Config = {
       },
       spacing: {
         '2.5': '10px',
-      }
+      },
+      transitionProperty: {
+        'width': 'width'
+      },
     },
   },
 }

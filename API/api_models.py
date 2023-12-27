@@ -96,3 +96,12 @@ class PostBase(BaseModel):
     user_poster_id: int
     content: str
     likes_count: int
+
+
+class UpdateUsernameRequest(BaseModel):
+    username: str
+
+class PasswordChangeRequest(BaseModel):
+    oldPassword: str
+    newPasswordHash: str
+    newPasswordSalt: str

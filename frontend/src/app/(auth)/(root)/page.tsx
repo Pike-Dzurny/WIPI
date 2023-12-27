@@ -2,6 +2,8 @@
 
 import { useSession } from "next-auth/react";
 
+import { useRouter } from 'next/navigation'
+
 import React, { useEffect, useState, useContext } from 'react';
 import { PFP } from '../../../components/pfp';
 
@@ -17,14 +19,10 @@ import axios from 'axios';
 
 import { Dropdown } from '../../../components/Dropdown/Dropdown';
 
-import { QueryFunctionContext } from 'react-query';
+import { User, Post } from '../../../components/Modules'
+import { SkeletonPost } from '../../../components/Skeletons'
 
-const fetchPosts = async ({ pageParam = 1 }: QueryFunctionContext<'posts', number>) => {
-  const url = `http://localhost:8000/posts?page=${pageParam}&per_page=6`;
-  const response = await axios.get(url);
-  
-  return response.data;
-};
+
 
 
 
@@ -36,8 +34,31 @@ export default function Home() {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
   }
   const { isOverlayOpen, setIsOverlayOpen } = context;
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
+  const [sessionID, setSessionID] = useState<number | undefined>(undefined);
 
-  const { data: session } = useSession();
+
+  const fetchPosts = async ({ pageParam = 1 }) => {
+    const userId = session?.user?.id;
+    if (!userId) {
+      console.log("Session ID is undefined.");
+      return { pages: [], pageParams: [] };
+    }
+  
+    console.log("Fetching posts for user ID:", userId);
+    const baseUrl = `http://localhost:8000/posts/${userId}/`;
+    const params = new URLSearchParams({
+      page: pageParam.toString(),
+      per_page: '10'
+    }).toString();
+    const url = baseUrl + "?" + params;
+  
+    const response = await axios.get(url);
+    return response.data;
+  };
+
+
 
 
 
@@ -49,7 +70,10 @@ export default function Home() {
     isFetchingNextPage,
   } = useInfiniteQuery('posts', fetchPosts, {
     getNextPageParam: (lastPage, allPages) => allPages.length + 1,
-    });
+    enabled: !!session?.user?.id, // This will delay the query until the session ID is available
+    staleTime: Infinity, // Adjust according to your needs
+    cacheTime: 1000 * 60 * 60 * 24, // 24 hours, for example
+  });
   const lastPostRef = React.useRef<HTMLDivElement>(null)
 
   const {ref, entry} = useIntersection({
@@ -58,56 +82,56 @@ export default function Home() {
 
   useEffect(() => {
     if(entry?.isIntersecting) {
-      fetchNextPage()
-    }
-  }, [entry, fetchNextPage]);
+        fetchNextPage()
+      }
+    }, [entry, fetchNextPage]);
 
-  const _posts = data?.pages.flatMap((page) => page)
-  const [scrollPosition, setScrollPosition] = useState(0);
+    const _posts = data?.pages.flatMap((page) => page)
+    // const [scrollPosition, setScrollPosition] = useState(0);
 
-  const handleScroll = () => {
-    const position = window.pageYOffset;
-    setScrollPosition(position);
-  };
+    // const handleScroll = () => {
+    //   const position = window.pageYOffset;
+    //   setScrollPosition(position);
+    // };
+
+  // useEffect(() => {
+
+  //   const hash = window.location.hash;
+  //   if (hash) {
+  //     console.log("hash is: " + hash);
+  //     const id = hash.replace('#', ''); // Remove the '#' from the hash
+  //     const element = document.getElementById(id);
+  //     if (element) {
+  //       element.scrollIntoView({ behavior: 'smooth' });
+  //     }
+  //   }
+
+  //   window.addEventListener('scroll', handleScroll, { passive: true });
+
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, [session]);
+
+  // const [lastScrollTop, setLastScrollTop] = useState(0);
+
+
 
   useEffect(() => {
-
-    const hash = window.location.hash;
-    if (hash) {
-      console.log("hash is: " + hash);
-      const id = hash.replace('#', ''); // Remove the '#' from the hash
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+    console.log("Current session:", session);
+    if (session?.user?.id) {
+      console.log("Setting session ID:", session.user.id);
+      setSessionID(session.user.id);
+    } else {
+      console.log("Session ID not available.");
     }
+  }, [session]);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-
-  interface User {
-    account_name: string;
-    bio: string | null;
-    display_name: string;
-    profile_picture: string | null;
-  }
-  
-  interface Post {
-    date_of_post: string;
-    likes_count: number;
-    id: number;
-    content: string;
-    user_poster_id: number;
-    user: User;
-  }
-  
-  
-  
+  useEffect(() => {
+    if (sessionID !== undefined) {
+      queryClient.refetchQueries('posts');
+    }
+  }, [sessionID, queryClient]);
 
   return (
     <div>
@@ -123,12 +147,12 @@ export default function Home() {
 
             <div className='flex-col-reverse'>
 
-            {data?.pages.map((page, i) => (
+            {data?.pages && data?.pages.map((page, i) => (
                 <React.Fragment key={i}>
-                  {page.map((post: Post, index: number) => {
+                  {page && Array.isArray(page) && page.map((post: Post, index: number) => {
                     const postElement = (
                       <div className="h-100" key={post.post.id} id={post.post.id}>
-                        <RealPost postObject={post} id={session?.user.id} />
+                        <RealPost postObject={post} id={session?.user.id ?? 0} />
                       </div>
                     );
 
@@ -142,14 +166,14 @@ export default function Home() {
                   })}
                 </React.Fragment>
               ))}
-              {//<PostList data={data} ref={ref} />}
+              {
 }
-              <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage} className="flex justify-center items-center w-full">
+              <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage} className="flex justify-center items-center w-full">
                 {
                   isFetchingNextPage
-                  ? <div className="loading-circle justify-center align-middle"></div>
-                  : (data?.pages.length ?? 0) < 6
-                  ? <div className="loading-circle justify-center"></div>
+                  ? <SkeletonPost count={4} />
+                  : !hasNextPage
+                  ? <SkeletonPost count={4} />
                   : 'Nothing more to load'
                 }
               </button>

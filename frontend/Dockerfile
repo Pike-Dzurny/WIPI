@@ -16,6 +16,8 @@ RUN npm install react-tsparticles
 RUN npm install --save-dev @types/lodash.debounce
 RUN npm install -g next
 
+# Install latest version of Next.js
+RUN npm install next@latest
 
 # Copy the rest of the application code
 # COPY . .
