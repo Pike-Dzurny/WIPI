@@ -308,7 +308,7 @@ export default function AboutPage() {
                   <input className='' type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                 </div>
                 <div className=''>
-                  <div className={clsx('flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner', {
+                  <div className={clsx('flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4', {
                     'border-green-500': isSuccessful,
                     'border-red-500': !isSuccessful,
                   })}>
