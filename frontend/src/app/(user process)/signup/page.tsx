@@ -213,9 +213,13 @@ export default function Signup() {
 
 
             <div>
-              <input type="submit" value="Sign Up" className="focus:outline-none flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" />
+            <button type="submit" className='relative w-full'>
+              <div className="absolute w-full p-2 inset-0 rounded-md bg-green-300 blur-sm group-hover:bg-green-500 group-hover:blur trasnition duration-1000 group-hover:duration-300"></div>
+              <div className={`relative w-full p-2 text-white text-center rounded-md Sign_Up_Button`}>Sign Up</div>
+            </button>
             </div>
-              </form>
+
+            </form>
         
               <p className="mt-10 text-center text-sm text-gray-500">{message}</p>
               </div>
@@ -227,7 +231,10 @@ export default function Signup() {
       <div className="mt-2 shadow p-5 border-gray-300 rounded-md bg-white flex flex-col items-center w-full">
       <p className="mb-4">Already have an account?</p>
       <Link href="/signin" className='w-full px-6 lg:px-8'>
-          <div className="w-full p-2 bg-green-500 text-white text-center rounded-md">Sign In</div>
+          <div className='relative w-full'>
+            <div className={`absolute w-full mb-4  p-2 inset-0 rounded-md bg-blue-300 hover:bg-blue-800 blur-sm hover:blur-xl trasnition duration-1000 hover:duration-300`}></div>
+            <button type="submit" className={`w-full relative mb-4 p-2 text-white rounded-md Sign_In_Button--activated`}>Sign In</button>
+          </div>
       </Link>
   </div>
 </div>        

@@ -58,7 +58,7 @@ export default function SignIn() {
         rotatingTextRef.current.classList.add('rotating-text');
       }
 
-    }, 3000); // Change the word every 2 seconds
+    }, 3000); // Change the word every 3 seconds
 
 
   
@@ -92,9 +92,6 @@ export default function SignIn() {
   if (status === 'unauthenticated') {
     return (
       <div className={`${font.className} flex flex-col md:flex-row items-center justify-center min-h-screen p-4 md:p-24 pt-16 md:pt-24`}>
-        <header className="fixed flex top-0 left-0 right-0 items-right justify-end py-4 px-8 backdrop-blur-2xl bg-opacity-30 font-light">
-          <div className="flex">test</div>
-        </header>
         <div className="hidden md:block md:w-2/3 md:h-max text-center med:px-20 mx-auto py-32">
           <div className="flex items-center justify-center">
             <div className="flex items-center justify-between w-full h-full">
@@ -102,7 +99,7 @@ export default function SignIn() {
                 <span className="text-5xl font-bold">Your next artistic</span>
               </div>
               <div className="text-left ml-3 flex-1">
-                <div ref={rotatingTextRef} className="rotating-text text-5xl font-bold ml-1">
+                <div ref={rotatingTextRef} className="rotating-text text-5xl font-bold ml-1 select-none">
                     <span className={`${colorClasses[index % colorClasses.length]} bg-clip-text text-transparent`}>
                       {words[index]}
                     </span>
@@ -149,6 +146,13 @@ export default function SignIn() {
               <div className={`relative w-full p-2 text-white text-center rounded-md Sign_Up_Button`}>Sign Up</div>
             </div>
             </Link>
+          </div>
+          <div className="p-4 flex flex-row text-sm select-none space-x-2 justify-center w-full">
+            <Link className="flex font-light underline-offset-2 hover:underline select-auto" href="">about </Link>
+            <Link className="flex font-light underline-offset-2 hover:underline select-auto" href="">contact </Link>
+            <Link className="flex font-light underline-offset-2 hover:underline select-auto" href="">terms of service </Link>
+            <Link className="flex font-light underline-offset-2 hover:underline  select-auto" href="">privacy policy </Link>
+
           </div>
         </div>
 
