@@ -103,5 +103,4 @@ class UpdateUsernameRequest(BaseModel):
 
 class PasswordChangeRequest(BaseModel):
     oldPassword: str
-    newPasswordHash: str
-    newPasswordSalt: str
+    newPassword: str

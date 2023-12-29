@@ -364,23 +364,21 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
     if hashed_old_password_hex != user.password_hash:
         raise HTTPException(status_code=400, detail="Old password is incorrect")
 
-    # Hash the new password
-    new_salt = hashlib.pbkdf2_hmac(
-        'sha512',
-        request.newPasswordSalt.encode('utf-8'),
-        salt,
-        user.iterations
-    )
+    # Generate a new salt for the new password
+    new_salt = os.urandom(16)  # Generate a new, random salt
+
+    # Hash the new password with the new salt
     hashed_new_password = hashlib.pbkdf2_hmac(
         'sha512',
-        request.newPasswordHash.encode('utf-8'),
+        request.newPassword.encode('utf-8'),  # Make sure you are receiving the new password in plaintext
         new_salt,
         user.iterations
     )
     hashed_new_password_hex = binascii.hexlify(hashed_new_password).decode('utf-8')
 
-    # Update the user's password in the database
+    # Update the user's password and salt in the database
     user.password_hash = hashed_new_password_hex
+    user.salt = new_salt.decode('utf-8')  # Store the new salt
     db.commit()
 
     return {"message": "Password changed successfully"}
