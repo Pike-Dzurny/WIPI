@@ -66,6 +66,32 @@ def read_users(db: Session = Depends(get_db)):
         # Handle the exception here
         return {"status": "error", "message": str(e)}
 
+@router.delete("/users/{user_id}/delete")
+async def delete_user(user_id: int, db: Session = Depends(get_db)):
+    """
+    Deletes a user from the database if the provided user id exists.
+
+    Args:
+        user_id (int): The id of the user to be deleted.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing a success message.
+
+    Raises:
+        HTTPException: If a user with the given id does not exist in the database.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
+        db.delete(user)
+        db.commit()
+        return {"message": "User deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/signup")
 async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
@@ -219,6 +245,7 @@ def get_profile_picture(user_id: int):
                                                      Params={'Bucket': bucket_name, 'Key': s3_key}, 
                                                      ExpiresIn=3600)
     return {"url": presigned_url}
+
 
 
 @router.post("/user/{user_id}/pfp")

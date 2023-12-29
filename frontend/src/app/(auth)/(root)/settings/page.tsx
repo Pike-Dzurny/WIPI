@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 
 import { OverlayContext } from '@/components/OverlayContext';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import Image from 'next/image';
 import { hashPassword } from '@/components/hashPassword';
@@ -39,7 +39,12 @@ export default function AboutPage() {
 
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+
+
   const [passwordMessage, setPasswordMessage] = useState('');
+
+  const [accountPassword, setAccountPassword] = React.useState("");
+
 
   const handlePasswordChange = async () => {
     const newPasswordHash = await hashPassword(newPassword);
@@ -220,6 +225,24 @@ export default function AboutPage() {
     }
   };
 
+  const handleAccountDeletion = async () => {
+    if (!session?.user?.id) {
+      console.error('User ID is not available');
+      return;
+    }
+  
+    const response = await fetch(`http://localhost:8000/users/${session.user.id}/delete`, {
+      method: 'DELETE',
+    });
+  
+    if (response.ok) {
+      console.log('Account deletion successful');
+      signOut()
+    } else {
+      console.error('Account deletion failed');
+    }
+  };
+
   return (
     <div>
       <main className="w-full">
@@ -307,14 +330,12 @@ export default function AboutPage() {
               <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
                 <div className='mb-4'>
                   <p className=''>Delete your account</p>
-                  <p className='mb-4 text-red-400'>This will permanently delete your account. T</p>
-                  <input className='mb-4' type="text" placeholder="Old password" value={username} onChange={(e) => setUsername(e.target.value)} />
-                  {usernamemessage && <b className='text-red-500'>{usernamemessage}</b>}
+                  <p className='text-red-400'>This will permanently delete your account.</p>
+                  <input className='my-4' type="text" placeholder="Password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} />
                   <p/>
-                  <input className='' type="email" placeholder="New password" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className=''>
-                  <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handleUpload}>Save Changes</button>
+                  <button className='bg-red-500 text-white rounded-lg p-2 hover:bg-red-400' onClick={handleAccountDeletion}>Delete Account</button>
                 </div>
               </div>
             </div>
