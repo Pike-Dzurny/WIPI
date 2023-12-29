@@ -181,6 +181,7 @@ async def check_username(username: str = Query(..., description="The username to
 
 @router.post("/auth")
 async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
+    print("0")
     try:
         print("1")
         # Fetch the user from the database
@@ -211,6 +212,7 @@ async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get
         # If the username and password are correct, return the user details
         return {"id": db_user.id, "name": db_user.display_name, "email": db_user.email}
     except Exception as e:
+        print(f"Exception occurred: {e}")
         raise HTTPException(status_code=500, detail="Error querying the database") from e
 
 @router.get("/user/{user_id}/posts")
