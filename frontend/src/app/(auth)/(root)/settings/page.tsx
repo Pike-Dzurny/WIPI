@@ -228,8 +228,12 @@ export default function AboutPage() {
       return;
     }
   
+    const formData = new FormData();
+    formData.append('password', accountPassword);
+  
     const response = await fetch(`http://localhost:8000/users/${session.user.id}/delete`, {
       method: 'DELETE',
+      body: formData,
     });
   
     if (response.ok) {
@@ -298,9 +302,9 @@ export default function AboutPage() {
                 <p className='text-sm text-sky-900'>Edit your password</p>
               </div>
               <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
-                <div className='mb-4'>
+                <div className=''>
                   <p className='mb-4'>Change Password</p>
-                  <input className='' type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
+                  <input className='mb-4' type="password" placeholder="Old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
                   <p/>
                   <input className='' type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                 </div>
