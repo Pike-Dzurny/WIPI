@@ -47,6 +47,29 @@ def get_db():
 
 router = APIRouter()
 
+
+def hash_password(password: str, salt: str, iterations: int) -> str:
+    """
+    Hashes a password using PBKDF2 HMAC.
+
+    Args:
+        password (str): The password to be hashed.
+        salt (str): The salt to be used in the hashing process.
+        iterations (int): The number of iterations for the hashing process.
+
+    Returns:
+        str: The hashed password.
+    """
+    salt_bytes = binascii.unhexlify(salt)  # Decode the hex-encoded salt
+    hashed_password = hashlib.pbkdf2_hmac(
+        'sha512',
+        password.encode('utf-8'),
+        salt_bytes,
+        iterations
+    )
+    hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')
+    return hashed_password_hex
+
 @router.get("/users")
 def read_users(db: Session = Depends(get_db)):
     """
@@ -282,10 +305,8 @@ async def upload_image(user_id: int, file: UploadFile = File(...)):
         # Check the size of the in-memory file
         in_mem_file.seek(0, 2)  # Go to the end of the in-memory file
         size_in_kb = in_mem_file.tell() / 1024  # Get the size in kilobytes
-        if size_in_kb > 1000:  # Replace 100 with your desired size limit in kilobytes
+        if size_in_kb > 1024:  # Replace 100 with your desired size limit in kilobytes
             raise HTTPException(status_code=400, detail="File size exceeds 1000 KB. Please select a smaller file.")
-
-        in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
 
         in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
 
@@ -352,7 +373,7 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
         raise HTTPException(status_code=404, detail="User not found")
 
     # Verify the old password
-    salt = user.salt.encode('utf-8')
+    salt = binascii.unhexlify(user.salt)  # Decode the hex-encoded salt
     hashed_old_password = hashlib.pbkdf2_hmac(
         'sha512',
         request.oldPassword.encode('utf-8'),
@@ -360,6 +381,11 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
         user.iterations
     )
     hashed_old_password_hex = binascii.hexlify(hashed_old_password).decode('utf-8')
+
+    print("yeezy", hashed_old_password_hex)
+    print("yeezy", user.password_hash)
+    print("yeezy", request.oldPassword) 
+    print("yeezy", request.newPassword)
 
     if hashed_old_password_hex != user.password_hash:
         raise HTTPException(status_code=400, detail="Old password is incorrect")
@@ -370,7 +396,7 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
     # Hash the new password with the new salt
     hashed_new_password = hashlib.pbkdf2_hmac(
         'sha512',
-        request.newPassword.encode('utf-8'),  # Make sure you are receiving the new password in plaintext
+        request.newPassword.encode('utf-8'),
         new_salt,
         user.iterations
     )
@@ -378,7 +404,7 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
 
     # Update the user's password and salt in the database
     user.password_hash = hashed_new_password_hex
-    user.salt = new_salt.decode('utf-8')  # Store the new salt
+    user.salt = binascii.hexlify(new_salt).decode('utf-8')  # Store the new salt as a hex-encoded string
     db.commit()
 
     return {"message": "Password changed successfully"}

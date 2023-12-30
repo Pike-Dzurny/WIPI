@@ -46,9 +46,7 @@ export default function AboutPage() {
   const [accountPassword, setAccountPassword] = React.useState("");
 
 
-  const handlePasswordChange = async () => {
-    const newPasswordHash = await hashPassword(newPassword);
-  
+  const handlePasswordChange = async () => {  
     const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/passwordchange`, {
       method: 'POST',
       headers: {
@@ -56,8 +54,7 @@ export default function AboutPage() {
       },
       body: JSON.stringify({
         oldPassword: oldPassword,
-        newPasswordHash: newPasswordHash.hashedPassword,
-        newPasswordSalt: newPasswordHash.salt,
+        newPassword: newPassword,
       }),
     });
   
