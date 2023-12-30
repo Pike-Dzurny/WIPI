@@ -48,27 +48,48 @@ def get_db():
 router = APIRouter()
 
 
-def hash_password(password: str, salt: str, iterations: int) -> str:
+def hash_password(password: str, salt: str = None, iterations: int = 100000) -> tuple:
     """
     Hashes a password using PBKDF2 HMAC.
 
     Args:
         password (str): The password to be hashed.
-        salt (str): The salt to be used in the hashing process.
+        salt (str): The salt to be used in the hashing process. If None, a new salt will be generated.
         iterations (int): The number of iterations for the hashing process.
 
     Returns:
-        str: The hashed password.
+        tuple: The hashed password and the salt used.
     """
-    salt_bytes = binascii.unhexlify(salt)  # Decode the hex-encoded salt
+    if salt is None:
+        salt = os.urandom(16)  # Generate a new salt if none is provided
+    else:
+        salt = binascii.unhexlify(salt)  # Decode the hex-encoded salt
+
     hashed_password = hashlib.pbkdf2_hmac(
         'sha512',
         password.encode('utf-8'),
-        salt_bytes,
+        salt,
         iterations
     )
     hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')
-    return hashed_password_hex
+    salt_hex = binascii.hexlify(salt).decode('utf-8')
+    return hashed_password_hex, salt_hex
+
+def compare_passwords(hashed_password: str, password: str, salt: str, iterations: int) -> bool:
+    """
+    Compares a hashed password with a plain-text password.
+
+    Args:
+        hashed_password (str): The hashed password.
+        password (str): The plain-text password to compare.
+        salt (str): The salt used in the original hashing process.
+        iterations (int): The number of iterations used in the original hashing process.
+
+    Returns:
+        bool: True if the passwords match, False otherwise.
+    """
+    new_hashed_password, _ = hash_password(password, salt, iterations)
+    return hashed_password == new_hashed_password
 
 @router.get("/users")
 def read_users(db: Session = Depends(get_db)):
@@ -149,8 +170,18 @@ async def create_user(user: SignUpUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid details")
     
     try:
-        db_user = User(**user.model_dump())    
+        user_dict = user.model_dump()
+        password = user_dict.pop('password', None)
+        db_user = User(**user_dict)
         db.add(db_user)
+
+        # Hash the password
+        hashed_password, salt = hash_password(user.password)
+
+        db_user.password_hash = hashed_password
+        db_user.salt = salt
+        db_user.iterations = 100000
+
         db.flush()
         db.commit()
         logging.info(f"Created user with username {db_user.account_name} and created user")
@@ -204,32 +235,24 @@ async def check_username(username: str = Query(..., description="The username to
 
 @router.post("/auth")
 async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
-    print("0")
+    print("/auth'ing")
     try:
         print("1")
         # Fetch the user from the database
         db_user = db.query(User).filter(User.account_name == auth_details.username).first()
-
         # If the user doesn't exist, raise an HTTPException
         if not db_user:
             raise HTTPException(status_code=400, detail="Does not exist")
 
         # Verify the password
-        salt = db_user.salt.encode('utf-8')  # Ensure that the salt is encoded to bytes
-        hashed_password = hashlib.pbkdf2_hmac(
-            'sha512',
-            auth_details.password.encode('utf-8'),  # Ensure that the password is encoded to bytes
-            salt,
-            db_user.iterations
-        )
+        salt = db_user.salt  # The salt is already encoded to bytes in the hash_password function
+        iterations = db_user.iterations
 
-        hashed_password_hex = binascii.hexlify(hashed_password).decode('utf-8')  # Convert to hex for comparison
+        # Hash the password
+        hashed_password_hex, _ = hash_password(auth_details.password, salt, iterations)
 
         # If the password is incorrect, raise an HTTPException
-        print(hashed_password_hex)
-        print(db_user.password_hash)
-        if hashed_password_hex != db_user.password_hash:
-            print("6")
+        if not compare_passwords(hashed_password_hex, auth_details.password, salt, iterations):
             raise HTTPException(status_code=400, detail="Invalid credentials")
 
         # If the username and password are correct, return the user details
@@ -373,38 +396,15 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
         raise HTTPException(status_code=404, detail="User not found")
 
     # Verify the old password
-    salt = binascii.unhexlify(user.salt)  # Decode the hex-encoded salt
-    hashed_old_password = hashlib.pbkdf2_hmac(
-        'sha512',
-        request.oldPassword.encode('utf-8'),
-        salt,
-        user.iterations
-    )
-    hashed_old_password_hex = binascii.hexlify(hashed_old_password).decode('utf-8')
-
-    print("yeezy", hashed_old_password_hex)
-    print("yeezy", user.password_hash)
-    print("yeezy", request.oldPassword) 
-    print("yeezy", request.newPassword)
-
-    if hashed_old_password_hex != user.password_hash:
+    if not compare_passwords(user.password_hash, request.oldPassword, user.salt, user.iterations):
         raise HTTPException(status_code=400, detail="Old password is incorrect")
 
-    # Generate a new salt for the new password
-    new_salt = os.urandom(16)  # Generate a new, random salt
-
-    # Hash the new password with the new salt
-    hashed_new_password = hashlib.pbkdf2_hmac(
-        'sha512',
-        request.newPassword.encode('utf-8'),
-        new_salt,
-        user.iterations
-    )
-    hashed_new_password_hex = binascii.hexlify(hashed_new_password).decode('utf-8')
+    # Hash the new password with a new salt
+    hashed_new_password_hex, new_salt_hex = hash_password(request.newPassword)
 
     # Update the user's password and salt in the database
     user.password_hash = hashed_new_password_hex
-    user.salt = binascii.hexlify(new_salt).decode('utf-8')  # Store the new salt as a hex-encoded string
+    user.salt = new_salt_hex
     db.commit()
 
     return {"message": "Password changed successfully"}

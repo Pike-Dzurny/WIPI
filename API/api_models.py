@@ -36,9 +36,8 @@ class SignUpUser(BaseModel):
     account_name: str
     display_name: str
     email: str
-    password_hash: str
-    iterations: int
-    salt: str
+    password: str
+
 
 class AuthDetails(BaseModel):
     """
@@ -47,23 +46,19 @@ class AuthDetails(BaseModel):
     Args:
         username (str): The username for authentication.
         password (str): The password for authentication.
-        reply_to (Optional[int], optional): An optional reply-to ID. Defaults to None.
 
     Attributes:
         username (str): The username for authentication.
         password (str): The password for authentication.
-        reply_to (Optional[int]): An optional reply-to ID.
 
     Example:
         auth = AuthDetails(username="john", password="password123")
         print(auth.username)  # Output: john
         print(auth.password)  # Output: password123
-        print(auth.reply_to)  # Output: None
     """
 
     username: str
     password: str
-    reply_to: Optional[int] = None
 
 
 class UsernameAvailability(BaseModel):
