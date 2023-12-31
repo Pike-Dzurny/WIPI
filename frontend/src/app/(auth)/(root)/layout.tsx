@@ -4,7 +4,6 @@ import { Roboto } from 'next/font/google';
 import './../../globals.css';
 
 
-
 import { useRef, useEffect, useState } from 'react';
 
 const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
@@ -12,7 +11,9 @@ const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets
 import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
-import { ProfilePicContext, ProfilePicProvider, useProfilePic } from '@/components/ProfilePicContext';
+import { ProfilePicProvider, useProfilePic } from '@/components/ProfilePicContext';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import React from 'react';
 
@@ -270,3 +271,4 @@ const fetchaccountname = async () => {
   return null;
 }
 export default RootLayout;
+

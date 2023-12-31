@@ -21,13 +21,13 @@ import { Dropdown } from '../../../components/Dropdown/Dropdown';
 
 import { User, Post } from '../../../components/Modules'
 import { SkeletonPost } from '../../../components/Skeletons'
-import { ProfilePicContext, useProfilePic } from "@/components/ProfilePicContext";
+import { useProfilePic } from "@/components/ProfilePicContext";
 
 
 
 
 
-export default function Home() {
+export default function Home({pfpUrl}) {
 
 
   const context = useContext(OverlayContext);
@@ -155,4 +155,5 @@ export default function Home() {
 
   );
 }
+
 
