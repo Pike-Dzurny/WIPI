@@ -365,6 +365,22 @@ def get_username(user_id: int, db: Session = Depends(get_db)):
             return {"username": user.display_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
+
+@router.get("/user/{user_id}/accountname")
+def get_account_name(user_id: int, db: Session = Depends(get_db)):
+    try:
+        print("1")
+        user = db.query(User).get(user_id)
+        print("2")
+        if user is None:
+            print("3")
+            raise HTTPException(status_code=404, detail=str(e)) 
+        else:
+            print("4")
+            return {"accountname": user.account_name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
+
     
 @router.post("/user/{user_id}/username")
 def update_username(user_id: int, request: UpdateUsernameRequest, db: Session = Depends(get_db)):

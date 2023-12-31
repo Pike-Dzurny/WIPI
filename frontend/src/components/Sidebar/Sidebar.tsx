@@ -57,6 +57,21 @@ const fetchusername = async () => {
   }
 }
 
+const [accountName, setaccountName] = useState('');
+const fetchaccountname = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/accountname`);
+    if (response.ok) {
+      const data = await response.json();
+      setaccountName(data.accountname);
+    } else {
+      console.error('Failed to fetch username');
+    }
+  } catch (error) {
+    console.error('Failed to fetch username:', error);
+  }
+}
+
 
   useEffect(() => {
 
@@ -64,6 +79,7 @@ const fetchusername = async () => {
     if (session?.user?.id) {
       fetchusername();
       fetchPfpUrl();
+      fetchaccountname();
     }
   }, [session?.user?.id]);
 
@@ -195,12 +211,12 @@ const fetchusername = async () => {
             <div className='flex flex-col ml-1 leading-snug justify-start line-clamp-1'>
               <p className='font-semibold lowercase'>{username}</p>
               <div>
-                <p className='text-sm font-normal font-mono lowercase'>@name</p>
+                <p className='text-sm font-normal font-mono lowercase'>@{accountName}</p>
               </div>
             </div>
             <div className='flex flex-grow items-center justify-end'>
               <span
-                className="material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1 select-none"
+                className="material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1 select-none cursor-pointer"
                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}
                 onClick={signOutOfApp()}
               >
