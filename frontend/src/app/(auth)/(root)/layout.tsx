@@ -195,7 +195,6 @@ const fetchaccountname = async () => {
 
   if (status === 'authenticated' || status === 'loading') {
     return (
-      <ProfilePicProvider>
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
         <div className={`flex flex-col md:flex-row ${isOverlayOpen ? 'blur-sm' : ''}`}>
           <div className="hidden md:block md:flex-grow z-20">
@@ -265,7 +264,6 @@ const fetchaccountname = async () => {
             </div>
           </Overlay>
       </body>
-      </ProfilePicProvider>
     );
   }
 
