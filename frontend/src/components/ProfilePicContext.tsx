@@ -23,6 +23,7 @@ interface ProfilePicProviderProps {
 export const ProfilePicProvider: React.FC<ProfilePicProviderProps> = ({ children }) => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>('');
 
+  console.log("ProfilePicProvider: profilePicUrl:", profilePicUrl);
   return (
     <ProfilePicContext.Provider value={{ profilePicUrl, setProfilePicUrl }}>
       {children}

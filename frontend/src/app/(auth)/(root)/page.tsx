@@ -21,7 +21,7 @@ import { Dropdown } from '../../../components/Dropdown/Dropdown';
 
 import { User, Post } from '../../../components/Modules'
 import { SkeletonPost } from '../../../components/Skeletons'
-import { ProfilePicContext } from "@/components/ProfilePicContext";
+import { ProfilePicContext, useProfilePic } from "@/components/ProfilePicContext";
 
 
 
@@ -88,9 +88,9 @@ export default function Home() {
 
 
   useEffect(() => {
-    console.log("Current session:", session);
+    //console.log("Current session:", session);
     if (session?.user?.id) {
-      console.log("Setting session ID:", session.user.id);
+      //console.log("Setting session ID:", session.user.id);
       setSessionID(session.user.id);
     } else {
       console.log("Session ID not available.");
@@ -102,7 +102,7 @@ export default function Home() {
       queryClient.refetchQueries('posts');
     }
   }, [sessionID, queryClient]);
-  const profilePicUrl = useContext(ProfilePicContext);
+  const { profilePicUrl } = useProfilePic();
 
   return (
     <div>

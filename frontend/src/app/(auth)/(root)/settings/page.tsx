@@ -72,9 +72,9 @@ export default function AboutPage() {
 
 
   useEffect(() => {
-    console.log("Current session:", session);
+    //console.log("Current session:", session);
     if (session?.user?.id) {
-      console.log("Setting session ID:", session.user.id);
+      //console.log("Setting session ID:", session.user.id);
       setSessionID(session.user.id);
     } else {
       console.log("Session ID not available.");
