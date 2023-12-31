@@ -3,18 +3,21 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { profile } from 'console';
+import { useProfilePic } from '../ProfilePicContext';
 
 
 interface SidebarProps {
-  profilePictureUrl: String;
+  //profilePictureUrl: String;
   username: String; 
   accountName: String;
 }
 
 
 
-export const Sidebar: React.FC<SidebarProps> = ({ profilePictureUrl, username, accountName }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
 
+  const { profilePicUrl, setProfilePicUrl } = useProfilePic();
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
 
@@ -23,65 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ profilePictureUrl, username, a
   const toggleMenu = () => {
     setShowMenu(!showMenu);
   };
-
-//   const [profilePictureUrl, setProfilePictureUrl] = useState('');
-//   const fetchPfpUrl = async () => {
-//     try {
-//       // Use session.user.id to fetch the profile picture URL
-//       const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-//       if (response.ok) {
-//         const data = await response.json();
-//         setProfilePictureUrl(data.url); // Use the URL of the response
-//         console.log('Got profile picture URL: ', data.url)
-//       } else {
-//         console.error('Failed to fetch profile picture URL');
-//       }
-//     } catch (error) {
-//       console.error('Failed to fetch profile picture URL:', error);
-//     }
-//   };
-
-
-// const [username, setName] = useState('');
-// const fetchusername = async () => {
-//   try {
-//     const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`);
-//     if (response.ok) {
-//       const data = await response.json();
-//       setName(data.username);
-//     } else {
-//       console.error('Failed to fetch username');
-//     }
-//   } catch (error) {
-//     console.error('Failed to fetch username:', error);
-//   }
-// }
-
-// const [accountName, setaccountName] = useState('');
-// const fetchaccountname = async () => {
-//   try {
-//     const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/accountname`);
-//     if (response.ok) {
-//       const data = await response.json();
-//       setaccountName(data.accountname);
-//     } else {
-//       console.error('Failed to fetch username');
-//     }
-//   } catch (error) {
-//     console.error('Failed to fetch username:', error);
-//   }
-// }
-
-
-  // useEffect(() => {
-
-  
-  //   if (session?.user?.id) {
-  //     fetchusername();
-  //     fetchPfpUrl();
-  //     fetchaccountname();
-  //   }
-  // }, [session?.user?.id]);
 
     const [userStatus, setUserStatus] = useState('online');
 
@@ -154,12 +98,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ profilePictureUrl, username, a
         <hr className="border-slate-300 border-1" />
         <div className='bg-white  w-30 h-12 rounded-full shadow border-black mt-4 flex items-center group'>
           <div className="relative cursor-pointer" onClick={toggleMenu}>
+            {/* Profile picture */}
+            {profilePicUrl &&
             <Image
-              src={profilePictureUrl}
+              src={profilePicUrl}
               alt="Profile"
               width={80}
               height={80}
               className="rounded-full" />
+            }
             <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white group-hover:animate-ping ${userStatus === 'online' ? 'bg-green-500' :
               userStatus === 'offline' ? 'bg-gray-400' :
                 userStatus === 'dnd' ? 'bg-red-500' :

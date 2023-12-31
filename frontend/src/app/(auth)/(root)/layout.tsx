@@ -12,7 +12,7 @@ const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets
 import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
-import { ProfilePicContext } from '@/components/ProfilePicContext';
+import { ProfilePicContext, ProfilePicProvider, useProfilePic } from '@/components/ProfilePicContext';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import React from 'react';
 
@@ -130,14 +130,15 @@ function RootLayout({
     }
   }, [session?.user?.id]);
 
-  const [profilePictureUrl, setProfilePictureUrl] = useState('');
+  //const [profilePictureUrl, setProfilePictureUrl] = useState('');
+  const { setProfilePicUrl } = useProfilePic();
   const fetchPfpUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
       const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
       if (response.ok) {
         const data = await response.json();
-        setProfilePictureUrl(data.url); // Use the URL of the response
+        setProfilePicUrl(data.url); // Use the URL of the response
         console.log('Got profile picture URL: ', data.url)
       } else {
         console.error('Failed to fetch profile picture URL');
@@ -191,15 +192,17 @@ const fetchaccountname = async () => {
 
   //const ProfilePicContext = React.createContext('');
 
+
   if (status === 'authenticated' || status === 'loading') {
     return (
+      <ProfilePicProvider>
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
         <div className={`flex flex-col md:flex-row ${isOverlayOpen ? 'blur-sm' : ''}`}>
           <div className="hidden md:block md:flex-grow z-20">
             <div className="flex flex-row h-screen fixed w-1/4 p-4">
               <div className='basis-1/2' />
               <div className='flex basis-1/2 items-center justify-center justify-items-center'>
-                <Sidebar profilePictureUrl={profilePictureUrl} username={username} accountName={accountName}  />
+                <Sidebar username={username} accountName={accountName}  />
               </div>
             </div>
           </div>
@@ -211,9 +214,7 @@ const fetchaccountname = async () => {
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
               <div className="flex md:rounded-t-xl border-l border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
                 <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
-                  <ProfilePicContext.Provider value={profilePictureUrl}>
                     {children}
-                  </ProfilePicContext.Provider>
                 </OverlayContext.Provider>
               </div>
             </div>
@@ -264,6 +265,7 @@ const fetchaccountname = async () => {
             </div>
           </Overlay>
       </body>
+      </ProfilePicProvider>
     );
   }
 
