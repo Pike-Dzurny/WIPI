@@ -3,6 +3,8 @@
 import { Roboto } from 'next/font/google';
 import './../../globals.css';
 
+
+
 import { useRef, useEffect, useState } from 'react';
 
 const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
@@ -10,9 +12,9 @@ const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets
 import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
-import Image from 'next/image'
+import { ProfilePicContext } from '@/components/ProfilePicContext';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
-import { MobileSidebar } from '@/components/Sidebar/MobileSidebar';
+import React from 'react';
 
 
 interface UserPostBase {
@@ -187,6 +189,8 @@ const fetchaccountname = async () => {
     }
   }, [session?.user?.id]);
 
+  //const ProfilePicContext = React.createContext('');
+
   if (status === 'authenticated' || status === 'loading') {
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
@@ -207,7 +211,9 @@ const fetchaccountname = async () => {
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
               <div className="flex md:rounded-t-xl border-l border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
                 <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
-                  {children}
+                  <ProfilePicContext.Provider value={profilePictureUrl}>
+                    {children}
+                  </ProfilePicContext.Provider>
                 </OverlayContext.Provider>
               </div>
             </div>

@@ -2,35 +2,15 @@
 import Image from 'next/image'
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { useSession } from 'next-auth/react';
 
-export const PFP: React.FC = () => {
+interface SidebarProps {
+  profilePictureUrl: string;
+}
 
-  const { data: session, status } = useSession();
-  const [profilePictureUrl, setProfilePictureUrl] = useState('');
-  const fetchPfpUrl = async () => {
-    try {
-      // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-      if (response.ok) {
-        const data = await response.json();
-        setProfilePictureUrl(data.url); // Use the URL of the response
-        console.log('Got profile picture URL: ', data.url)
-      } else {
-        console.error('Failed to fetch profile picture URL');
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile picture URL:', error);
-    }
-  };
+export const PFP: React.FC<SidebarProps>  = ({ profilePictureUrl }) => {
 
-  useEffect(() => {
 
   
-    if (session?.user?.id) {
-      fetchPfpUrl();
-    }
-  }, [session?.user?.id]);
 
   return (
     <div className="p-16 relative">

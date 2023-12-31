@@ -21,6 +21,7 @@ import { Dropdown } from '../../../components/Dropdown/Dropdown';
 
 import { User, Post } from '../../../components/Modules'
 import { SkeletonPost } from '../../../components/Skeletons'
+import { ProfilePicContext } from "@/components/ProfilePicContext";
 
 
 
@@ -59,9 +60,6 @@ export default function Home() {
   };
 
 
-
-
-
   const queryClient = new QueryClient();
   const {
     data,
@@ -87,34 +85,6 @@ export default function Home() {
     }, [entry, fetchNextPage]);
 
     const _posts = data?.pages.flatMap((page) => page)
-    // const [scrollPosition, setScrollPosition] = useState(0);
-
-    // const handleScroll = () => {
-    //   const position = window.pageYOffset;
-    //   setScrollPosition(position);
-    // };
-
-  // useEffect(() => {
-
-  //   const hash = window.location.hash;
-  //   if (hash) {
-  //     console.log("hash is: " + hash);
-  //     const id = hash.replace('#', ''); // Remove the '#' from the hash
-  //     const element = document.getElementById(id);
-  //     if (element) {
-  //       element.scrollIntoView({ behavior: 'smooth' });
-  //     }
-  //   }
-
-  //   window.addEventListener('scroll', handleScroll, { passive: true });
-
-  //   return () => {
-  //     window.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, [session]);
-
-  // const [lastScrollTop, setLastScrollTop] = useState(0);
-
 
 
   useEffect(() => {
@@ -132,6 +102,7 @@ export default function Home() {
       queryClient.refetchQueries('posts');
     }
   }, [sessionID, queryClient]);
+  const profilePicUrl = useContext(ProfilePicContext);
 
   return (
     <div>
@@ -139,7 +110,7 @@ export default function Home() {
           <main className="w-full">
               
             <div className="relative rounded-t-2xl">
-            <ProfileCard backgroundImage="" profileImage={<PFP />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} />            </div>
+            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} />            </div>
 
             <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
               <Dropdown />
