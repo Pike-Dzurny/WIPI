@@ -128,6 +128,65 @@ function RootLayout({
     }
   }, [session?.user?.id]);
 
+  const [profilePictureUrl, setProfilePictureUrl] = useState('');
+  const fetchPfpUrl = async () => {
+    try {
+      // Use session.user.id to fetch the profile picture URL
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+      if (response.ok) {
+        const data = await response.json();
+        setProfilePictureUrl(data.url); // Use the URL of the response
+        console.log('Got profile picture URL: ', data.url)
+      } else {
+        console.error('Failed to fetch profile picture URL');
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile picture URL:', error);
+    }
+  };
+
+
+const [username, setName] = useState('');
+const fetchusername = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`);
+    if (response.ok) {
+      const data = await response.json();
+      setName(data.username);
+    } else {
+      console.error('Failed to fetch username');
+    }
+  } catch (error) {
+    console.error('Failed to fetch username:', error);
+  }
+}
+
+const [accountName, setaccountName] = useState('');
+const fetchaccountname = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/accountname`);
+    if (response.ok) {
+      const data = await response.json();
+      setaccountName(data.accountname);
+    } else {
+      console.error('Failed to fetch username');
+    }
+  } catch (error) {
+    console.error('Failed to fetch username:', error);
+  }
+}
+
+
+  useEffect(() => {
+
+  
+    if (session?.user?.id) {
+      fetchusername();
+      fetchPfpUrl();
+      fetchaccountname();
+    }
+  }, [session?.user?.id]);
+
   if (status === 'authenticated' || status === 'loading') {
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
@@ -136,12 +195,13 @@ function RootLayout({
             <div className="flex flex-row h-screen fixed w-1/4 p-4">
               <div className='basis-1/2' />
               <div className='flex basis-1/2 items-center justify-center justify-items-center'>
-                <Sidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} pfp={pfpUrl} />
+                <Sidebar profilePictureUrl={profilePictureUrl} username={username} accountName={accountName}  />
               </div>
             </div>
           </div>
           <div className='md:hidden block backdrop-blur-sm	fixed bottom-0 w-screen h-14 z-20 border-t border-slate-100 border-2'>
-            <MobileSidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} pfp={pfpUrl} />
+            {//<MobileSidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} pfp={pfpUrl} />}
+  }
           </div>
           <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">

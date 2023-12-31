@@ -6,14 +6,14 @@ import Link from 'next/link';
 
 
 interface SidebarProps {
-  // Define your prop types here
-  id: Number;
-  name: String; 
+  profilePictureUrl: String;
+  username: String; 
+  accountName: String;
 }
 
 
 
-export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ profilePictureUrl, username, accountName }) => {
 
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
@@ -24,64 +24,64 @@ export const Sidebar: React.FC<SidebarProps> = ({ id, name }) => {
     setShowMenu(!showMenu);
   };
 
-  const [profilePictureUrl, setProfilePictureUrl] = useState('');
-  const fetchPfpUrl = async () => {
-    try {
-      // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-      if (response.ok) {
-        const data = await response.json();
-        setProfilePictureUrl(data.url); // Use the URL of the response
-        console.log('Got profile picture URL: ', data.url)
-      } else {
-        console.error('Failed to fetch profile picture URL');
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile picture URL:', error);
-    }
-  };
+//   const [profilePictureUrl, setProfilePictureUrl] = useState('');
+//   const fetchPfpUrl = async () => {
+//     try {
+//       // Use session.user.id to fetch the profile picture URL
+//       const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+//       if (response.ok) {
+//         const data = await response.json();
+//         setProfilePictureUrl(data.url); // Use the URL of the response
+//         console.log('Got profile picture URL: ', data.url)
+//       } else {
+//         console.error('Failed to fetch profile picture URL');
+//       }
+//     } catch (error) {
+//       console.error('Failed to fetch profile picture URL:', error);
+//     }
+//   };
 
 
-const [username, setName] = useState('');
-const fetchusername = async () => {
-  try {
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`);
-    if (response.ok) {
-      const data = await response.json();
-      setName(data.username);
-    } else {
-      console.error('Failed to fetch username');
-    }
-  } catch (error) {
-    console.error('Failed to fetch username:', error);
-  }
-}
+// const [username, setName] = useState('');
+// const fetchusername = async () => {
+//   try {
+//     const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`);
+//     if (response.ok) {
+//       const data = await response.json();
+//       setName(data.username);
+//     } else {
+//       console.error('Failed to fetch username');
+//     }
+//   } catch (error) {
+//     console.error('Failed to fetch username:', error);
+//   }
+// }
 
-const [accountName, setaccountName] = useState('');
-const fetchaccountname = async () => {
-  try {
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/accountname`);
-    if (response.ok) {
-      const data = await response.json();
-      setaccountName(data.accountname);
-    } else {
-      console.error('Failed to fetch username');
-    }
-  } catch (error) {
-    console.error('Failed to fetch username:', error);
-  }
-}
+// const [accountName, setaccountName] = useState('');
+// const fetchaccountname = async () => {
+//   try {
+//     const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/accountname`);
+//     if (response.ok) {
+//       const data = await response.json();
+//       setaccountName(data.accountname);
+//     } else {
+//       console.error('Failed to fetch username');
+//     }
+//   } catch (error) {
+//     console.error('Failed to fetch username:', error);
+//   }
+// }
 
 
-  useEffect(() => {
+  // useEffect(() => {
 
   
-    if (session?.user?.id) {
-      fetchusername();
-      fetchPfpUrl();
-      fetchaccountname();
-    }
-  }, [session?.user?.id]);
+  //   if (session?.user?.id) {
+  //     fetchusername();
+  //     fetchPfpUrl();
+  //     fetchaccountname();
+  //   }
+  // }, [session?.user?.id]);
 
     const [userStatus, setUserStatus] = useState('online');
 
