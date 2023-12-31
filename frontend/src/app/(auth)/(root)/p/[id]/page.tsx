@@ -16,6 +16,9 @@ import axios from 'axios';
 import { parseISO, differenceInMinutes, differenceInHours, differenceInDays, differenceInMonths, differenceInYears } from 'date-fns';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { useProfilePic } from '@/components/ProfilePicContext';
+
+import Image from 'next/image'
 
 // Define the type for a comment
 type Comment = {
@@ -72,6 +75,9 @@ export default function Page({ params }: { params: { id: string } }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isChatBubble, setIsChatBubble] = useState(false);
   const [isChangeCircle, setIsChangeCircle] = useState(false);
+
+  const { profilePicUrl } = useProfilePic();
+
 
   
 
@@ -244,7 +250,7 @@ export default function Page({ params }: { params: { id: string } }) {
   );
   
 
-const handleSubmit = async (event: React.FormEvent, postID: number) => {
+const handleSubmit = async (postID: number) => {
   //event.preventDefault();
   if (!session) {
     console.log('No active session');
@@ -300,6 +306,7 @@ const handleSubmit = async (event: React.FormEvent, postID: number) => {
         console.error('An error occurred:', error);
       }
     };
+
 
   return (
     <div className='w-full'>
@@ -366,8 +373,9 @@ const handleSubmit = async (event: React.FormEvent, postID: number) => {
         <div className="p-8 border-b">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
-              <img className="inline-block h-10 w-10 rounded-full" src='http://localhost:8000/user/1/profile_picture' alt=""/> {// TODO: Replace with profile picture of use}
-}
+              {profilePicUrl && 
+              <Image height={256} width={256} className="inline-block h-10 w-10 rounded-full" src={profilePicUrl} alt=""/>
+              }
             </div>
             <div className="min-w-0 flex-1">
               <form action="#" className="relative">
@@ -402,8 +410,19 @@ const handleSubmit = async (event: React.FormEvent, postID: number) => {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={handleSubmit(post.id)}>Post</button>
-                  </div>
+                  {post &&
+                    <button 
+                      type="submit" 
+                      className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" 
+                      onClick={async (event) => {
+                        event.preventDefault();
+                        await handleSubmit(post.id);
+                      }}
+                    >
+                      Post
+                    </button>     
+                  }            
+                   </div>
                 </div>
               </form>
             </div>

@@ -27,7 +27,7 @@ import { useProfilePic } from "@/components/ProfilePicContext";
 
 
 
-export default function Home({pfpUrl}) {
+export default function Home() {
 
 
   const context = useContext(OverlayContext);

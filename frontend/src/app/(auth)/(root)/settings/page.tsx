@@ -7,12 +7,12 @@ import { signOut, useSession } from 'next-auth/react';
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import Image from 'next/image';
 import { hashPassword } from '@/components/hashPassword';
+import { useProfilePic } from '@/components/ProfilePicContext';
 
 
 
 export default function AboutPage() {
 
-  const [ProfilePictureURL, setProfilePictureURL] = useState<string | undefined>(undefined);
   const [pfpmessage, setPFPMessage] = useState<string | null>(null);
 
   const [username, setUsername] = useState('');
@@ -44,6 +44,8 @@ export default function AboutPage() {
   const [passwordMessage, setPasswordMessage] = useState('');
 
   const [accountPassword, setAccountPassword] = React.useState("");
+
+  const { setProfilePicUrl, profilePicUrl } = useProfilePic();
 
 
   const handlePasswordChange = async () => {  
@@ -81,29 +83,8 @@ export default function AboutPage() {
     }
   }, [session]);
 
-  const fetchPfpUrl = async () => {
-    try {
-      // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-      if (response.ok) {
-        const data = await response.json();
-        setProfilePictureURL(data.url); // Use the URL of the response
-        console.log('Got profile picture URL: ', data.url)
-      } else {
-        console.error('Failed to fetch profile picture URL');
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile picture URL:', error);
-    }
-  };
 
-  useEffect(() => {
 
-  
-    if (session?.user?.id) {
-      fetchPfpUrl();
-    }
-  }, [session?.user?.id]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -115,7 +96,7 @@ export default function AboutPage() {
         if (file.size <= 1000000) {
           const reader = new FileReader();
           reader.onloadend = () => {
-            setProfilePictureURL(reader.result as string);
+            setProfilePicUrl(reader.result as string);
           };
           reader.readAsDataURL(file);
         } else {
@@ -146,7 +127,7 @@ export default function AboutPage() {
         }
         setPFPMessage('Upload successful');
         console.log('Upload successful');
-        fetchPfpUrl();
+        setProfilePicUrl(response.url);
       } catch (error: any) {
         setPFPMessage(`Upload failed: ${error.message}`);
         return;
@@ -257,9 +238,9 @@ export default function AboutPage() {
               </div>
               <div className='flex flex-col basis-2/3 bg-slate-50 rounded-l-lg p-4 shadow-inner'>
               <div className='mb-4 flex-col'>
-                    {ProfilePictureURL && (
+                    {profilePicUrl && (
                       <Image 
-                        src={ProfilePictureURL} 
+                        src={profilePicUrl} 
                         width={80} 
                         height={80} 
                         className='rounded-full cursor-pointer hover:bg-gray-700/90' 
