@@ -30,6 +30,12 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [copySuccess, setCopySuccess] = useState('');
   const [showPopup, setShowPopup] = useState(false);
 
+  const [isLikedClicked, setIsLikedClicked] = useState(false);
+  const [isCommentedClicked, setIsCommentedClicked] = useState(false);
+  const [isChangeCircleClicked, setIsChangeCircleClicked] = useState(false);
+  const [isShareClicked, setIsShareClicked] = useState(false);
+
+
 
 
 
@@ -109,7 +115,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
       <div className={clsx(paddingClass, "pb-2 grid grid-cols-[auto,1fr] items-start  text-slate-700", className, " ")}>
 
         <div className="p-1 pr-2 flex items-center">
-          <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={20} width={20} />
+          <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={256} width={256} />
         </div>
         
         <div className="flex flex-col justify-between overflow-hidden">
@@ -124,47 +130,60 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
           </div>
           <div className="flex w-full justify-between items-center">
             <div className="flex items-center">
-                  <span 
-                    className={`material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
-                    style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleLike();
-                    }}
-                  >
-                    favorite
-                  </span>
+              <span 
+                className={`material-symbols-sharp rounded-full p-2 transition-transform duration-100 ease-in-out ${isLikedClicked ? 'transform scale-90' : 'transform scale-100'} ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
+                style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                onMouseDown={() => setIsLikedClicked(true)}
+                onMouseUp={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsLikedClicked(false);
+                  toggleLike();
+                }}
+              >
+                favorite
+              </span>
                 <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(likes_count)}</p>            
               </div>
               <div className="flex items-center">
-                <span 
-                  className={`material-symbols-sharp rounded-full p-2 ${hasCommented ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
+              <span 
+                  className={`material-symbols-sharp rounded-full p-2 transition-transform duration-100 ease-in-out ${isCommentedClicked ? 'transform scale-90' : 'transform scale-100'} ${hasCommented ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
                   style={hasCommented ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
-                  onClick={() => setHasCommented(!hasCommented)}
+                  onMouseDown={() => setIsCommentedClicked(true)}
+                  onMouseUp={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsCommentedClicked(false);
+                    setHasCommented(!hasCommented);
+                  }}
                 >
                   chat_bubble
-                </span>
-                <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(comment_count)}</p>
+              </span>
+              <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{formatCount(comment_count)}</p>
               </div>
               <span 
-                className={`material-symbols-sharp rounded-full p-2 ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
+                className={`material-symbols-sharp rounded-full p-2 transition-transform duration-100 ease-in-out ${isChangeCircleClicked ? 'transform scale-90' : 'transform scale-100'} ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
                 style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
-                onClick={() => setIsChangeCircle(!isChangeCircle)}
+                onMouseDown={() => setIsChangeCircleClicked(true)}
+                onMouseUp={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsChangeCircleClicked(false);
+                  setIsChangeCircle(!isChangeCircle);
+                }}
               >
                 change_circle
               </span>
               <span 
-                className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
+                className={`material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2 transition-transform duration-100 ease-in-out ${isShareClicked ? 'transform scale-90' : 'transform scale-100'}`} 
                 style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
-                onClick={
-                  (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleCopyClick()
-                  }
-                  
-                  }
+                onMouseDown={() => setIsShareClicked(true)}
+                onMouseUp={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsShareClicked(false);
+                  handleCopyClick();
+                }}
               >
                 ios_share
               </span>

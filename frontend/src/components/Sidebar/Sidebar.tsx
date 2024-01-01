@@ -23,6 +23,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
 
   const [showMenu, setShowMenu] = useState(false);
 
+  const [isClicked, setIsClicked] = useState(false);
+  const [clickedButton, setClickedButton] = useState<number | null>(null);
+
   const toggleMenu = () => {
     setShowMenu(!showMenu);
   };
@@ -61,34 +64,34 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
     return (
       <div className="flex flex-col justify-self-end z-50 w-full">
         <div>
-          {buttonInfo.map((button, index) => (
-            <Link
-              key={index}
-              href={button.route}
-              className={`flex items-center p-2 rounded-full mt-2 w-full ${pathname === button.route ? 'hover:bg-slate-200' : ' hover:bg-slate-200 '}`}
-            >
-              <div className='flex flex-row w-full'>
-                <div className='basis-1/2'>
-                  {button.name}
-                </div>
-                <div className='flex basis-1/2 justify-end justify-items-end'>
-                  <span
-                  className={`material-symbols-outlined text-2xl justify-end text-sky-900
-                  ${pathname === button.route ? 'filled-icon ' : ''}`}
-                  style={{
-                    fontVariationSettings: pathname === button.route
-                      ? " 'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48"
-                      : " 'FILL' 0, 'wght' 500, 'GRAD' -25, 'opsz' 48"
-                  }}
-                  >
-                  {button.icon}
-                  </span>
-                </div>
+        {buttonInfo.map((button, index) => (
+          <Link
+            key={index}
+            href={button.route}
+            className={`flex items-center p-2 rounded-full mt-2 w-full transition-transform duration-100 ease-in-out ${pathname === button.route ? 'hover:bg-slate-200' : ' hover:bg-slate-200 '} ${clickedButton === index ? 'transform scale-90' : 'transform scale-100'}`}
+            onMouseDown={() => setClickedButton(index)}
+            onMouseUp={() => setClickedButton(null)}
+          >
+            <div className='flex flex-row w-full'>
+              <div className='basis-1/2'>
+                {button.name}
               </div>
-
-            </Link>
-
-          ))}
+              <div className='flex basis-1/2 justify-end justify-items-end'>
+                <span
+                className={`material-symbols-outlined text-2xl justify-end text-sky-900
+                ${pathname === button.route ? 'filled-icon ' : ''}`}
+                style={{
+                  fontVariationSettings: pathname === button.route
+                    ? " 'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48"
+                    : " 'FILL' 0, 'wght' 500, 'GRAD' -25, 'opsz' 48"
+                }}
+                >
+                {button.icon}
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
         </div>
         <button
           onClick={() => console.log('Profile menu clicked')}
@@ -99,13 +102,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
         <div className='bg-white  w-30 h-12 rounded-full shadow border-black mt-4 flex items-center group'>
           <div className="relative cursor-pointer" onClick={toggleMenu}>
             {/* Profile picture */}
+            {!profilePicUrl &&
+              <div className='w-14 h-14 rounded-full overflow-hidden'>
+                <div className='animate-pulse bg-gray-200 w-full h-full'></div>
+              </div>
+            }
             {profilePicUrl &&
-            <Image
-              src={profilePicUrl}
-              alt="Profile"
-              width={80}
-              height={80}
-              className="rounded-full" />
+            <div className='w-14 h-14'>
+              <Image
+                src={profilePicUrl}
+                alt="Profile"
+                width={256}
+                height={256}
+                className="rounded-full" />
+            </div>
+
             }
             <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white group-hover:animate-ping ${userStatus === 'online' ? 'bg-green-500' :
               userStatus === 'offline' ? 'bg-gray-400' :
@@ -162,9 +173,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
               </div>
             </div>
             <div className='flex flex-grow items-center justify-end'>
-              <span
-                className="material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1 select-none cursor-pointer"
+            <span
+                className={`material-symbols-outlined text-sky-900 rounded-full hover:bg-slate-200 mr-2 p-1 select-none cursor-pointer transition-transform duration-100 ease-in-out ${isClicked ? 'scale-90' : 'scale-100'}`}
                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}
+                onMouseDown={() => setIsClicked(true)}
+                onMouseUp={() => setIsClicked(false)}
                 onClick={signOutOfApp()}
               >
                 logout
