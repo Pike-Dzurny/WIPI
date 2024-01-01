@@ -78,6 +78,9 @@ export default function Page({ params }: { params: { id: string } }) {
   const [isChatBubble, setIsChatBubble] = useState(false);
   const [isChangeCircle, setIsChangeCircle] = useState(false);
 
+  const [hasLiked, setHasLiked] = useState(post?.user_has_liked);
+
+
   const { profilePicUrl } = useProfilePic();
 
 
@@ -114,6 +117,36 @@ export default function Page({ params }: { params: { id: string } }) {
   const handleReplyClick = (commentId: number) => {
     setActiveReplyId(commentId);
   };
+
+  const handleCopyClick = async () => {
+    const textToCopy = `http://localhost:3000/p/${id}`; // Replace with the actual link
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+
+    } catch (err) {
+    }
+  };
+  
+
+
+
+  function toggleLike() {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${id}/toggle_like/${session?.user.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        setHasLiked((prevIsFavorite: boolean) => !prevIsFavorite);
+        setLikesCount((prevCount: number) => prevCount + (hasLiked ? -1 : 1));
+      } else {
+        // Handle error
+      }
+    });
+  }
 
   const handleReplySubmit = (replyContent: string, replyToId: number) => {
     console.log("Reply Content:", replyContent);
@@ -323,39 +356,51 @@ const handleSubmit = async (postID: number) => {
             </div>
 
             {/* Content and Buttons Column */}
-            <div className="flex flex-col justify-start flex-grow">
-              <div className="mb-4">
-                <div className="font-medium">{post.user_display_name}</div>
-                <div className=''>
-                  <p className="hyphens-auto break-all">{post.content}</p>
+            <div className="flex w-full justify-between items-center">
+                <div className="flex items-center">
+                  <span 
+                    className={`material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
+                    style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleLike();
+                    }}
+                  >
+                    favorite
+                  </span>
+                  <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{likes_count}</p>            
                 </div>
-              </div>
-              <div className="flex">
-                {/* Favorite Icon */}
-                <span className={`material-symbols-sharp ${isFavorite ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 rounded-full p-2`}
-                      onClick={() => setIsFavorite(!isFavorite)}>
-                  favorite
-                </span>
-
-                {/* Chat Bubble Icon */}
-                <span className={`material-symbols-sharp ${isChatBubble ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 rounded-full p-2`}
-                      onClick={() => setIsChatBubble(!isChatBubble)}>
-                  chat_bubble
-                </span>
-
-                {/* Change Circle Icon */}
-                <span className={`material-symbols-sharp ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 rounded-full p-2`}
-                      onClick={() => setIsChangeCircle(!isChangeCircle)}>
+                <div className="flex items-center">
+                  <span 
+                    className={`material-symbols-sharp rounded-full p-2 ${hasCommented ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
+                    style={hasCommented ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                  >
+                    chat_bubble
+                  </span>
+                  <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{comment_count}</p>
+                </div>
+                <span 
+                  className={`material-symbols-sharp rounded-full p-2 ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
+                  style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
+                  onClick={() => setIsChangeCircle(!isChangeCircle)}
+                >
                   change_circle
                 </span>
-
-                {/* Share Icon */}
-                <span className="material-symbols-sharp text-slate-500 hover:text-amber-600 rounded-full p-2"
-                      >
+                <span 
+                  className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
+                  style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
+                  onClick={
+                    (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleCopyClick()
+                    }
+                  }
+                >
                   ios_share
                 </span>
               </div>
-            </div>
           </>
         )}   </div>
         </div>
