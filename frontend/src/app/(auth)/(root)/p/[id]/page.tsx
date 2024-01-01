@@ -43,6 +43,7 @@ type Post = {
   id: number;
   reply_to: number | null;
   replies: Comment[];
+  profile_picture: string;
 };
 
 interface UserPostBase {
@@ -62,6 +63,7 @@ export default function Page({ params }: { params: { id: string } }) {
     id: 0,
     reply_to: null,
     replies: [],
+    profile_picture: '',
   });  
   const colors = ['indigo-500', 'red-500', 'blue-500', 'lime-500', 'purple-500'];
   const { status } = useSession();
@@ -214,7 +216,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="flex items-start space-x-4">
             {/* PFP Column */}
             <div className="flex-shrink-0">
-              <img className="inline-block h-10 w-10 rounded-full" src={`http://localhost:8000/user/${comment.id}/pfp`} alt="Profile" />
+              <img className="inline-block h-10 w-10 rounded-full" src={profilePicUrl} alt="Profile" />
             </div>
 
             {/* Form Column */}
@@ -317,7 +319,7 @@ const handleSubmit = async (postID: number) => {
           <>
             {/* Profile Picture Column */}
             <div className="flex flex-col justify-start items-center mr-4 flex-shrink-0">
-              <img className="rounded-full h-12 w-12 shadow-sm mb-4" src={`http://localhost:8000/user/${post.user_poster_id}/profile_picture`} alt="Author" />
+              <Image width={256} height={256} className="rounded-full h-12 w-12 shadow-sm mb-4" src={post.profile_picture} alt="Author" />
             </div>
 
             {/* Content and Buttons Column */}
@@ -370,7 +372,7 @@ const handleSubmit = async (postID: number) => {
         </div>
         </div>
         {/* Reply box */}
-        <div className="p-8 border-b">
+        <div className="p-4 border-b">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
               {profilePicUrl && 
