@@ -26,6 +26,9 @@ from dotenv import load_dotenv
 from cachetools import TTLCache
 import time
 
+# TTLCache can hold a limited number of items, and each item expires after a certain time.
+cache = TTLCache(maxsize=10000, ttl=3500)  # Adjust maxsize and ttl as needed
+
 load_dotenv('varsfordb.env')  
 
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
@@ -282,21 +285,25 @@ def read_user_posts(user_id: int, page: int = 1, per_page: int = 6):
 
 @router.get("/user/{user_id}/pfp")
 def get_profile_picture(user_id: int):
-    s3_key = f"profile_pictures/{user_id}.webp"  # Assuming webp format
+    cache_key = f"profile_picture_{user_id}"
+    presigned_url = cache.get(cache_key)
 
-    # Check if the file exists in S3
-    try:
-        s3_client.head_object(Bucket=bucket_name, Key=s3_key)
-        print("File found in S3")
-    except:
-        # Return a default image if the specific user's image doesn't exist
-        s3_key = f"profile_pictures/defaultpfp.webp"  # Assuming webp format 
-        s3_client.head_object(Bucket=bucket_name, Key=s3_key)       
+    if not presigned_url:
+        print("Cache miss")
+        s3_key = f"profile_pictures/{user_id}.webp"
+        try:
+            s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+        except:
+            s3_key = f"profile_pictures/defaultpfp.webp"
+            s3_client.head_object(Bucket=bucket_name, Key=s3_key)
 
-    # Generate a presigned URL for the S3 object
-    presigned_url = s3_client.generate_presigned_url('get_object', 
-                                                     Params={'Bucket': bucket_name, 'Key': s3_key}, 
-                                                     ExpiresIn=3600)
+        presigned_url = s3_client.generate_presigned_url('get_object',
+                                                         Params={'Bucket': bucket_name, 'Key': s3_key},
+                                                         ExpiresIn=3600)
+        cache[cache_key] = presigned_url
+    else:
+        print("Cache hit")
+
     return {"url": presigned_url}
 
 

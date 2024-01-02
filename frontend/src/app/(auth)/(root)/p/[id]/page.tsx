@@ -33,6 +33,7 @@ type Comment = {
   hasChildren: boolean;
   profile_picture: string;
   is_liked: boolean;
+  comment_count: number;
 };
 
 type Post = {
@@ -46,6 +47,7 @@ type Post = {
   replies: Comment[];
   profile_picture: string;
   is_liked: boolean;
+  comment_count: number;
 };
 
 interface UserPostBase {
@@ -84,7 +86,7 @@ export default function Page({ params }: { params: { id: string } }) {
     replies: [],
     profile_picture: '',
     is_liked: false,
-
+    comment_count: 0,
   });  
 
 
@@ -179,7 +181,7 @@ export default function Page({ params }: { params: { id: string } }) {
   }, []);
 
   const [hasLiked, setHasLiked] = useState(post?.is_liked);
-
+  const [openComment, setOpenComment] = useState(false);
 
   const loadMoreComments = async (commentId: number) => {
     try {
@@ -367,50 +369,69 @@ const handleSubmit = async (postID: number) => {
             </div>
 
             {/* Content and Buttons Column */}
-            <div className="flex w-full justify-between items-center">
-                <div className="flex items-center">
-                  <span 
-                    className={`material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
-                    style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleLike();
-                    }}
-                  >
-                    favorite
-                  </span>
-                  <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{likes_count}</p>            
+            {/* Content */}
+            <div className="flex flex-col w-full">
+              <div className="flex flex-col justify-between overflow-hidden">
+                  <div>
+                    {/* Author and Date */}
+                    <div className='flex flex-row justify-between'>
+                      <p className='font-medium'>{post.user_display_name}</p>
+                      <div className='' title={post.date_of_post}>{formatRelativeTime(post.date_of_post)}</div>
+                    </div>
+                    {/* Content */}
+                    <div className="overflow-hidden overflow-wrap break-words pb-2">
+                      <p className="hyphens-auto">{post.content}</p>
+                    </div>
+                  </div>
+                
                 </div>
-                <div className="flex items-center">
+
+              <div className="flex w-full justify-between items-center">
+
+                  <div className="flex items-center">
+                    <span 
+                      className={`material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
+                      style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleLike();
+                      }}
+                    >
+                      favorite
+                    </span>
+                    <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{post.likes_count}</p>            
+                  </div>
+                  <div className="flex items-center">
+                    <span 
+                      className={`material-symbols-sharp rounded-full p-2 ${openComment ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
+                      style={openComment ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                    >
+                      chat_bubble
+                    </span>
+                    <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{post.comment_count}</p>
+                  </div>
                   <span 
-                    className={`material-symbols-sharp rounded-full p-2 ${openComment ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
-                    style={openComment ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                    className={`material-symbols-sharp rounded-full p-2 ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
+                    style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
+                    onClick={() => setIsChangeCircle(!isChangeCircle)}
                   >
-                    chat_bubble
+                    change_circle
                   </span>
-                  <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{comment_count}</p>
-                </div>
-                <span 
-                  className={`material-symbols-sharp rounded-full p-2 ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
-                  style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
-                  onClick={() => setIsChangeCircle(!isChangeCircle)}
-                >
-                  change_circle
-                </span>
-                <span 
-                  className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
-                  style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
-                  onClick={
-                    (e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleCopyClick()
+                  <span 
+                    className="material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
+                    style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
+                    onClick={
+                      (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleCopyClick()
+                      }
                     }
-                  }
-                >
-                  ios_share
-                </span>
+                  >
+                    ios_share
+                  </span>
+                </div>
               </div>
           </>
         )}   </div>
