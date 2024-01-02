@@ -13,6 +13,8 @@ from database.database_session import SessionLocal
 
 from sqlalchemy.sql.functions import coalesce
 
+
+
 def get_db() -> Session:
     """
     Get a database session using dependency injection.
@@ -121,17 +123,21 @@ def check_for_more_replies(session, post_id, max_depth):
     replies_exist = session.query(Post.id).filter(Post.reply_to == post_id).first() is not None
     return replies_exist if max_depth > 0 else False
 
-def build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, depth=0, liked_posts_by_user=None):
+numbertimesran = 0
+
+def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3, depth=0, liked_posts_by_user=None):
     if depth > max_depth:
         return []
-
-
+    
     if post_id not in posts_dict:
         return []  # or some other placeholder value
 
     post = posts_dict[post_id]
+    global numbertimesran
+    print(numbertimesran)
+    numbertimesran += 1
 
-
+    comment_count = comment_count_dict.get(post_id, 0)
 
     user = users_dict.get(post.user_poster_id)
 
@@ -152,7 +158,8 @@ def build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, depth=0, like
         'is_liked': is_liked,
         'hasChildren': len(post.replies) > 0,
         'profile_picture': get_profile_picture(post.id)['url'],
-        'replies': [build_reply_tree(posts_dict, users_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
+        'comment_count': comment_count,
+        'replies': [build_reply_tree(posts_dict, users_dict, comment_count_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
     }
     return post_data
 
@@ -161,6 +168,8 @@ def build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, depth=0, like
 def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_depth=3, user_id: int = None):
     offset = (page - 1) * per_page
     session = SessionLocal()
+
+
 
     # Fetch the initial post
     initial_post = session.query(Post).get(post_id)
@@ -207,7 +216,13 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
     users = session.query(User).filter(User.id.in_(user_ids)).all()
     users_dict = {user.id: user for user in users}
 
-    reply_tree = build_reply_tree(posts_dict, users_dict, post_id, max_depth=3, liked_posts_by_user=liked_posts_by_user)
+    comment_counts = session.query(
+    Post.reply_to, func.count(Post.id).label('comment_count')
+    ).group_by(Post.reply_to).all()
+
+    comment_count_dict = {count[0]: count[1] for count in comment_counts}
+
+    reply_tree = build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3)
     
     # Adds a flag to the top-level post indicating if there are more top-level comments
     has_more_top_level_comments = session.query(Post.id).filter(Post.reply_to == post_id).offset(offset + per_page).limit(1).scalar() is not None
@@ -215,7 +230,6 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
     
     session.close()
     return reply_tree
-
 
 @router.get("/posts/{user_id}/")
 def read_posts(user_id: int, page: int = 1, per_page: int = 6):

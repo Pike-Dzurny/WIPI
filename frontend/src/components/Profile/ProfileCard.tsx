@@ -15,6 +15,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
   }
   const { isOverlayOpen, setIsOverlayOpen } = context;
+  const [isClicked, setIsClicked] = React.useState(false);
 
 
   const handleClick = () => {

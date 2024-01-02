@@ -23,6 +23,9 @@ import boto3
 import os
 from dotenv import load_dotenv
 
+from cachetools import TTLCache
+import time
+
 load_dotenv('varsfordb.env')  
 
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
@@ -35,6 +38,8 @@ s3_client = boto3.client(
     aws_secret_access_key=aws_secret_access_key
 )
 bucket_name = os.getenv('BUCKET_NAME')
+
+
 
 def get_db():
     db = SessionLocal()

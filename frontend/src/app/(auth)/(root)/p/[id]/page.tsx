@@ -32,6 +32,7 @@ type Comment = {
   replies: Comment[];
   hasChildren: boolean;
   profile_picture: string;
+  is_liked: boolean;
 };
 
 type Post = {
@@ -44,6 +45,7 @@ type Post = {
   reply_to: number | null;
   replies: Comment[];
   profile_picture: string;
+  is_liked: boolean;
 };
 
 interface UserPostBase {
@@ -54,6 +56,23 @@ interface UserPostBase {
 
 
 export default function Page({ params }: { params: { id: string } }) {
+  const colors = ['indigo-500', 'red-500', 'blue-500', 'lime-500', 'purple-500'];
+  const { status } = useSession();
+  const { data: session } = useSession();
+  const [postContent, setPostContent] = useState('');
+
+  const id = parseInt(params.id);
+
+  
+
+
+
+  const router = useRouter();
+
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isChatBubble, setIsChatBubble] = useState(false);
+  const [isChangeCircle, setIsChangeCircle] = useState(false);
+
   const [post, setPost] = useState<Post | null>({
     user_poster_id: 0,
     user_display_name: '',
@@ -64,27 +83,26 @@ export default function Page({ params }: { params: { id: string } }) {
     reply_to: null,
     replies: [],
     profile_picture: '',
+    is_liked: false,
+
   });  
-  const colors = ['indigo-500', 'red-500', 'blue-500', 'lime-500', 'purple-500'];
-  const { status } = useSession();
-  const { data: session } = useSession();
-  const [postContent, setPostContent] = useState('');
 
-
-
-  const router = useRouter();
-
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isChatBubble, setIsChatBubble] = useState(false);
-  const [isChangeCircle, setIsChangeCircle] = useState(false);
-
-  const [hasLiked, setHasLiked] = useState(post?.user_has_liked);
 
 
   const { profilePicUrl } = useProfilePic();
 
 
-  
+  // Fetch the post and its comments when the component mounts
+  useEffect(() => {
+    axios.get(`http://localhost:8000/posts/${id}/comments`)
+      .then(response => {
+        console.log(response.data); // Log to check the response structure
+        setPost(response.data);
+      })
+      .catch(error => console.error(error));
+  }, []);
+
+
 
 
   const formatRelativeTime = (dateString: string) => {
@@ -160,15 +178,8 @@ export default function Page({ params }: { params: { id: string } }) {
     window.scrollTo(0, 0);
   }, []);
 
-  // Fetch the post and its comments when the component mounts
-  useEffect(() => {
-    axios.get(`http://localhost:8000/posts/${params.id}/comments`)
-      .then(response => {
-        console.log(response.data); // Log to check the response structure
-        setPost(response.data);
-      })
-      .catch(error => console.error(error));
-  }, [params.id]);
+  const [hasLiked, setHasLiked] = useState(post?.is_liked);
+
 
   const loadMoreComments = async (commentId: number) => {
     try {
@@ -373,8 +384,8 @@ const handleSubmit = async (postID: number) => {
                 </div>
                 <div className="flex items-center">
                   <span 
-                    className={`material-symbols-sharp rounded-full p-2 ${hasCommented ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
-                    style={hasCommented ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
+                    className={`material-symbols-sharp rounded-full p-2 ${openComment ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
+                    style={openComment ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
                   >
                     chat_bubble
                   </span>
