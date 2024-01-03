@@ -289,7 +289,6 @@ def get_profile_picture(user_id: int):
     presigned_url = cache.get(cache_key)
 
     if not presigned_url:
-        print("Cache miss")
         s3_key = f"profile_pictures/{user_id}.webp"
         try:
             s3_client.head_object(Bucket=bucket_name, Key=s3_key)
@@ -301,8 +300,6 @@ def get_profile_picture(user_id: int):
                                                          Params={'Bucket': bucket_name, 'Key': s3_key},
                                                          ExpiresIn=3600)
         cache[cache_key] = presigned_url
-    else:
-        print("Cache hit")
 
     return {"url": presigned_url}
 
