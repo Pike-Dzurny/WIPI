@@ -109,7 +109,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
       <div className={clsx(paddingClass, "pb-2 grid grid-cols-[auto,1fr] items-start  text-slate-700", className, " ")}>
 
         <div className="p-1 pr-2 flex items-center">
-          <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={20} width={20} />
+          <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
         </div>
         
         <div className="flex flex-col justify-between overflow-hidden">
