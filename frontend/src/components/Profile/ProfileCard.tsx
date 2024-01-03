@@ -24,11 +24,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
 
   return (  
   <div>
-    <div className="absolute inset-0 z-0 rounded-2xl" style={{backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover'}}></div>
+    <div className="absolute inset-0 z-0" style={{backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover'}}></div>
     <div className="flex pl-4 pr-4 pb-16 pt-16 justify-center rounded-t-2xl z-10">
-      <div className="relative flex flex-col justify-center items-center bg-sky-50 border border-sky-200 p-20 rounded-3xl w-5/6">  
+      <div className="relative flex flex-row justify-center items-center bg-sky-50 border border-sky-200 p-20 rounded-3xl w-5/6">  
         <div className='absolute -left-4 transform hover:scale-110 transition-transform'>
           {profileImage}
+        </div>
+        <div className='absolute bottom-0  flex flex-row border-t border-l border-r rounded-t-lg border-sky-200 bg-sky-50'>
+            <div className='border-r border-sky-200 p-2'>Pike</div>
+            <div className='p-2'>Awsome</div>        
         </div>
         <div className={`profile-card`} />
           <button onClick={handleClick} className="absolute -bottom-4 -right-4 bg-blue-500 border-blue-300 hover:bg-blue-400 hover:shadow-sm shadow-lg  text-white rounded-full py-4 px-6 text-2xl">+</button>
