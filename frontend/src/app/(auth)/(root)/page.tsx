@@ -145,7 +145,7 @@ export default function Home() {
                   ? <SkeletonPost count={4} />
                   : !hasNextPage
                   ? <SkeletonPost count={4} />
-                  : 'Nothing more to load'
+                  : ''
                 }
               </button>
             </div>
