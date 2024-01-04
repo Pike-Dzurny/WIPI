@@ -24,3 +24,9 @@ CREATE TABLE IF NOT EXISTS post_likes (
     post_id INTEGER REFERENCES posts (id),
     PRIMARY KEY (user_id, post_id)
 );
+
+CREATE TABLE IF NOT EXISTS followers (
+    follower_id INTEGER REFERENCES users (id),
+    followed_id INTEGER REFERENCES users (id),
+    PRIMARY KEY (follower_id, followed_id)
+);
