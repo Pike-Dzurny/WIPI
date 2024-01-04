@@ -52,6 +52,14 @@ class User(Base):
 
     posts = relationship("Post", back_populates="poster")
 
+    followed = relationship(
+        'User', secondary='followers',
+        primaryjoin=id == followers.c.follower_id,
+        secondaryjoin=id == followers.c.followed_id,
+        backref='followers'
+    )
+
+
     def to_dict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
@@ -96,6 +104,12 @@ Post.liked_by = relationship(
     secondary=post_likes,
     back_populates="liked_posts",
     lazy='dynamic'
+)
+
+followers = Table(
+    'followers', Base.metadata,
+    Column('follower_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('followed_id', Integer, ForeignKey('users.id'), primary_key=True)
 )
 
 def main():
