@@ -37,6 +37,7 @@ followers = Table(
 )
 
 
+
 class User(Base):
     __tablename__ = 'users'
 

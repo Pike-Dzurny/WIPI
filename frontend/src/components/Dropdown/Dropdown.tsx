@@ -20,7 +20,7 @@ export const Dropdown: React.FC = () => {
       <div className="flex flex-col justify-center items-center"/>
       <DropdownButton icon="person" name="Profile" path="/profile" selected={pathname === '/profile'} />
       <DropdownButton icon="home" name="Home" path="/" selected={pathname === '/'} />
-      <DropdownButton icon="local_fire_department" name="Trending" path="/trending" selected={pathname === '/trending'} />
+      <DropdownButton icon="hub" name="Trending" path="/trending" selected={pathname === '/trending'} />
       <div className="flex flex-col justify-center items-center"/>
     </div>
     </>

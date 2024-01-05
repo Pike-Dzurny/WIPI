@@ -7,9 +7,12 @@ interface ProfileCardProps {
   profileImage: JSX.Element;
   isOverlayOpen: boolean;
   setIsOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  followingCount: number;
+  followersCount: number;
+  name: string;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount  }) => {
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
@@ -30,9 +33,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
         <div className='absolute -left-4 transform hover:scale-110 transition-transform'>
           {profileImage}
         </div>
-        <div className='absolute bottom-0  flex flex-row border-t border-l border-r rounded-t-lg border-sky-200 bg-sky-50'>
-            <div className='border-r border-sky-200 p-2'>Pike</div>
-            <div className='p-2'>Awsome</div>        
+        <div className='absolute bottom-0 flex flex-row justify-between border-t border-l border-r rounded-t-lg border-sky-200 bg-sky-50'>
+            <div className='border-r border-sky-200 p-2'>Following: {followingCount}</div>
+            <div className='p-2'>Followers: {followersCount}</div>        
         </div>
         <div className={`profile-card`} />
           <button onClick={handleClick} className="absolute -bottom-4 -right-4 bg-blue-500 border-blue-300 hover:bg-blue-400 hover:shadow-sm shadow-lg  text-white rounded-full py-4 px-6 text-2xl">+</button>

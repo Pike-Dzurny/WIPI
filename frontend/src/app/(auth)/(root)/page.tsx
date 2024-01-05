@@ -110,7 +110,7 @@ export default function Home() {
           <main className="w-full">
               
             <div className="relative rounded-t-2xl">
-            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} />            </div>
+            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={0} followersCount={0} name="" />            </div>
 
             <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
               <Dropdown />

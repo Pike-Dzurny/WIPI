@@ -15,7 +15,7 @@ import re
 
 from PIL import Image
 
-from database.database_initializer import User, Post
+from database.database_initializer import User, Post, followers
 from database.database_session import SessionLocal
 
 import boto3
@@ -411,7 +411,16 @@ def update_email(user_id: int, new_email: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Email updated successfully"}
 
+@router.get("/user/{user_id}/follow_counts")
+def get_follow_counts(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
+    following_count = user.following.count()
+    followers_count = user.followers.count()
+
+    return {"followingCount": following_count, "followersCount": followers_count}
 
 
 @router.post("/user/{user_id}/passwordchange")
