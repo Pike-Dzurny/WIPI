@@ -104,13 +104,30 @@ export default function Home() {
   }, [sessionID, queryClient]);
   const { profilePicUrl } = useProfilePic();
 
+
+  const [followings, setFollowings] = useState(0);
+  const [followers, setFollowers] = useState(0);
+
+  useEffect(() => {
+    console.log("Fetching follow counts for user ID: ", sessionID);
+    if (!sessionID) {
+      return;
+    }
+    fetch(`http://localhost:8000/user/${sessionID}/follow_counts`)
+      .then(response => response.json())
+      .then(data => {
+        setFollowings(data.followingCount);
+        setFollowers(data.followersCount);
+      });
+  }, [sessionID]);
+
   return (
     <div>
 
           <main className="w-full">
               
             <div className="relative rounded-t-2xl">
-            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={0} followersCount={0} name="" />            </div>
+            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followings} followersCount={followers} name="" />            </div>
 
             <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
               <Dropdown />

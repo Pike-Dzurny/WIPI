@@ -1,7 +1,7 @@
 // Skeletons.tsx
 export const SkeletonPost = ({ count = 1 }) => {
     const skeletons = Array.from({ length: count }, (_, index) => (
-      <div key={count} className='hover:bg-slate-100 pt-4  w-full'>
+      <div key={index} className='hover:bg-slate-100 pt-4  w-full'>
         <div className="px-8 mt-4 animate-pulse">
             <div className="pb-4 grid grid-cols-[auto,1fr] items-start text-slate-700 gap-x-4">
             <div className="p-1 pr-2 flex items-center">

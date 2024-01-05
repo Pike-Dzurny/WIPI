@@ -417,8 +417,10 @@ def get_follow_counts(user_id: int, db: Session = Depends(get_db)):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    following_count = user.following.count()
-    followers_count = user.followers.count()
+    following_count = db.query(followers).filter(followers.c.follower_id == user_id).count()
+    followers_count = db.query(followers).filter(followers.c.followed_id == user_id).count()
+    print("counts")
+    print(following_count, followers_count)
 
     return {"followingCount": following_count, "followersCount": followers_count}
 
