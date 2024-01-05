@@ -1,28 +1,64 @@
 "use client";
 
-import { Dropdown } from '../../../../components/Dropdown/Dropdown';
-import { PFP } from '../../../../components/pfp';
+import { useSession } from "next-auth/react";
 
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'
+
+import React, { useEffect, useState, useContext } from 'react';
+import { PFP } from '../../../../components/pfp';
 
 import { QueryClient, useInfiniteQuery } from 'react-query';
 import { useIntersection } from '@mantine/hooks';
 import { RealPost } from '../../../../components/Post/RealPost'; // Import RealPost at the top of your file
+import  ProfileCard  from '../../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
+
+import { OverlayContext } from '../../../../components/OverlayContext';
+
 
 import axios from 'axios';
 
-import { QueryFunctionContext } from 'react-query';
-const userId = 1; // Replace with the actual user ID
+import { Dropdown } from '../../../../components/Dropdown/Dropdown';
 
-const fetchPosts = async ({ pageParam = 1 }: QueryFunctionContext<'posts', number>) => {
-  const url = `http://localhost:8000/user/${userId}/posts?page=${pageParam}&per_page=6`;
-  console.log(url); // Log the URL to the console
-  const response = await axios.get(url);
+import { User, Post } from '../../../../components/Modules'
+import { SkeletonPost } from '../../../../components/Skeletons'
+import { useProfilePic } from "@/components/ProfilePicContext";
+
+
+
+
+
+export default function Home() {
+
+
+  const context = useContext(OverlayContext);
+  if (!context) {
+    throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
+  }
+  const { isOverlayOpen, setIsOverlayOpen } = context;
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
+  const [sessionID, setSessionID] = useState<number | undefined>(undefined);
+
+
+  const fetchPosts = async ({ pageParam = 1 }) => {
+    const userId = session?.user?.id;
+    if (!userId) {
+      console.log("Session ID is undefined.");
+      return { pages: [], pageParams: [] };
+    }
   
-  return response.data;
-};
+    console.log("Fetching posts for user ID:", userId);
+    const baseUrl = `http://localhost:8000/posts/${userId}/user/`;
+    const params = new URLSearchParams({
+      page: pageParam.toString(),
+      per_page: '10'
+    }).toString();
+    const url = baseUrl + "?" + params;
+  
+    const response = await axios.get(url);
+    return response.data;
+  };
 
-const AboutPage = () => {
 
   const queryClient = new QueryClient();
   const {
@@ -30,9 +66,12 @@ const AboutPage = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery('posts', fetchPosts, {
+  } = useInfiniteQuery('profiletab', fetchPosts, {
     getNextPageParam: (lastPage, allPages) => allPages.length + 1,
-    });
+    enabled: !!session?.user?.id, // This will delay the query until the session ID is available
+    staleTime: Infinity, // Adjust according to your needs
+    cacheTime: 1000 * 60 * 60 * 24, // 24 hours, for example
+  });
   const lastPostRef = React.useRef<HTMLDivElement>(null)
 
   const {ref, entry} = useIntersection({
@@ -41,71 +80,56 @@ const AboutPage = () => {
 
   useEffect(() => {
     if(entry?.isIntersecting) {
-      fetchNextPage()
-    }
-  }, [entry, fetchNextPage]);
+        fetchNextPage()
+      }
+    }, [entry, fetchNextPage]);
 
-  const _posts = data?.pages.flatMap((page) => page)
-  const [scrollPosition, setScrollPosition] = useState(0);
+    const _posts = data?.pages.flatMap((page) => page)
 
-  const handleScroll = () => {
-    const position = window.pageYOffset;
-    setScrollPosition(position);
-  };
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    //console.log("Current session:", session);
+    if (session?.user?.id) {
+      //console.log("Setting session ID:", session.user.id);
+      setSessionID(session.user.id);
+    } else {
+      console.log("Session ID not available.");
+    }
+  }, [session]);
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-
-  interface User {
-    id: number;
-    account_name: string;
-  }
-  
-  interface Post {
-    user_poster_id: number;
-    content: string;
-    date_of_post: string;
-    id: number;
-    user: User;
-  }
-  
-  
+  useEffect(() => {
+    if (sessionID !== undefined) {
+      queryClient.refetchQueries('posts');
+    }
+  }, [sessionID, queryClient]);
+  const { profilePicUrl } = useProfilePic();
 
   return (
-    <div className='w-full'>
-    <div className="relative rounded-t-2xl">
-    <div className="absolute inset-0 z-0 rounded-2xl" style={{backgroundImage: "url('/../static/trees.jpg')", backgroundSize: 'cover'}}></div>
-    <div className="flex pl-4 pr-4 pb-16 pt-16 justify-center rounded-t-2xl backdrop-blur-xl z-10">
-      <div className="relative flex flex-col justify-center items-center bg-sky-50 border border-sky-200 backdrop-blur-xl p-20 rounded-3xl w-5/6">  
-        <div className='absolute -left-4 transform hover:scale-110 transition-transform'>
-          <PFP/>
-        </div>
-        <button className="absolute -bottom-4 -right-4 bg-blue-500 border-blue-300 hover:bg-blue-400 hover:shadow-sm shadow-lg  text-white rounded-full py-4 px-6 text-2xl">+</button>
-          </div>
-        </div>
-      </div>
-      <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
-        <Dropdown />
-      </div>
-      <div className='p-8 flex-col-reverse overflow-auto'>
+    <div>
 
-            {data?.pages.map((page, i) => (
+          <main className="w-full">
+              
+            <div className="relative rounded-t-2xl">
+            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} />            </div>
+
+            <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
+              <Dropdown />
+            </div>
+
+            <div className='flex-col-reverse'>
+
+            {data?.pages && data?.pages.map((page, i) => (
                 <React.Fragment key={i}>
-                  {page.map((post: Post, index: number) => {
+                  {page && Array.isArray(page) && page.map((post: Post, index: number) => {
                     const postElement = (
-                      <div className="h-100 mb-4" key={post.id}>
-                        <RealPost post={post} />
+                      <div className="h-100" key={post.post.id} id={post.post.id}>
+                        <RealPost postObject={post} id={session?.user.id ?? 0} />
                       </div>
                     );
 
                     // If it's the last post of the last page, attach the ref for intersection observer
                     if (i === data.pages.length - 1 && index === page.length - 1) {
+                      console.log();
                       return <div ref={ref} key={post.id}>{postElement}</div>;
                     }
 
@@ -113,18 +137,23 @@ const AboutPage = () => {
                   })}
                 </React.Fragment>
               ))}
-              <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+              {
+}
+              <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage} className="flex justify-center items-center w-full">
                 {
                   isFetchingNextPage
-                  ? <div className="loading-circle justify-center"></div>
-                  : (data?.pages.length ?? 0) < 6
-                  ? <div className="loading-circle"></div>
-                  : 'Nothing more to load'
+                  ? <SkeletonPost count={4} />
+                  : !hasNextPage
+                  ? <SkeletonPost count={4} />
+                  : ''
                 }
               </button>
+            </div>
+          </main>
         </div>
-    </div>
-  );
-};
 
-export default AboutPage;
+
+  );
+}
+
+

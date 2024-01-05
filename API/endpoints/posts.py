@@ -287,6 +287,62 @@ def read_posts(user_id: int, page: int = 1, per_page: int = 6):
         for post, account_name, bio, display_name, profile_picture, likes_count, comments_count, user_has_liked, user_has_commented in posts
     ]
 
+@router.get("/posts/{user_id}/user/")
+def read_own_posts(user_id: int, page: int = 1, per_page: int = 6):
+    offset = (page - 1) * per_page
+    session = SessionLocal()
+
+    # Subquery to check if the user has liked each post
+    user_liked_subquery = (session.query(post_likes.c.post_id)
+                           .filter(post_likes.c.user_id == user_id)
+                           .subquery())
+
+    # Subquery to check if the user has commented on each post
+    user_commented_subquery = (session.query(Post.id)
+                               .filter(Post.user_poster_id == user_id, Post.reply_to != None)
+                               .subquery())
+
+    # Subquery to count comments for each post
+    comments_subquery = (session.query(Post.reply_to.label('post_id'), func.count('*').label('comments_count'))
+                        .group_by(Post.reply_to)
+                        .subquery())
+
+    # Main query
+    posts = (session.query(Post, User.account_name, User.bio, User.display_name, User.profile_picture,
+                        func.count(post_likes.c.post_id).label('likes_count'),
+                        coalesce(func.max(comments_subquery.c.comments_count), 0).label('comments_count'),
+                        exists().where(Post.id == user_liked_subquery.c.post_id).label('user_has_liked'),
+                        exists().where(Post.id == user_commented_subquery.c.id).label('user_has_commented'))
+            .join(User, Post.user_poster_id == User.id)
+            .outerjoin(post_likes, Post.id == post_likes.c.post_id)
+            .outerjoin(comments_subquery, Post.id == comments_subquery.c.post_id)
+            .filter(Post.reply_to == None, User.id == user_id)  # Filter posts by user_id
+            .group_by(Post.id, User.id)
+            .order_by(desc(Post.date_of_post))
+            .offset(offset)
+            .limit(per_page)
+            .all())
+
+    session.close()
+    return [
+        {
+            "post": {
+                **post.__dict__,
+                "user": {
+                    "account_name": account_name,
+                    "bio": bio,
+                    "display_name": display_name,
+                    "profile_picture": get_profile_picture(post.user_poster_id)['url'] if profile_picture is None else profile_picture
+                },
+                "likes_count": likes_count,
+                "comments_count": comments_count,
+                "user_has_liked": user_has_liked,
+                "user_has_commented": user_has_commented
+            }
+        }
+        for post, account_name, bio, display_name, profile_picture, likes_count, comments_count, user_has_liked, user_has_commented in posts
+    ]
+
 
 def get_comments_recursive(post_id, parent_id=None):
     session = SessionLocal()
