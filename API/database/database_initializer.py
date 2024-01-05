@@ -30,6 +30,11 @@ print(postgres_user)
 
 Base = declarative_base()
 
+followers = Table(
+    'followers', Base.metadata,
+    Column('follower_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('followed_id', Integer, ForeignKey('users.id'), primary_key=True)
+)
 
 
 class User(Base):
@@ -106,11 +111,7 @@ Post.liked_by = relationship(
     lazy='dynamic'
 )
 
-followers = Table(
-    'followers', Base.metadata,
-    Column('follower_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('followed_id', Integer, ForeignKey('users.id'), primary_key=True)
-)
+
 
 def main():
     engine = create_engine(f'postgresql://postgres:{postgres_password}@localhost:5432/mydatabase')
