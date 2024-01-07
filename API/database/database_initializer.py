@@ -81,9 +81,12 @@ class Post(Base):
     content = Column(String)
     likes_count = Column(Integer, default=0)
 
-    poster = relationship("User", back_populates="posts")
         
     reply_to = Column(Integer, ForeignKey('posts.id'))  # New field
+
+    # Define relationships
+    
+    poster = relationship("User", back_populates="posts")
 
     replies = relationship('Post', backref=backref('parent', remote_side=[id]))
 
