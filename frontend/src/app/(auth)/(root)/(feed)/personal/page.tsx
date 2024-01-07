@@ -66,6 +66,7 @@ export default function Home() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useInfiniteQuery('userPosts', fetchUserPosts, {
     getNextPageParam: (lastPage, allPages) => allPages.length + 1,
     enabled: !!session?.user?.id, // This will delay the query until the session ID is available
@@ -108,7 +109,7 @@ export default function Home() {
   useEffect(() => {
     if (newPostAdded) {
       console.log("post refresh!");
-      queryClient.refetchQueries('userPosts'); // Re-fetch posts
+      refetch();
       setNewPostAdded(false); // Reset the state
     }
   }, [newPostAdded, queryClient, setNewPostAdded]);
