@@ -12,10 +12,31 @@ import { useSession } from 'next-auth/react';
 import { Overlay } from '@/components/Overlay';
 import { OverlayContext } from '@/components/OverlayContext';
 import { ProfilePicProvider, useProfilePic } from '@/components/ProfilePicContext';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+
+import { usePostUpdate } from '@/components/PostUpdateContext';
+
 
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import React from 'react';
+
+
+
+import { PFP } from '../../../components/pfp';
+
+import { QueryClient, useInfiniteQuery } from 'react-query';
+import { useIntersection } from '@mantine/hooks';
+import { RealPost } from '../../../components/Post/RealPost'; // Import RealPost at the top of your file
+import  ProfileCard  from '../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
+
+
+
+import axios from 'axios';
+
+import { Dropdown } from '../../../components/Dropdown/Dropdown';
+
+import { User, Post } from '../../../components/Modules'
+import { SkeletonPost } from '../../../components/Skeletons'
+
 
 
 interface UserPostBase {
@@ -34,6 +55,9 @@ function RootLayout({
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [postContent, setPostContent] = useState('');
+
+  const { setNewPostAdded } = usePostUpdate();
+
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -77,6 +101,7 @@ function RootLayout({
       if (data.status === 'success') {
         console.log('it worked!')
         // Handle success (e.g., clear the textarea and close the overlay)
+        setNewPostAdded(true); // Update the context to indicate a new post was added
         setPostContent('');
         setIsOverlayOpen(false);
       } else {
@@ -192,6 +217,25 @@ const fetchaccountname = async () => {
   }, [session?.user?.id]);
 
   //const ProfilePicContext = React.createContext('');
+  const { profilePicUrl } = useProfilePic();
+
+
+
+  const [followings, setFollowings] = useState(0);
+  const [followers, setFollowers] = useState(0);
+
+  useEffect(() => {
+    console.log("Fetching follow counts for user ID: ", session?.user?.id);
+    if (!session?.user?.id) {
+      return;
+    }
+    fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
+      .then(response => response.json())
+      .then(data => {
+        setFollowings(data.followingCount);
+        setFollowers(data.followersCount);
+      });
+  }, [session?.user?.id]);
 
 
   if (status === 'authenticated' || status === 'loading') {
@@ -213,9 +257,17 @@ const fetchaccountname = async () => {
           <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
               <div className="flex md:rounded-t-xl border-l border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
-                <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
+              <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
+                <main className="w-full">
+                    <div className="relative rounded-t-2xl">
+                      <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followings} followersCount={followers} name="" />            
+                    </div>
+                    <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
+                      <Dropdown />
+                    </div>
                     {children}
-                </OverlayContext.Provider>
+                </main>
+              </OverlayContext.Provider> 
               </div>
             </div>
           </div>

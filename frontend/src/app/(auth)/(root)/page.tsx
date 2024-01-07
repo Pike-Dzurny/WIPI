@@ -10,7 +10,6 @@ import { PFP } from '../../../components/pfp';
 import { QueryClient, useInfiniteQuery } from 'react-query';
 import { useIntersection } from '@mantine/hooks';
 import { RealPost } from '../../../components/Post/RealPost'; // Import RealPost at the top of your file
-import  ProfileCard  from '../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
 
 import { OverlayContext } from '../../../components/OverlayContext';
 
@@ -22,6 +21,10 @@ import { Dropdown } from '../../../components/Dropdown/Dropdown';
 import { User, Post } from '../../../components/Modules'
 import { SkeletonPost } from '../../../components/Skeletons'
 import { useProfilePic } from "@/components/ProfilePicContext";
+import { usePostUpdate } from "@/components/PostUpdateContext";
+
+
+
 
 
 
@@ -30,6 +33,7 @@ import { useProfilePic } from "@/components/ProfilePicContext";
 export default function Home() {
 
 
+  const { newPostAdded, setNewPostAdded } = usePostUpdate();
 
 
   const context = useContext(OverlayContext);
@@ -104,24 +108,18 @@ export default function Home() {
       queryClient.refetchQueries('posts');
     }
   }, [sessionID, queryClient]);
-  const { profilePicUrl } = useProfilePic();
 
 
-  const [followings, setFollowings] = useState(0);
-  const [followers, setFollowers] = useState(0);
+
+
 
   useEffect(() => {
-    console.log("Fetching follow counts for user ID: ", sessionID);
-    if (!sessionID) {
-      return;
+    if (newPostAdded) {
+      console.log("post refresh!");
+      queryClient.refetchQueries('posts'); // Re-fetch posts
+      setNewPostAdded(false); // Reset the state
     }
-    fetch(`http://localhost:8000/user/${sessionID}/follow_counts`)
-      .then(response => response.json())
-      .then(data => {
-        setFollowings(data.followingCount);
-        setFollowers(data.followersCount);
-      });
-  }, [sessionID]);
+  }, [newPostAdded, queryClient, setNewPostAdded]);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -131,16 +129,6 @@ export default function Home() {
   if (!mounted) return <></>;
 
   return (
-    <div>
-
-          <main className="w-full">
-              
-            <div className="relative rounded-t-2xl">
-            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followings} followersCount={followers} name="" />            </div>
-
-            <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
-              <Dropdown />
-            </div>
 
             <div className='flex-col-reverse'>
 
@@ -175,9 +163,6 @@ export default function Home() {
                 }
               </button>
             </div>
-          </main>
-        </div>
-
 
   );
 }
