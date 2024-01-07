@@ -30,6 +30,8 @@ import { useProfilePic } from "@/components/ProfilePicContext";
 export default function Home() {
 
 
+
+
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
@@ -120,6 +122,13 @@ export default function Home() {
         setFollowers(data.followersCount);
       });
   }, [sessionID]);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <></>;
 
   return (
     <div>
