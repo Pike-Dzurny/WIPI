@@ -4,7 +4,7 @@ import { Roboto } from 'next/font/google';
 import './../../../globals.css';
 
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useContext } from 'react';
 
 const font = Roboto({weight: ["100", "500", "300", "400", "700", "900"], subsets: ["latin"]})
 
@@ -51,8 +51,13 @@ function RootLayout({
   const { status } = useSession();
   const { data: session } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [postContent, setPostContent] = useState('');
+  
+  const context = useContext(OverlayContext);
+  
+  if (!context) {
+    throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
+  }
+  const { isOverlayOpen, setIsOverlayOpen } = context;  const [postContent, setPostContent] = useState('');
 
   const { setNewPostAdded } = usePostUpdate();
 

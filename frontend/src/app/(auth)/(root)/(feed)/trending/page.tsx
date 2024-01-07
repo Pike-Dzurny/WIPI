@@ -108,10 +108,10 @@ export default function Home() {
   useEffect(() => {
     if (newPostAdded) {
       console.log("post refresh!");
-      queryClient.refetchQueries('posts'); // Re-fetch posts
+      queryClient.refetchQueries('trendingPosts'); // Re-fetch posts
       setNewPostAdded(false); // Reset the state
     }
-  }, [newPostAdded, queryClient, setNewPostAdded]);
+  }, [newPostAdded]);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {

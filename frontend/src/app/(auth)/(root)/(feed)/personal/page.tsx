@@ -108,17 +108,11 @@ export default function Home() {
   useEffect(() => {
     if (newPostAdded) {
       console.log("post refresh!");
-      queryClient.refetchQueries('posts'); // Re-fetch posts
+      queryClient.refetchQueries('userPosts'); // Re-fetch posts
       setNewPostAdded(false); // Reset the state
     }
   }, [newPostAdded, queryClient, setNewPostAdded]);
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return <></>;
 
   return (
 
