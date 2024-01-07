@@ -79,9 +79,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
               <div className='flex basis-1/2 justify-end justify-items-end'>
                 <span
                 className={`material-symbols-outlined text-2xl justify-end text-sky-900
-                ${pathname === button.route ? 'filled-icon ' : ''}`}
+                ${(pathname === button.route || ['/', '/personal', '/trending'].includes(pathname)) ? 'filled-icon ' : ''}`}
                 style={{
-                  fontVariationSettings: pathname === button.route
+                  fontVariationSettings: pathname === button.route || (button.route === '/' && ['/', '/personal', '/trending'].includes(pathname))
                     ? " 'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 48"
                     : " 'FILL' 0, 'wght' 500, 'GRAD' -25, 'opsz' 48"
                 }}

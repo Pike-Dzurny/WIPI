@@ -23,11 +23,9 @@ function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const queryClient = new QueryClient();
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
-    <QueryClientProvider client={queryClient}>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       <AuthProvider>
         <ProfilePicProvider>
@@ -36,7 +34,6 @@ function RootLayout({
         </PostUpdateProvider>
         </ProfilePicProvider>
       </AuthProvider>
-    </QueryClientProvider>
     </html>
 
 

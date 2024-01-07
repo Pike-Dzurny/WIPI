@@ -5,35 +5,29 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation'
 
 import React, { useEffect, useState, useContext } from 'react';
-import { PFP } from '../../../components/pfp';
+import { PFP } from '../../../../../components/pfp';
 
 import { QueryClient, useInfiniteQuery } from 'react-query';
 import { useIntersection } from '@mantine/hooks';
-import { RealPost } from '../../../components/Post/RealPost'; // Import RealPost at the top of your file
+import { RealPost } from '../../../../../components/Post/RealPost'; // Import RealPost at the top of your file
+import  ProfileCard  from '../../../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
 
-import { OverlayContext } from '../../../components/OverlayContext';
+import { OverlayContext } from '../../../../../components/OverlayContext';
 
 
 import axios from 'axios';
 
-import { Dropdown } from '../../../components/Dropdown/Dropdown';
+import { Dropdown } from '../../../../../components/Dropdown/Dropdown';
 
-import { User, Post } from '../../../components/Modules'
-import { SkeletonPost } from '../../../components/Skeletons'
+import { User, Post } from '../../../../../components/Modules'
+import { SkeletonPost } from '../../../../../components/Skeletons'
 import { useProfilePic } from "@/components/ProfilePicContext";
-import { usePostUpdate } from "@/components/PostUpdateContext";
-
-
-
 
 
 
 
 
 export default function Home() {
-
-
-  const { newPostAdded, setNewPostAdded } = usePostUpdate();
 
 
   const context = useContext(OverlayContext);
@@ -54,7 +48,7 @@ export default function Home() {
     }
   
     console.log("Fetching posts for user ID:", userId);
-    const baseUrl = `http://localhost:8000/posts/${userId}/`;
+    const baseUrl = `http://localhost:8000/posts/${userId}/user/`;
     const params = new URLSearchParams({
       page: pageParam.toString(),
       per_page: '10'
@@ -72,7 +66,7 @@ export default function Home() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery('posts', fetchPosts, {
+  } = useInfiniteQuery('profiletab', fetchPosts, {
     getNextPageParam: (lastPage, allPages) => allPages.length + 1,
     enabled: !!session?.user?.id, // This will delay the query until the session ID is available
     staleTime: Infinity, // Adjust according to your needs
@@ -108,27 +102,19 @@ export default function Home() {
       queryClient.refetchQueries('posts');
     }
   }, [sessionID, queryClient]);
-
-
-
-
-
-  useEffect(() => {
-    if (newPostAdded) {
-      console.log("post refresh!");
-      queryClient.refetchQueries('posts'); // Re-fetch posts
-      setNewPostAdded(false); // Reset the state
-    }
-  }, [newPostAdded, queryClient, setNewPostAdded]);
-
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return <></>;
+  const { profilePicUrl } = useProfilePic();
 
   return (
+    <div>
+
+          <main className="w-full">
+              
+            <div className="relative rounded-t-2xl">
+            <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} />            </div>
+
+            <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
+              <Dropdown />
+            </div>
 
             <div className='flex-col-reverse'>
 
@@ -163,6 +149,9 @@ export default function Home() {
                 }
               </button>
             </div>
+          </main>
+        </div>
+
 
   );
 }

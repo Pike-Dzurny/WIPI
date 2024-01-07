@@ -18,7 +18,7 @@ export const Dropdown: React.FC = () => {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional" />
     <div className="flex justify-around items-center">
       <div className="flex flex-col justify-center items-center"/>
-      <DropdownButton icon="person" name="Profile" path="/profile" selected={pathname === '/profile'} />
+      <DropdownButton icon="person" name="Profile" path="/personal" selected={pathname === '/personal'} />
       <DropdownButton icon="home" name="Home" path="/" selected={pathname === '/'} />
       <DropdownButton icon="hub" name="Trending" path="/trending" selected={pathname === '/trending'} />
       <div className="flex flex-col justify-center items-center"/>
