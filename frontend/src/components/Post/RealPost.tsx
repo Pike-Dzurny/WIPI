@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import  differenceInYears  from 'date-fns/differenceInYears';
 import  parseISO  from 'date-fns/parseISO';
@@ -103,13 +103,48 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   } else {
     relativeTime = `${years}y`;
   }
+
+  const [showPFPPopup, setShowPFPPopup] = useState(false);
+  const timeoutId = useRef<NodeJS.Timeout | undefined>();
+  const handleMouseEnter = () => {
+    clearTimeout(timeoutId.current); // Clear any existing timeout to prevent the popup from hiding
+    setShowPFPPopup(true);
+    
+  };
+  
+  const handleMouseLeave = () => {
+    timeoutId.current = setTimeout(() => {
+      setShowPFPPopup(false); // Corrected state name here
+    }, 50);
+  };
+  
+
   return (
     <Link href={`/p/${post.id}`}>
     <div className='hover:bg-slate-50 px-8 pt-4'>
       <div className={clsx(paddingClass, "pb-2 grid grid-cols-[auto,1fr] items-start  text-slate-700", className, " ")}>
 
-        <div className="p-1 pr-2 flex items-center">
+        <div className="p-1 pr-2 flex items-center"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
+          {showPFPPopup && (
+            <div className="absolute bg-white p-4 rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 border border-slate-100 flex flex-col">
+              <div className="relative h-32 bg-cover bg-center" style={{ backgroundImage: `url(${post.user.background_image})` }}>
+                <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full border-4 border-white" src={post.user.profile_picture} alt="Author" height={64} width={64} />
+                <div className="absolute bottom-0 right-0 mr-4 mb-4 text-white text-sm">
+                  <p>Followers: {post.user.followers}</p>
+                  <p>Following: {post.user.following}</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="font-bold">{post.user.account_name}</p>
+                <p>{post.user.bio}</p>
+                <button className="mt-2 bg-blue-500 text-white rounded px-4 py-2">Follow</button>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="flex flex-col justify-between overflow-hidden">
