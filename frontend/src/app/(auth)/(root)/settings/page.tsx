@@ -283,8 +283,7 @@ const handleUpload = async () => {
         }
         setBackgroundMessage('Upload successful');
         console.log('Upload successful');
-        const data = await response.json();
-        setBackgroundPicUrl(data.file_name);
+        // setBackgroundPicUrl(response.url);
       } catch (error: any) {
         setBackgroundMessage(`Upload failed: ${error.message}`);
       }
