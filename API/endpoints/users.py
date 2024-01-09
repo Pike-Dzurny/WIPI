@@ -389,16 +389,27 @@ async def upload_background(user_id: int, file: UploadFile = File(...)):
         # Log after opening the image
         print("Image opened successfully")
 
+        print(image.mode)
+
         # Convert to RGB if the image has an alpha channel
         if image.mode != 'RGB':
             if image.mode == 'RGBA':
+                print("Converting RGBA to RGB")
                 base = Image.new('RGB', image.size, 'white')
-                image = Image.alpha_composite(base, image.convert('RGBA'))
+                print("Created base image")
+                print(f"Original image mode: {image.mode}")
+                converted_image = image.convert('RGBA')
+                print(f"Converted image mode: {converted_image.mode}")
+                print("Converted image")
             elif image.mode in ['LA', 'L']:
                 image = image.convert('RGB')
             else:
-                # For other modes like 'P', 'CMYK', etc., convert directly to RGB
-                image = image.convert('RGB')
+                try:
+                    # For other modes like 'P', 'CMYK', etc., convert directly to RGB
+                    image = image.convert('RGB')
+                except Exception as e:
+                    print(f"Failed to convert image mode to RGB: {e}")
+                    raise HTTPException(status_code=400, detail="Failed to process image. Please upload an image in RGB or RGBA format.")
 
 
         # Resize the image to 384x216 a 16:9 ratio
