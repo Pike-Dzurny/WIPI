@@ -306,7 +306,7 @@ def get_profile_picture(user_id: int):
 
 
 @router.post("/user/{user_id}/pfp")
-async def upload_image(user_id: int, file: UploadFile = File(...)):
+async def upload_pfp(user_id: int, file: UploadFile = File(...)):
     try:
         # Image processing steps
         image = Image.open(file.file)
@@ -359,6 +359,85 @@ async def upload_image(user_id: int, file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Upload successful", "file_name": s3_key}
+
+
+@router.get("/user/{user_id}/background")
+def get_background(user_id: int):
+    cache_key = f"background_{user_id}"
+    presigned_url = cache.get(cache_key)
+
+    if not presigned_url:
+        s3_key = f"profile_pictures/{user_id}_background.webp"
+        try:
+            s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+        except:
+            s3_key = f"profile_pictures/defaultbackground.webp"
+            s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+
+        presigned_url = s3_client.generate_presigned_url('get_object',
+                                                         Params={'Bucket': bucket_name, 'Key': s3_key},
+                                                         ExpiresIn=3600)
+        cache[cache_key] = presigned_url
+
+    return {"url": presigned_url}
+
+@router.post("/user/{user_id}/background")
+async def upload_background(user_id: int, file: UploadFile = File(...)):
+    try:
+        # Image processing steps
+        image = Image.open(file.file)
+        # Log after opening the image
+        print("Image opened successfully")
+
+        # Convert to RGB if the image has an alpha channel
+        if image.mode != 'RGB':
+            if image.mode == 'RGBA':
+                base = Image.new('RGB', image.size, 'white')
+                image = Image.alpha_composite(base, image.convert('RGBA'))
+            elif image.mode in ['LA', 'L']:
+                image = image.convert('RGB')
+            else:
+                # For other modes like 'P', 'CMYK', etc., convert directly to RGB
+                image = image.convert('RGB')
+
+
+        # Resize the image to 256x256
+        image = image.resize((256, 256))
+
+        # Prepare the file to save
+        in_mem_file = io.BytesIO()
+
+        # Save the image to the in-memory file in webp format
+        image.save(in_mem_file, format='webp')
+
+        # Check the size of the in-memory file
+        in_mem_file.seek(0, 2)  # Go to the end of the in-memory file
+        size_in_kb = in_mem_file.tell() / 1024  # Get the size in kilobytes
+        if size_in_kb > 1024:  # Replace 100 with your desired size limit in kilobytes
+            raise HTTPException(status_code=400, detail="File size exceeds 1000 KB. Please select a smaller file.")
+
+        in_mem_file.seek(0)  # Go to the start of the in-memory file for reading
+
+        # Define the S3 key (filename) with the .webp extension
+        s3_key = f"profile_pictures/{user_id}_background.webp"
+        print(f"Uploading to S3 with key: {s3_key}")
+        try:
+            in_mem_file.seek(0)  # Ensure the file is at the beginning
+            s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
+            print("Upload to S3 attempted successfully")
+        except Exception as e:
+            print("S3 upload failed: ", e)
+            raise
+        print("Upload to S3 attempted")
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "Upload successful", "file_name": s3_key}
+
+
+
 
 @router.get("/user/{user_id}/username")
 def get_username(user_id: int, db: Session = Depends(get_db)):
@@ -444,4 +523,68 @@ def change_password(user_id: int, request: PasswordChangeRequest, db: Session = 
     db.commit()
 
     return {"message": "Password changed successfully"}
+
+@router.get("/user/{user_id}/followers")
+def get_followers(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    followers_list = db.query(followers).filter(followers.c.followed_id == user_id).all()
+    followers_list = [db.query(User).get(follower.follower_id).to_dict() for follower in followers_list]
+
+    return followers_list
+
+@router.get("/user/{user_id}/following")
+def get_following(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    following_list = db.query(followers).filter(followers.c.follower_id == user_id).all()
+    following_list = [db.query(User).get(following.followed_id).to_dict() for following in following_list]
+
+    return following_list
+
+@router.post("/user/{user_id}/follow")
+def follow_user(user_id: int, request: int, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_to_follow = db.query(User).get(request)
+    if user_to_follow is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Check if the user is already following the other user
+    existing_follow = db.query(followers).filter(followers.c.follower_id == user_id, followers.c.followed_id == request).first()
+    if existing_follow is not None:
+        raise HTTPException(status_code=400, detail="Already following user")
+
+    # Add the follow to the database
+    db.execute(followers.insert().values(follower_id=user_id, followed_id=request))
+    db.commit()
+
+    return {"message": "Followed user successfully"}
+
+@router.post("/user/{user_id}/unfollow")
+def unfollow_user(user_id: int, request: int, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_to_unfollow = db.query(User).get(request)
+    if user_to_unfollow is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Check if the user is already following the other user
+    existing_follow = db.query(followers).filter(followers.c.follower_id == user_id, followers.c.followed_id == request).first()
+    if existing_follow is None:
+        raise HTTPException(status_code=400, detail="Not following user")
+
+    # Remove the follow from the database
+    db.execute(followers.delete().where(followers.c.follower_id == user_id, followers.c.followed_id == request))
+    db.commit()
+
+    return {"message": "Unfollowed user successfully"}
 
