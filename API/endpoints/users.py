@@ -491,7 +491,7 @@ def update_username(user_id: int, request: UpdateUsernameRequest, db: Session = 
     db.commit()
     return {"message": "Username updated successfully"}
 
-
+ 
 @router.post("/user/{user_id}/email")
 def update_email(user_id: int, new_email: str, db: Session = Depends(get_db)):
     user = db.query(User).get(user_id)
