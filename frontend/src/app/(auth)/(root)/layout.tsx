@@ -155,11 +155,12 @@ function RootLayout({
   }, [session?.user?.id]);
 
   //const [profilePictureUrl, setProfilePictureUrl] = useState('');
-  const { setProfilePicUrl } = useProfilePic();
+  const { setProfilePicUrl, setBackgroundPicUrl } = useProfilePic();
   const fetchPfpUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
       const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+      const background_response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
       if (response.ok) {
         const data = await response.json();
         setProfilePicUrl(data.url); // Use the URL of the response
@@ -171,6 +172,22 @@ function RootLayout({
       console.error('Failed to fetch profile picture URL:', error);
     }
   };
+
+const fetchBackgroundPicUrl = async () => {
+    try {
+      // Use session.user.id to fetch the profile picture URL
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/background`);
+      if (response.ok) {
+        const data = await response.json();
+        setBackgroundPicUrl(data.url); // Use the URL of the response
+        console.log('Got background picture URL: ', data.url)
+      } else {
+        console.error('Failed to fetch background picture URL');
+      }
+    } catch (error) {
+      console.error('Failed to fetch background picture URL:', error);
+    }
+  }
 
 
 const [username, setName] = useState('');
@@ -210,6 +227,7 @@ const fetchaccountname = async () => {
     if (session?.user?.id) {
       fetchusername();
       fetchPfpUrl();
+      fetchBackgroundPicUrl();
       fetchaccountname();
     }
   }, [session?.user?.id]);

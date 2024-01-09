@@ -9,6 +9,8 @@ import Image from 'next/image';
 import { hashPassword } from '@/components/hashPassword';
 import { useProfilePic } from '@/components/ProfilePicContext';
 
+import axios from 'axios';
+
 
 
 export default function AboutPage() {
@@ -45,8 +47,10 @@ export default function AboutPage() {
 
   const [accountPassword, setAccountPassword] = React.useState("");
 
-  const { setProfilePicUrl, profilePicUrl } = useProfilePic();
+  const { setProfilePicUrl, profilePicUrl, setBackgroundPicUrl, backgroundPicUrl } = useProfilePic();  
 
+
+  
 
   const handlePasswordChange = async () => {  
     const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/passwordchange`, {
@@ -108,71 +112,7 @@ export default function AboutPage() {
     }
   };
 
-  const handleUpload = async () => {
 
-    // Profile Picture
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    const file = fileInput.files?.[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-      try {
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`, {
-          method: 'POST',
-          body: formData,
-        });
-        if (!response.ok) {
-          throw new Error('Upload failed');
-          return;
-        }
-        setPFPMessage('Upload successful');
-        console.log('Upload successful');
-        setProfilePicUrl(response.url);
-      } catch (error: any) {
-        setPFPMessage(`Upload failed: ${error.message}`);
-        return;
-      }
-    }
-
-    // Username
-    console.log("Username:", username);
-    if (username) {
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: username }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-      } else {
-        throw new Error('Failed to update username');
-      }
-    }
-
-    // Email
-    if (email) {
-      const formData = new FormData();
-      formData.append('email', email);
-      try {
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/email`, {
-          method: 'POST',
-          body: formData,
-        });
-        if (!response.ok) {
-          throw new Error('Upload failed');
-        }
-        setEmailMessage('Upload successful');
-        console.log('Upload successful');
-      } catch (error: any) {
-        setEmailMessage(`Upload failed: ${error.message}`);
-      }
-    }
-
-  };
 
   const handleImageClick = () => {
     if (fileInputRef.current) {
@@ -203,27 +143,181 @@ export default function AboutPage() {
     }
   };
 
-  const handleAccountDeletion = async () => {
-    if (!session?.user?.id) {
-      console.error('User ID is not available');
+
+
+  // State variables
+const [backgroundMessage, setBackgroundMessage] = useState('');
+
+// Refs
+const backgroundFileInputRef = useRef<HTMLInputElement>(null);
+
+// Event handlers
+const handleBackgroundImageClick = () => {
+  if (backgroundFileInputRef.current) {
+    backgroundFileInputRef.current.click();
+  }
+};
+
+const handleBackgroundDragOver = (e: React.DragEvent) => {
+  e.preventDefault();
+};
+
+const handleBackgroundFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (file) {
+    const fileType = file.type;
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (validImageTypes.includes(fileType)) {
+      // Check file size, 1 MB = 1000000 bytes
+      if (file.size <= 1000000) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setBackgroundPicUrl(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setBackgroundMessage('File size exceeds 1 MB. Please select a smaller file.');
+      }
+    } else {
+      setBackgroundMessage('Invalid file type. Please select a JPEG, PNG, or WEBP file.');
+    }
+  }
+};
+
+const handleBackgroundDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const fileList = {
+      0: file,
+      length: 1,
+      item: (index: number) => file,
+      [Symbol.iterator]: function* () {
+        let index = 0;
+        while (index < this.length) {
+          yield this[index++];
+        }
+      },
+    } as any as FileList;
+    handleBackgroundFileChange({ target: { files: fileList } } as React.ChangeEvent<HTMLInputElement>);
+  }
+};
+
+// Upload the data to the server
+const handleUpload = async () => {
+
+  // Profile Picture
+  const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+  const file = fileInput.files?.[0];
+  if (file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Upload failed');
+        return;
+      }
+      setPFPMessage('Upload successful');
+      console.log('Upload successful');
+      setProfilePicUrl(response.url);
+    } catch (error: any) {
+      setPFPMessage(`Upload failed: ${error.message}`);
       return;
     }
-  
-    const formData = new FormData();
-    formData.append('password', accountPassword);
-  
-    const response = await fetch(`http://localhost:8000/users/${session.user.id}/delete`, {
-      method: 'DELETE',
-      body: formData,
+  }
+
+  // Username
+  console.log("Username:", username);
+  if (username) {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username: username }),
     });
-  
+    
     if (response.ok) {
-      console.log('Account deletion successful');
-      signOut()
+      const data = await response.json();
+      console.log(data);
     } else {
-      console.error('Account deletion failed');
+      throw new Error('Failed to update username');
     }
-  };
+  }
+
+  // Email
+  if (email) {
+    const formData = new FormData();
+    formData.append('email', email);
+    try {
+      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/email`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      setEmailMessage('Upload successful');
+      console.log('Upload successful');
+    } catch (error: any) {
+      setEmailMessage(`Upload failed: ${error.message}`);
+    }
+  }
+
+  if (backgroundFileInputRef.current && backgroundFileInputRef.current.files) {
+    const file = backgroundFileInputRef.current.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/background`, {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+        setBackgroundMessage('Upload successful');
+        console.log('Upload successful');
+        const data = await response.json();
+        setBackgroundPicUrl(data.file_name);
+      } catch (error: any) {
+        setBackgroundMessage(`Upload failed: ${error.message}`);
+      }
+    }
+  }
+
+};
+
+
+// Account Management
+
+const handleAccountDeletion = async () => {
+  if (!session?.user?.id) {
+    console.error('User ID is not available');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('password', accountPassword);
+
+  const response = await fetch(`http://localhost:8000/users/${session.user.id}/delete`, {
+    method: 'DELETE',
+    body: formData,
+  });
+
+  if (response.ok) {
+    console.log('Account deletion successful');
+    signOut()
+  } else {
+    console.error('Account deletion failed');
+  }
+};
+
 
   return (
     <div>
@@ -241,9 +335,9 @@ export default function AboutPage() {
                     {profilePicUrl && (
                       <Image 
                         src={profilePicUrl} 
-                        width={80} 
-                        height={80} 
-                        className='rounded-full cursor-pointer hover:bg-gray-700/90' 
+                        width={256} 
+                        height={256} 
+                        className='rounded-full cursor-pointer hover:bg-gray-700/90 w-20 h-20' 
                         alt="Preview" 
                         onClick={handleImageClick}
                         onDragOver={handleDragOver}
@@ -259,6 +353,28 @@ export default function AboutPage() {
                     />
                     {pfpmessage && <b className='text-red-500'>{pfpmessage}</b>}
                 </div>
+                <div className='mb-4 flex-col'>
+                {backgroundPicUrl && (
+                  <Image 
+                    src={backgroundPicUrl} 
+                    width={384} 
+                    height={216} 
+                    className='rounded cursor-pointer hover:bg-gray-700/90 w-48 h-24' 
+                    alt="Preview" 
+                    onClick={handleBackgroundImageClick}
+                    onDragOver={handleBackgroundDragOver}
+                    onDrop={handleBackgroundDrop}
+                  />
+                )}
+                <input 
+                  id="backgroundFileInput" 
+                  type="file" 
+                  onChange={handleBackgroundFileChange}
+                  ref={backgroundFileInputRef}
+                  className="hidden" // Hide the input
+                />
+                {backgroundMessage && <b className='text-red-500'>{backgroundMessage}</b>}
+              </div>
                 <div className='mb-4'>
                   <p>Change User Name</p>
                   <input type="text" placeholder="New User Name" value={username} onChange={(e) => setUsername(e.target.value)} />

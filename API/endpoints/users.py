@@ -401,8 +401,8 @@ async def upload_background(user_id: int, file: UploadFile = File(...)):
                 image = image.convert('RGB')
 
 
-        # Resize the image to 256x256
-        image = image.resize((256, 256))
+        # Resize the image to 384x216 a 16:9 ratio
+        image = image.resize((384, 216))
 
         # Prepare the file to save
         in_mem_file = io.BytesIO()
