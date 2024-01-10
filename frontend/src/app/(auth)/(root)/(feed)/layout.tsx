@@ -220,7 +220,7 @@ const fetchaccountname = async () => {
   }, [session?.user?.id]);
 
   //const ProfilePicContext = React.createContext('');
-  const { profilePicUrl } = useProfilePic();
+  const { profilePicUrl, backgroundPicUrl } = useProfilePic();
 
 
 
@@ -249,7 +249,7 @@ const fetchaccountname = async () => {
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                 <main className="w-full">
                     <div className="relative rounded-t-2xl">
-                      <ProfileCard backgroundImage="" profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followings} followersCount={followers} name="" />            
+                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followings} followersCount={followers} name="" />            
                     </div>
                     <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
                       <Dropdown />

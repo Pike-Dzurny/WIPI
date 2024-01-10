@@ -272,7 +272,7 @@ const fetchaccountname = async () => {
           </div>
           <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
-              <div className="flex md:rounded-t-xl border-l border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
+              <div className="flex md:rounded-t-xl md:border-l md:border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
 
                     {children}
