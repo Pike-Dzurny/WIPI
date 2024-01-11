@@ -106,9 +106,15 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
   const [showPFPPopup, setShowPFPPopup] = useState(false);
   const timeoutId = useRef<NodeJS.Timeout | undefined>();
+  const [backgroundUrl, setBackgroundUrl] = useState('');
+
   const handleMouseEnter = () => {
     clearTimeout(timeoutId.current); // Clear any existing timeout to prevent the popup from hiding
     setShowPFPPopup(true);
+
+    fetch(`/user/${someUserId}/background`)
+    .then(response => response.json())
+    .then(data => setBackgroundUrl(data.url));
     
   };
   
@@ -131,8 +137,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
           <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
           {showPFPPopup && (
             <div className="absolute bg-white p-4 rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 border border-slate-100 flex flex-col">
-              <div className="relative h-32 bg-cover bg-center" style={{ backgroundImage: `url(${post.user.background_image})` }}>
-                <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full border-4 border-white" src={post.user.profile_picture} alt="Author" height={64} width={64} />
+            <div className="relative h-32 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundUrl})` }}>
+                  <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full border-4 border-white" src={post.user.profile_picture} alt="Author" height={64} width={64} />
                 <div className="absolute bottom-0 right-0 mr-4 mb-4 text-white text-sm">
                   <p>Followers: {post.user.followers}</p>
                   <p>Following: {post.user.following}</p>
