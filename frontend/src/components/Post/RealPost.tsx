@@ -112,8 +112,13 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     clearTimeout(timeoutId.current); // Clear any existing timeout to prevent the popup from hiding
     setShowPFPPopup(true);
 
-    fetch(`/user/${someUserId}/background`)
-    .then(response => response.json())
+    console.log(someUserId);
+
+    fetch(`http://localhost:8000/user/${someUserId}/background`)
+    .then(response => {
+      console.log(response);
+      return response.json();
+    })
     .then(data => setBackgroundUrl(data.url));
     
   };
