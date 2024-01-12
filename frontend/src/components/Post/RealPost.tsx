@@ -14,6 +14,9 @@ import { formatCount } from '../formatCount';
 
 import { User, Post } from '../Modules'
 
+import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
+
+
 interface RealPostProps {
   postObject: Post;
   className?: string;
@@ -29,6 +32,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [comment_count, setCommentCount] = useState(post.comments_count);
   const [copySuccess, setCopySuccess] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+
+  const queryClient = useQueryClient();
 
 
 
@@ -171,6 +176,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     .catch((error) => {
       console.error('Error:', error);
     });
+
   }
 
   const unfollowUser = () => {
@@ -189,6 +195,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     .catch((error) => {
       console.error('Error:', error);
     });
+
+    queryClient.invalidateQueries('posts');
   }
 
   return (
