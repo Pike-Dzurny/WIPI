@@ -557,7 +557,7 @@ def get_following(user_id: int, db: Session = Depends(get_db)):
 
     return following_list
 
-@router.post("/user/{user_id}/follow")
+@router.post("/user/{user_id}/follow/{request}")
 def follow_user(user_id: int, request: int, db: Session = Depends(get_db)):
     user = db.query(User).get(user_id)
     if user is None:

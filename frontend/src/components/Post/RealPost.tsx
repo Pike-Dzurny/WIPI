@@ -142,13 +142,12 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   
 
   const followUser = () => {
-    console.log("Follow user");
-    fetch(`http://localhost:8000/user/${id}/follow`, {
+    console.log("Follow user " + someUserId + " from user " + id + "");
+    fetch(`http://localhost:8000/user/${id}/follow/${someUserId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({request: someUserId}),
     })
     .then(response => response.json())
     .then(data => {
@@ -168,26 +167,26 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
         <div className="p-1 pr-2 flex items-center"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          onClick={(e) => e.stopPropagation()}
-        >
+          onClick={(e) => { e.preventDefault(); // Prevents default link navigation
+          e.stopPropagation(); // Stops event from propagating to parent Link component}
+          }}>
+
           <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
           {(showPFPPopup && (id !== someUserId)) && (
-            <div className="absolute bg-white p-4 rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 border border-slate-100 flex flex-col">
-            <div className="relative h-32 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundUrl})` }}>
-                  <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full border-4 border-white" src={post.user.profile_picture} alt="Author" height={64} width={64} />
+            <div className="absolute bg-white rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 flex flex-col cursor-default">
+            <div className="relative h-32 bg-cover bg-center rounded-t-2xl" style={{ backgroundImage: `url(${backgroundUrl})`, backdropFilter: 'blur(90px)' }}>                  <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full w-20 h-20" src={post.user.profile_picture} alt="Author" height={512} width={512} />
                 <div className="absolute bottom-0 right-0 mr-4 mb-4 text-white text-sm">
                   <p>Followers: {post.user.followers}</p>
                   <p>Following: {post.user.following}</p>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="m-4">
                 <p className="font-bold">{post.user.account_name}</p>
                 <p>{post.user.bio}</p>
                 {isFollowing ? (
                   <button disabled className="follow-button">Following</button>
                 ) : (
-                  <button onClick={followUser} className="follow-button">Follow</button>
-                )}
+                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); followUser();}} className="bg-indigo-100 rounded-full px-4 py-2">Follow</button>                )}
               </div>
             </div>
           )}
