@@ -373,7 +373,6 @@ def read_trending_posts(user_id: int, page: int = 1, per_page: int = 6):
             .join(User, Post.user_poster_id == User.id)
             .outerjoin(post_likes, Post.id == post_likes.c.post_id)
             .outerjoin(comments_subquery, Post.id == comments_subquery.c.post_id)
-            .filter(Post.reply_to == None, User.id == user_id)  # Filter posts by user_id
             .group_by(Post.id, User.id)
             .order_by(desc(Post.date_of_post))
             .offset(offset)

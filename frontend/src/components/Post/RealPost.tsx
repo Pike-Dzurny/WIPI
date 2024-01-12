@@ -33,7 +33,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
 
 
-  const someUserId = id;
+  const someUserId = post.user_poster_id;
 
   //console.log(id);
 
@@ -107,8 +107,13 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [showPFPPopup, setShowPFPPopup] = useState(false);
   const timeoutId = useRef<NodeJS.Timeout | undefined>();
   const [backgroundUrl, setBackgroundUrl] = useState('');
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const handleMouseEnter = () => {
+    console.log(someUserId);
+    console.log(id);
+    console.log("Mouse enter");
+    if(id === someUserId) return;
     clearTimeout(timeoutId.current); // Clear any existing timeout to prevent the popup from hiding
     setShowPFPPopup(true);
 
@@ -120,15 +125,40 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
       return response.json();
     })
     .then(data => setBackgroundUrl(data.url));
+
+
+    fetch(`http://localhost:8000/user/${id}/is_following/${someUserId}`)
+    .then(response => response.json())
+    .then(data => setIsFollowing(data.is_following));
     
   };
   
   const handleMouseLeave = () => {
+    if(id === someUserId) return;
     timeoutId.current = setTimeout(() => {
       setShowPFPPopup(false); // Corrected state name here
     }, 50);
   };
   
+
+  const followUser = () => {
+    console.log("Follow user");
+    fetch(`http://localhost:8000/user/${id}/follow`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(someUserId),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.message);
+      setIsFollowing(true); // Update the isFollowing state variable
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
 
   return (
     <Link href={`/p/${post.id}`}>
@@ -140,7 +170,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
           onMouseLeave={handleMouseLeave}
         >
           <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
-          {showPFPPopup && (
+          {(showPFPPopup && (id !== someUserId)) && (
             <div className="absolute bg-white p-4 rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 border border-slate-100 flex flex-col">
             <div className="relative h-32 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundUrl})` }}>
                   <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full border-4 border-white" src={post.user.profile_picture} alt="Author" height={64} width={64} />
@@ -152,7 +182,11 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
               <div className="mt-4">
                 <p className="font-bold">{post.user.account_name}</p>
                 <p>{post.user.bio}</p>
-                <button className="mt-2 bg-blue-500 text-white rounded px-4 py-2">Follow</button>
+                {isFollowing ? (
+                  <button disabled className="follow-button">Following</button>
+                ) : (
+                  <button onClick={followUser} className="follow-button">Follow</button>
+                )}
               </div>
             </div>
           )}
