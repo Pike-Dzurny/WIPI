@@ -599,3 +599,17 @@ def unfollow_user(user_id: int, request: int, db: Session = Depends(get_db)):
 
     return {"message": "Unfollowed user successfully"}
 
+@router.get("/user/{user_id}/is_following/{other_user_id}")
+def is_following(user_id: int, other_user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    other_user = db.query(User).get(other_user_id)
+    if other_user is None:
+        raise HTTPException(status_code=404, detail="Other user not found")
+
+    existing_follow = db.query(followers).filter(followers.c.follower_id == user_id, followers.c.followed_id == other_user_id).first()
+
+    return {"is_following": existing_follow is not None}
+
