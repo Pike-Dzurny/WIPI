@@ -578,7 +578,7 @@ def follow_user(user_id: int, request: int, db: Session = Depends(get_db)):
 
     return {"message": "Followed user successfully"}
 
-@router.post("/user/{user_id}/unfollow")
+@router.post("/user/{user_id}/unfollow/{request}")
 def unfollow_user(user_id: int, request: int, db: Session = Depends(get_db)):
     user = db.query(User).get(user_id)
     if user is None:

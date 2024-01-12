@@ -159,6 +159,24 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     });
   }
 
+  const unfollowUser = () => {
+    console.log("Follow user " + someUserId + " from user " + id + "");
+    fetch(`http://localhost:8000/user/${id}/unfollow/${someUserId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.message);
+      setIsFollowing(false); // Update the isFollowing state variable
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
+
   return (
     <Link href={`/p/${post.id}`}>
     <div className='hover:bg-slate-50 px-8 pt-4'>
@@ -184,9 +202,9 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
                 <p className="font-bold">{post.user.account_name}</p>
                 <p>{post.user.bio}</p>
                 {isFollowing ? (
-                  <button disabled className="follow-button">Following</button>
+                  <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); unfollowUser();}} className="border border-slate-500 px-4 py-2 rounded-full w-28 h-10">Following</button>
                 ) : (
-                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); followUser();}} className="bg-indigo-100 rounded-full px-4 py-2">Follow</button>                )}
+                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); followUser();}} className="bg-indigo-100 rounded-full px-4 py-2 w-28 h-10">Follow</button>                )}
               </div>
             </div>
           )}
