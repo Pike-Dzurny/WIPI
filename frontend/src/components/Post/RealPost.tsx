@@ -108,16 +108,17 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const timeoutId = useRef<NodeJS.Timeout | undefined>();
   const [backgroundUrl, setBackgroundUrl] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
+  const [popupFollowers, setPopupFollowers] = useState(0);
+  const [popupFollowing, setPopupFollowing] = useState(0);
+
 
   const handleMouseEnter = () => {
-    console.log(someUserId);
-    console.log(id);
-    console.log("Mouse enter");
     if(id === someUserId) return;
     clearTimeout(timeoutId.current); // Clear any existing timeout to prevent the popup from hiding
-    setShowPFPPopup(true);
-
-    console.log(someUserId);
+    
+    fetch(`http://localhost:8000/user/${id}/is_following/${someUserId}`)
+    .then(response => response.json())
+    .then(data => setIsFollowing(data.is_following));
 
     fetch(`http://localhost:8000/user/${someUserId}/background`)
     .then(response => {
@@ -126,10 +127,23 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     })
     .then(data => setBackgroundUrl(data.url));
 
-
-    fetch(`http://localhost:8000/user/${id}/is_following/${someUserId}`)
+    fetch(`http://localhost:8000/user/${someUserId}/follow_counts`)
     .then(response => response.json())
-    .then(data => setIsFollowing(data.is_following));
+    .then(data => {
+      console.log(data);
+      setPopupFollowers(data.followersCount);
+      setPopupFollowing(data.followingCount);
+    })
+    .catch(error => console.error('Error:', error));
+
+    setShowPFPPopup(true);
+
+    console.log(someUserId);
+
+
+
+
+
     
   };
   
@@ -193,9 +207,9 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
           {(showPFPPopup && (id !== someUserId)) && (
             <div className="absolute bg-white rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 flex flex-col cursor-default">
             <div className="relative h-32 bg-cover bg-center rounded-t-2xl" style={{ backgroundImage: `url(${backgroundUrl})`, backdropFilter: 'blur(90px)' }}>                  <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full w-20 h-20" src={post.user.profile_picture} alt="Author" height={512} width={512} />
-                <div className="absolute bottom-0 right-0 mr-4 mb-4 text-white text-sm">
-                  <p>Followers: {post.user.followers}</p>
-                  <p>Following: {post.user.following}</p>
+                <div className="absolute bottom-0 text-white text-sm flex items-center">
+                  <p>Followers: {popupFollowers}</p>
+                  <p>Following: {popupFollowing}</p>
                 </div>
               </div>
               <div className="m-4">

@@ -29,7 +29,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
   return (  
   <div className="relative">
     <div className="relative md:rounded-t-xl w-full h-4/6 overflow-hidden">
-      <Image src={backgroundImage} width={100} height={100} alt="Background Image" className="w-full" />
+      <Image src={backgroundImage} width={100} height={100} alt="Background Image" className="w-full max-h-72" />
       <div className="absolute inset-0 bg-white/10 backdrop-blur-lg"></div> {/* Adjust the blur and color as needed */}
     </div>
     <div className="absolute inset-0 flex items-center justify-center">
