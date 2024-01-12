@@ -238,6 +238,7 @@ const fetchaccountname = async () => {
         setFollowings(data.followingCount);
         setFollowers(data.followersCount);
       });
+      console.log("Follow counts: ", followings, followers);
   }, [session?.user?.id]);
 
   const queryClient = new QueryClient();

@@ -148,7 +148,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(someUserId),
+      body: JSON.stringify({request: someUserId}),
     })
     .then(response => response.json())
     .then(data => {
@@ -168,6 +168,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
         <div className="p-1 pr-2 flex items-center"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          onClick={(e) => e.stopPropagation()}
         >
           <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
           {(showPFPPopup && (id !== someUserId)) && (
