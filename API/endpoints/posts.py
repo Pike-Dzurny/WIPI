@@ -157,7 +157,7 @@ def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_de
         'user_poster_id': post.user_poster_id,
         'is_liked': is_liked,
         'hasChildren': len(post.replies) > 0,
-        'profile_picture': get_profile_picture(post.id)['url'],
+        'profile_picture': get_profile_picture(post.user_poster_id)['url'],
         'comment_count': comment_count,
         'replies': [build_reply_tree(posts_dict, users_dict, comment_count_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
     }
