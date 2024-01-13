@@ -220,26 +220,26 @@ const fetchaccountname = async () => {
   }, [session?.user?.id]);
 
   //const ProfilePicContext = React.createContext('');
-  const { profilePicUrl, backgroundPicUrl } = useProfilePic();
+  const { profilePicUrl, backgroundPicUrl, followerCount, followingCount } = useProfilePic();
 
 
 
-  const [followings, setFollowings] = useState(0);
-  const [followers, setFollowers] = useState(0);
+  // const [followings, setFollowings] = useState(0);
+  // const [followers, setFollowers] = useState(0);
 
-  useEffect(() => {
-    console.log("Fetching follow counts for user ID: ", session?.user?.id);
-    if (!session?.user?.id) {
-      return;
-    }
-    fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
-      .then(response => response.json())
-      .then(data => {
-        setFollowings(data.followingCount);
-        setFollowers(data.followersCount);
-      });
-      console.log("Follow counts: ", followings, followers);
-  }, [session?.user?.id]);
+  // useEffect(() => {
+  //   console.log("Fetching follow counts for user ID: ", session?.user?.id);
+  //   if (!session?.user?.id) {
+  //     return;
+  //   }
+  //   fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       setFollowings(data.followingCount);
+  //       setFollowers(data.followersCount);
+  //     });
+  //     console.log("Follow counts: ", followings, followers);
+  // }, [session?.user?.id]);
 
   const queryClient = new QueryClient();
 
@@ -250,7 +250,7 @@ const fetchaccountname = async () => {
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                 <main className="w-full">
                     <div className="relative rounded-t-2xl">
-                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followings} followersCount={followers} name="" />            
+                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} name="" />            
                     </div>
                     <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
                       <Dropdown />

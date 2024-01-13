@@ -15,6 +15,7 @@ import { formatCount } from '../formatCount';
 import { User, Post } from '../Modules'
 
 import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
+import { useProfilePic } from "@/components/ProfilePicContext";
 
 
 interface RealPostProps {
@@ -34,6 +35,9 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   const [showPopup, setShowPopup] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const { followingCount, setFollowingCount } = useProfilePic();
+
 
 
 
@@ -178,6 +182,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     });
     queryClient.invalidateQueries('posts');
     setPopupFollowers(popupFollowers+1);
+    setFollowingCount(followingCount+1);
 
   }
 
@@ -197,6 +202,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     .catch((error) => {
       console.error('Error:', error);
     });
+    setFollowingCount(followingCount-1);
+
 
     queryClient.invalidateQueries('posts');
   }

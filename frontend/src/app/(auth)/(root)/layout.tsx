@@ -19,23 +19,6 @@ import React from 'react';
 
 
 
-// import { PFP } from '../../../../components/pfp';
-
-import { QueryClient, useInfiniteQuery } from 'react-query';
-import { useIntersection } from '@mantine/hooks';
-// import { RealPost } from '../../../../components/Post/RealPost'; // Import RealPost at the top of your file
-// import  ProfileCard  from '../../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
-
-
-
-import axios from 'axios';
-
-// import { Dropdown } from '../../../../components/Dropdown/Dropdown';
-
-// import { User, Post } from '../../../../components/Modules'
-// import { SkeletonPost } from '../../../../components/Skeletons'
-
-
 
 interface UserPostBase {
   user_poster_id: Number;
@@ -155,7 +138,7 @@ function RootLayout({
   }, [session?.user?.id]);
 
   //const [profilePictureUrl, setProfilePictureUrl] = useState('');
-  const { setProfilePicUrl, setBackgroundPicUrl } = useProfilePic();
+  const { setProfilePicUrl, setBackgroundPicUrl, setFollowerCount, setFollowingCount } = useProfilePic();
   const fetchPfpUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
@@ -235,11 +218,6 @@ const fetchaccountname = async () => {
   //const ProfilePicContext = React.createContext('');
   const { profilePicUrl } = useProfilePic();
 
-
-
-  const [followings, setFollowings] = useState(0);
-  const [followers, setFollowers] = useState(0);
-
   useEffect(() => {
     console.log("Fetching follow counts for user ID: ", session?.user?.id);
     if (!session?.user?.id) {
@@ -248,10 +226,11 @@ const fetchaccountname = async () => {
     fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
       .then(response => response.json())
       .then(data => {
-        setFollowings(data.followingCount);
-        setFollowers(data.followersCount);
+        setFollowingCount(data.followingCount);
+        setFollowerCount(data.followersCount);
       });
   }, [session?.user?.id]);
+
 
 
   if (status === 'authenticated' || status === 'loading') {
