@@ -176,6 +176,8 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     .catch((error) => {
       console.error('Error:', error);
     });
+    queryClient.invalidateQueries('posts');
+    setPopupFollowers(popupFollowers+1);
 
   }
 
@@ -214,19 +216,28 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
           <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
           {(showPFPPopup && (id !== someUserId)) && (
             <div className="absolute bg-white rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 flex flex-col cursor-default">
-            <div className="relative h-32 bg-cover bg-center rounded-t-2xl" style={{ backgroundImage: `url(${backgroundUrl})`, backdropFilter: 'blur(90px)' }}>                  <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full w-20 h-20" src={post.user.profile_picture} alt="Author" height={512} width={512} />
-                <div className="absolute bottom-0 text-white text-sm flex items-center">
-                  <p>Followers: {popupFollowers}</p>
-                  <p>Following: {popupFollowing}</p>
+            <div className="relative h-32 bg-cover bg-center rounded-t-2xl" style={{ backgroundImage: `url(${backgroundUrl})`, backdropFilter: 'blur(90px)' }}>                  
+            <Image className="absolute bottom-0 left-0 ml-4 mb-4 rounded-full w-20 h-20" src={post.user.profile_picture} alt="Author" height={512} width={512} />
+              <div className="absolute bottom-0 left-0 right-0 text-white flex items-center justify-center  w-full">
+                <div className="flex px-2 flex-row divide-x divide-indigo-400 items-center justify-center bg-indigo-300 border-indigo-400 border-t rounded-t-xl">
+                <p className="mr-2">{popupFollowers}</p>
+                <p className="pl-2">{popupFollowing}</p>
                 </div>
+              </div>
               </div>
               <div className="m-4">
                 <p className="font-bold">{post.user.account_name}</p>
                 <p>{post.user.bio}</p>
                 {isFollowing ? (
-                  <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); unfollowUser();}} className="border border-slate-500 px-4 py-2 rounded-full w-28 h-10">Following</button>
+                  <button 
+                    onClick={(e) => {e.preventDefault(); e.stopPropagation(); unfollowUser();}} 
+                    className="border px-4 py-2 rounded-full w-28 h-10 relative hover:border-red-500 hover:text-red-500 group"
+                  >
+                    <span className="absolute inset-0 flex items-center justify-center group-hover:opacity-0">Following</span>
+                    <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100">Unfollow</span>
+                  </button>
                 ) : (
-                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); followUser();}} className="bg-indigo-100 rounded-full px-4 py-2 w-28 h-10">Follow</button>                )}
+                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); followUser();}} className="bg-indigo-100 rounded-full px-4 py-2 w-28 h-10 hover:bg-indigo-200">Follow</button>                )}
               </div>
             </div>
           )}
