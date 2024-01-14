@@ -365,8 +365,16 @@ const handleSubmit = async (postID: number) => {
           return null;
         }
       
-        const newComment = data.comment;
+        const newComment = {
+          ...data.comment, // Assuming data.comment contains most of the needed properties
+          profile_picture: profilePicUrl, // From session state
+          date_of_post: new Date().toISOString(), // Current timestamp
+          user_display_name: session.user.name,
+          content: postContent,
+        };
       
+
+
         return {
           ...prevPost,
           replies: [newComment, ...prevPost.replies]
