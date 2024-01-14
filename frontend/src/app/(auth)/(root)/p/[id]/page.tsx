@@ -114,13 +114,21 @@ export default function Page({ params }: { params: { id: string } }) {
   const [likesCount, setLikesCount] = useState(post?.likes_count);
   const [hasLiked, setHasLiked] = useState(post?.is_liked);
 
+  type RepliesContent = {
+    [key: number]: string;
+  };
+  
+  const [repliesContent, setRepliesContent] = useState<RepliesContent>({});
+
   useEffect(() => {
   setLikesCount(post?.likes_count);
   setHasLiked(post?.is_liked);
   
   }, [post?.likes_count]);
 
-
+  const handleReplyChange = (commentId: number, content: string) => {
+    setRepliesContent(prev => ({ ...prev, [commentId]: content }));
+  };
 
   const formatRelativeTime = (dateString: string) => {
     const date = parseISO(dateString);
@@ -288,8 +296,13 @@ export default function Page({ params }: { params: { id: string } }) {
               <div className="h-[v30]">
                 {/* Textarea container */}
                 <div className="overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600">
-                  <textarea name="reply" id="reply" className="block w-full resize-none border-0 bg-transparent outline-none py-1.5 px-2 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 ring-0" 
-                  placeholder="Write a reply..."></textarea>
+                <textarea
+                    name="reply"
+                    className="block w-full ..."
+                    value={repliesContent[comment.id] || ""}
+                    onChange={(e) => handleReplyChange(comment.id, e.target.value)}
+                    placeholder="Write a reply..."
+                  ></textarea>
                   {/* Button Container */}
                   <div className="flex justify-end py-2">
                     <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={() => handleSubmit(comment.id)}>Post</button>
@@ -318,6 +331,18 @@ export default function Page({ params }: { params: { id: string } }) {
   
 
 const handleSubmit = async (postID: number) => {
+
+  //const content = postID ? repliesContent[postID] : postContent;
+  let content: string; // Declare content here
+
+  if(postID === id) {
+    content = postContent;
+  }
+  else {
+    content = repliesContent[postID];
+  }
+  
+
   //event.preventDefault();
   if (!session) {
     console.log('No active session');
@@ -333,11 +358,10 @@ const handleSubmit = async (postID: number) => {
   // Create an instance of UserPostBase
   const userPost: UserPostBase = {
     user_poster_id: session.user.id, // replace with the actual username
-    post_content: postContent,
+    post_content: content,
     reply_to: postID,
   };
 
-  console.log(userPost);
 
   try {
     console.log('Trying to wait for response!'); // The authenticated user
@@ -360,34 +384,57 @@ const handleSubmit = async (postID: number) => {
     if (data.status === 'success') {
 
 
-
-      setPost(prevPost => {
-        if (prevPost === null) {
-          return null;
-        }
-      
-        const newComment = {
-          ...data.comment, // Assuming data.comment contains most of the needed properties
-          profile_picture: profilePicUrl, // From session state
-          date_of_post: new Date().toISOString(), // Current timestamp
-          user_display_name: session.user.name,
-          content: postContent,
-        };
-      
-
-
-        return {
-          ...prevPost,
-          replies: [newComment, ...prevPost.replies]
-        };
-      });
+      if(postID === id) {
+          console.log('the post id is the same as the id');
+            setPost(prevPost => {
+              if (prevPost === null) {
+                return null;
+              }
+            
+              const newComment = {
+                ...data.comment, // Assuming data.comment contains most of the needed properties
+                profile_picture: profilePicUrl, // From session state
+                date_of_post: new Date().toISOString(), // Current timestamp
+                user_display_name: session.user.name,
+                content: postContent,
+              };
+            
 
 
+              return {
+                ...prevPost,
+                replies: [newComment, ...prevPost.replies]
+              };
+            });
 
-      setPostContent('');
 
+
+            setPostContent('');
 
     } else {
+      console.log('the post id is not the same as the id');
+      // Handle reply to a comment
+      setPost(prevPost => {
+        if (!prevPost) return null;
+    
+        const newComment = {
+          ...data.comment,
+          profile_picture: profilePicUrl,
+          date_of_post: new Date().toISOString(),
+          user_display_name: session.user.name,
+          content: content,
+        };
+    
+        // Here you need to insert newComment into the correct place in the replies.
+        // This logic depends on how your data is structured.
+        // ...
+    
+        return prevPost;
+      });
+      setRepliesContent(prev => ({ ...prev, [postID]: '' }));
+    }
+  }
+     else {
       console.log('it didnt work!')
       // Handle error
       console.error('Failed to create post');
