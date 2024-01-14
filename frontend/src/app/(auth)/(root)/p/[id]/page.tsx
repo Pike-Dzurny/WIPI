@@ -276,7 +276,7 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
       {activeReplyId === comment.id && (
         <div className="p-4 transition">
-          {/* Flex container for PFP and the form */}
+          {/* Flex container for PFP and the textbox */}
           <div className="flex items-start space-x-4">
             {/* PFP Column */}
             <div className="flex-shrink-0">
@@ -285,18 +285,19 @@ export default function Page({ params }: { params: { id: string } }) {
 
             {/* Form Column */}
             <div className="flex-1 min-w-0">
-              <form action="#" className="h-[v30]">
+              <div className="h-[v30]">
                 {/* Textarea container */}
                 <div className="overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600">
                   <textarea name="reply" id="reply" className="block w-full resize-none border-0 bg-transparent outline-none py-1.5 px-2 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 ring-0" 
                   placeholder="Write a reply..."></textarea>
+                  {/* Button Container */}
+                  <div className="flex justify-end py-2">
+                    <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={() => handleSubmit(comment.id)}>Post</button>
+                  </div>
                 </div>
 
-                {/* Button Container */}
-                <div className="flex justify-end py-2">
-                  <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={() => handleSubmit(comment.id)}>Post</button>
-                </div>
-              </form>
+
+              </div>
             </div>
           </div>
         </div>
