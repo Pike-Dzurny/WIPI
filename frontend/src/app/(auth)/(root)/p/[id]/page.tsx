@@ -150,6 +150,10 @@ export default function Page({ params }: { params: { id: string } }) {
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
 
   const handleReplyClick = (commentId: number) => {
+    if (activeReplyId === commentId) {
+      setActiveReplyId(null);
+      return;
+    }
     setActiveReplyId(commentId);
   };
 
@@ -276,7 +280,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="flex items-start space-x-4">
             {/* PFP Column */}
             <div className="flex-shrink-0">
-              <img className="inline-block h-10 w-10 rounded-full" src={profilePicUrl} alt="Profile" />
+              <Image height={256} width={256} className="inline-block h-10 w-10 rounded-full" src={profilePicUrl} alt="Profile" />
             </div>
 
             {/* Form Column */}
@@ -353,9 +357,27 @@ const handleSubmit = async (postID: number) => {
     console.log(response);
     const data = await response.json();
     if (data.status === 'success') {
-      console.log('it worked!')
-      // Handle success (e.g., clear the textarea and close the overlay)
+
+
+
+      setPost(prevPost => {
+        if (prevPost === null) {
+          return null;
+        }
+      
+        const newComment = data.comment;
+      
+        return {
+          ...prevPost,
+          replies: [newComment, ...prevPost.replies]
+        };
+      });
+
+
+
       setPostContent('');
+
+
     } else {
       console.log('it didnt work!')
       // Handle error
@@ -373,13 +395,13 @@ const handleSubmit = async (postID: number) => {
   return (
     <div className='w-full'>
       <div className="relative rounded-t-2xl w-full">
-        <div className="flex pl-4 pr-4 rounded-t-2xl">
-          <div className="relative flex flex-row rounded-3xl p-4 w-full">
+        <div className="flex pl-2 pr-4 rounded-t-2xl">
+          <div className="relative flex flex-row rounded-3xl py-4 w-full">
           {post && (
           <>
             {/* Profile Picture Column */}
             <div className="flex flex-col justify-start items-center mr-4 flex-shrink-0">
-              <Image width={256} height={256} className="rounded-full h-12 w-12 shadow-sm mb-4" src={post.profile_picture} alt="Author" />
+              <Image width={256} height={256} className="rounded-full h-14 w-14 shadow-sm mb-4" src={post.profile_picture} alt="Author" />
             </div>
 
             {/* Content and Buttons Column */}
@@ -489,12 +511,6 @@ const handleSubmit = async (postID: number) => {
                 <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
                   <div className="flex items-center space-x-5">
                     <div className="flex items-center">
-                      <button type="button" className="-m-2.5 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:text-gray-500">
-                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clipRule="evenodd" />
-                        </svg>
-                        <span className="sr-only">Attach a file</span>
-                      </button>
                     </div>
                     <div className="flex items-center">
                       <div>

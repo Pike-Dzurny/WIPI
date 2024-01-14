@@ -172,13 +172,13 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
     initial_post = session.query(Post).get(post_id)
 
     # Fetch the user who is viewing the post
-    print("user_id: ", user_id)
+    #print("user_id: ", user_id)
     user_looking_at_post = session.query(User).get(user_id)
     try:
-        print("user_looking_at_post: ", user_looking_at_post)
-        print("user_looking_at_post.liked_posts: ", user_looking_at_post.liked_posts)
+        #print("user_looking_at_post: ", user_looking_at_post)
+        #print("user_looking_at_post.liked_posts: ", user_looking_at_post.liked_posts)
         liked_posts_by_user = user_looking_at_post.liked_posts.all()
-        print(liked_posts_by_user)
+        #print(liked_posts_by_user)
     except AttributeError:
         liked_posts_by_user = []
 
