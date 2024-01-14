@@ -245,7 +245,6 @@ async def check_username(username: str = Query(..., description="The username to
 async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
     print("/auth'ing")
     try:
-        print("1")
         # Fetch the user from the database
         db_user = db.query(User).filter(User.account_name == auth_details.username).first()
         # If the user doesn't exist, raise an HTTPException
@@ -266,7 +265,6 @@ async def authenticate_user(auth_details: AuthDetails, db: Session = Depends(get
         # If the username and password are correct, return the user details
         return {"id": db_user.id, "name": db_user.display_name, "email": db_user.email}
     except Exception as e:
-        print(f"Exception occurred: {e}")
         raise HTTPException(status_code=500, detail="Error querying the database") from e
 
 @router.get("/user/{user_id}/posts")
@@ -311,7 +309,6 @@ async def upload_pfp(user_id: int, file: UploadFile = File(...)):
         # Image processing steps
         image = Image.open(file.file)
         # Log after opening the image
-        print("Image opened successfully")
 
         # Convert to RGB if the image has an alpha channel
         if image.mode != 'RGB':
@@ -344,13 +341,11 @@ async def upload_pfp(user_id: int, file: UploadFile = File(...)):
 
         # Define the S3 key (filename) with the .webp extension
         s3_key = f"profile_pictures/{user_id}.webp"
-        print(f"Uploading to S3 with key: {s3_key}")
         try:
             in_mem_file.seek(0)  # Ensure the file is at the beginning
             s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
             print("Upload to S3 attempted successfully")
         except Exception as e:
-            print("S3 upload failed: ", e)
             raise
         print("Upload to S3 attempted")
 
@@ -387,20 +382,15 @@ async def upload_background(user_id: int, file: UploadFile = File(...)):
         # Image processing steps
         image = Image.open(file.file)
         # Log after opening the image
-        print("Image opened successfully")
 
-        print(image.mode)
 
         # Convert to RGB if the image has an alpha channel
         if image.mode != 'RGB':
             if image.mode == 'RGBA':
-                print("Converting RGBA to RGB")
                 base = Image.new('RGB', image.size, 'white')
-                print("Created base image")
-                print(f"Original image mode: {image.mode}")
+
                 converted_image = image.convert('RGBA')
-                print(f"Converted image mode: {converted_image.mode}")
-                print("Converted image")
+
             elif image.mode in ['LA', 'L']:
                 image = image.convert('RGB')
             else:
@@ -408,7 +398,6 @@ async def upload_background(user_id: int, file: UploadFile = File(...)):
                     # For other modes like 'P', 'CMYK', etc., convert directly to RGB
                     image = image.convert('RGB')
                 except Exception as e:
-                    print(f"Failed to convert image mode to RGB: {e}")
                     raise HTTPException(status_code=400, detail="Failed to process image. Please upload an image in RGB or RGBA format.")
 
 
@@ -431,18 +420,13 @@ async def upload_background(user_id: int, file: UploadFile = File(...)):
 
         # Define the S3 key (filename) with the .webp extension
         s3_key = f"profile_pictures/{user_id}_background.webp"
-        print(f"Uploading to S3 with key: {s3_key}")
         try:
             in_mem_file.seek(0)  # Ensure the file is at the beginning
             s3_client.upload_fileobj(in_mem_file, bucket_name, s3_key)
-            print("Upload to S3 attempted successfully")
         except Exception as e:
-            print("S3 upload failed: ", e)
             raise
-        print("Upload to S3 attempted")
 
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Upload successful", "file_name": s3_key}
@@ -453,14 +437,10 @@ async def upload_background(user_id: int, file: UploadFile = File(...)):
 @router.get("/user/{user_id}/username")
 def get_username(user_id: int, db: Session = Depends(get_db)):
     try:
-        print("1")
         user = db.query(User).get(user_id)
-        print("2")
         if user is None:
-            print("3")
             raise HTTPException(status_code=404, detail=str(e)) 
         else:
-            print("4")
             return {"username": user.display_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
@@ -468,14 +448,10 @@ def get_username(user_id: int, db: Session = Depends(get_db)):
 @router.get("/user/{user_id}/accountname")
 def get_account_name(user_id: int, db: Session = Depends(get_db)):
     try:
-        print("1")
         user = db.query(User).get(user_id)
-        print("2")
         if user is None:
-            print("3")
             raise HTTPException(status_code=404, detail=str(e)) 
         else:
-            print("4")
             return {"accountname": user.account_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
@@ -483,7 +459,6 @@ def get_account_name(user_id: int, db: Session = Depends(get_db)):
     
 @router.post("/user/{user_id}/username")
 def update_username(user_id: int, request: UpdateUsernameRequest, db: Session = Depends(get_db)):
-    print(user_id, request.username)
     user = db.query(User).get(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -509,8 +484,6 @@ def get_follow_counts(user_id: int, db: Session = Depends(get_db)):
 
     following_count = db.query(followers).filter(followers.c.follower_id == user_id).count()
     followers_count = db.query(followers).filter(followers.c.followed_id == user_id).count()
-    print("counts")
-    print(following_count, followers_count)
 
     return {"followingCount": following_count, "followersCount": followers_count}
 

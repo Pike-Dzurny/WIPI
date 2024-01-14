@@ -123,7 +123,6 @@ def check_for_more_replies(session, post_id, max_depth):
     replies_exist = session.query(Post.id).filter(Post.reply_to == post_id).first() is not None
     return replies_exist if max_depth > 0 else False
 
-numbertimesran = 0
 
 def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3, depth=0, liked_posts_by_user=None):
     if depth > max_depth:
@@ -133,9 +132,7 @@ def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_de
         return []  # or some other placeholder value
 
     post = posts_dict[post_id]
-    global numbertimesran
-    print(numbertimesran)
-    numbertimesran += 1
+
 
     comment_count = comment_count_dict.get(post_id, 0)
 
@@ -175,9 +172,13 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
     initial_post = session.query(Post).get(post_id)
 
     # Fetch the user who is viewing the post
+    print("user_id: ", user_id)
     user_looking_at_post = session.query(User).get(user_id)
     try:
-        liked_posts_by_user = user_looking_at_post.liked_posts
+        print("user_looking_at_post: ", user_looking_at_post)
+        print("user_looking_at_post.liked_posts: ", user_looking_at_post.liked_posts)
+        liked_posts_by_user = user_looking_at_post.liked_posts.all()
+        print(liked_posts_by_user)
     except AttributeError:
         liked_posts_by_user = []
 
@@ -222,7 +223,7 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
 
     comment_count_dict = {count[0]: count[1] for count in comment_counts}
 
-    reply_tree = build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3)
+    reply_tree = build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3, liked_posts_by_user=liked_posts_by_user)
     
     # Adds a flag to the top-level post indicating if there are more top-level comments
     has_more_top_level_comments = session.query(Post.id).filter(Post.reply_to == post_id).offset(offset + per_page).limit(1).scalar() is not None
