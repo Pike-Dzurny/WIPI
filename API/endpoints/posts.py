@@ -42,7 +42,7 @@ def create_post(user_post: UserPostBase, db: Session = Depends(get_db)):
         db_post = Post(user_poster_id=user.id, content=sanitized_content, reply_to=user_post.reply_to)
         db.add(db_post)
         db.commit()
-        return {"status": "success"}
+        return {"status": "success", "post_id": db_post.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

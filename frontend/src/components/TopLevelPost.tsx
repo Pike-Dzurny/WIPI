@@ -55,8 +55,10 @@ const PostComponent: React.FC<PostComponentProps> = ({
               <div className='' title={post.date_of_post}>{formatRelativeTime(post.date_of_post)}</div>
             </div>
             {/* Post Content */}
-            <div className="overflow-hidden overflow-wrap break-words pb-2">
+            <div className="overflow-hidden overflow-wrap break-words">
               <p className="hyphens-auto">{post.content}</p>
+              <p className='text-sm text-slate-500 font-light font-mono  italic'>#{post.id}</p>
+
             </div>
           </div>
         </div>

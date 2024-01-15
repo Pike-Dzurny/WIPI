@@ -231,6 +231,54 @@ export default function Page({ params }: { params: { id: string } }) {
     });
   }
 
+
+
+
+  const toggleCommentLike = (commentId: number) => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${commentId}/toggle_like/${session?.user.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        setPost(prevPost => {
+          if (!prevPost) return null;
+          const updatedReplies = toggleCommentLikeInTree(prevPost.replies, commentId);
+          return {
+            ...prevPost,
+            replies: updatedReplies,
+          };
+        });
+      } else {
+        // Handle error
+      }
+    });
+  };
+
+  const toggleCommentLikeInTree = (comments: any, commentId: any) => {
+    return comments.map((comment: any) => {
+      if (comment.id === commentId) {
+        // Toggle the like state for the comment
+        return {
+          ...comment,
+          is_liked: !comment.is_liked, // Assuming you have an 'is_liked' field
+          // Update any other relevant fields (e.g., likes_count)
+        };
+      } else if (comment.replies) {
+        // Recursively update replies
+        return {
+          ...comment,
+          replies: toggleCommentLikeInTree(comment.replies, commentId),
+        };
+      } else {
+        return comment;
+      }
+    });
+  };
+
   const handleReplySubmit = (replyContent: string, replyToId: number) => {
     console.log("Reply Content:", replyContent);
     console.log("Replying to Comment ID:", replyToId);
@@ -294,8 +342,9 @@ export default function Page({ params }: { params: { id: string } }) {
     <div 
       key={comment.id} 
       className={clsx(
-        'pt-2 pl-2 border-l', 
+        'pt-2 pl-2 ', 
         { 'ml-[20px]': depth > 0},
+        { 'border-l': depth > 0},
         { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 },
         { [`border-${colors[depth % colors.length]}`]: depth > 0 }
       )}
@@ -316,10 +365,16 @@ export default function Page({ params }: { params: { id: string } }) {
             </div>
         </div>
         <button className="font-mono" onClick={() => handleReplyClick(comment.id)}>Reply</button>
-      </div>
+        <button 
+      className={`ml-2 font-mono  ${comment.is_liked ? 'text-red-500' : ''}`}
+      onClick={() => toggleCommentLike(comment.id)}
+    >
+      Like
+    </button>
+          </div>
       </div>
       {activeReplyId === comment.id && (
-        <div className="p-4 transition">
+        <div className="py-4 mr-4 transition">
           {/* Flex container for PFP and the textbox */}
           <div className="flex items-start space-x-4">
             {/* PFP Column */}
@@ -331,10 +386,11 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className="flex-1 min-w-0">
               <div className="h-[v30]">
                 {/* Textarea container */}
-                <div className="overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600">
+                <div className={clsx('overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600', 
+                      { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}>                
                 <textarea
                     name="reply"
-                    className="block w-full ..."
+                    className={clsx("block w-full outline-none", { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}
                     value={repliesContent[comment.id] || ""}
                     onChange={(e) => handleReplyChange(comment.id, e.target.value)}
                     placeholder="Write a reply..."
@@ -365,6 +421,26 @@ export default function Page({ params }: { params: { id: string } }) {
     </div>
   );
   
+
+  const insertCommentInTree = (comments: any, parentCommentId: any, newComment: any) => {
+    return comments.map((comment: any) => {
+      if (comment.id === parentCommentId) {
+        // Found the parent comment, insert the new comment
+        return {
+          ...comment,
+          replies: [...(comment.replies || []), newComment],
+        };
+      } else if (comment.replies) {
+        // Recursively search in the replies
+        return {
+          ...comment,
+          replies: insertCommentInTree(comment.replies, parentCommentId, newComment),
+        };
+      } else {
+        return comment;
+      }
+    });
+  };
 
 const handleSubmit = async (postID: number) => {
 
@@ -417,6 +493,7 @@ const handleSubmit = async (postID: number) => {
 
     console.log(response);
     const data = await response.json();
+    const newPostID = data.post_id;
     if (data.status === 'success') {
 
 
@@ -428,6 +505,7 @@ const handleSubmit = async (postID: number) => {
               }
             
               const newComment = {
+                id: newPostID, // From the response
                 ...data.comment, // Assuming data.comment contains most of the needed properties
                 profile_picture: profilePicUrl, // From session state
                 date_of_post: new Date().toISOString(), // Current timestamp
@@ -452,20 +530,22 @@ const handleSubmit = async (postID: number) => {
       // Handle reply to a comment
       setPost(prevPost => {
         if (!prevPost) return null;
-    
+
         const newComment = {
+          id: newPostID,
           ...data.comment,
           profile_picture: profilePicUrl,
           date_of_post: new Date().toISOString(),
           user_display_name: session.user.name,
           content: content,
         };
-    
-        // Here you need to insert newComment into the correct place in the replies.
-        // This logic depends on how your data is structured.
-        // ...
-    
-        return prevPost;
+      
+        const updatedReplies = insertCommentInTree(prevPost.replies, postID, newComment);
+      
+        return {
+          ...prevPost,
+          replies: updatedReplies,
+        };
       });
       setRepliesContent(prev => ({ ...prev, [postID]: '' }));
     }
