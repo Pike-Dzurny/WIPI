@@ -360,7 +360,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className='' title={comment.date_of_post}>{formatRelativeTime(comment.date_of_post)}</div>
           </div>
 
-            <div className='border-l border-t border-b p-2 rounded-l-lg overflow-hidden overflow-wrap break-words'>
+            <div className='border-l border-t border-b p-2 rounded-l-lg overflow-hidden overflow-wrap break-words max-w-lg'>
             <p className='hyphens-auto'>{comment.content}</p>
             </div>
         </div>
@@ -390,7 +390,7 @@ export default function Page({ params }: { params: { id: string } }) {
                       { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}>                
                 <textarea
                     name="reply"
-                    className={clsx("block w-full outline-none", { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}
+                    className={clsx("block outline-none", { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}
                     value={repliesContent[comment.id] || ""}
                     onChange={(e) => handleReplyChange(comment.id, e.target.value)}
                     placeholder="Write a reply..."
@@ -566,11 +566,11 @@ const handleSubmit = async (postID: number) => {
 
   return (
     <div className='w-full'>
-      <div className="relative rounded-t-2xl w-full">
+      <div className="relative rounded-t-2xl">
         <div className="flex flex-col pl-2 pr-4 rounded-t-2xl">
 
           {post && post.reply_to != null && (
-                    <div className="relative flex flex-row rounded-3xl py-4 w-full">
+                    <div className="relative flex flex-row rounded-3xl py-4">
 
               <PostComponent
               post={parentPost}
@@ -584,12 +584,12 @@ const handleSubmit = async (postID: number) => {
               openComment={openComment}
               setOpenComment={setOpenComment}
               parent={true}
-              hasParent={post.reply_to != null}
+              hasParent={(post.reply_to != null)}
             />
                       </div>
 
            )}
-          <div className="relative flex flex-row rounded-3xl py-4 w-full">
+          <div className="relative flex flex-row rounded-3xl py-4">
           {post && (
           <>
             <PostComponent
@@ -604,7 +604,7 @@ const handleSubmit = async (postID: number) => {
               openComment={openComment}
               setOpenComment={setOpenComment}
               parent={false}
-              hasParent={post.reply_to != null}
+              hasParent={(post.reply_to != null)}
             />
           </>
         )}   

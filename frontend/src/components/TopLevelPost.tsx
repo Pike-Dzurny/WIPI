@@ -32,16 +32,25 @@ const PostComponent: React.FC<PostComponentProps> = ({
   parent,
   hasParent,
 }) => {
+  console.log(hasParent);
   return (
     <>
     {post && post.user_display_name && (
     <>
-      {/* Profile Picture Column */}
-      <div className="flex flex-col justify-start items-center mr-4 flex-shrink-0">
-        {/* Profile Picture */}
-        {post && post.profile_picture && (
-        <Image width={256} height={256} className="rounded-full h-14 w-14 shadow-sm mb-4" src={post.profile_picture} alt="Author" />
-        )}
+        {/* Profile Picture Column */}
+        <div className="relative flex flex-col justify-start items-center mr-4 flex-shrink-0">
+          {/* Line going up if there's a parent */}
+          {hasParent && !parent && (
+            <div className="absolute left-1/2 w-px h-3/4 bg-slate-200 transform -translate-y-1/2"></div>
+          )}
+          {/* Line going down if there are replies */}
+          {parent && (
+            <div className="absolute bottom-0 left-1/2 w-px h-4/5 bg-slate-200 transform translate-y-1/2"></div>
+          )}
+          {/* Profile Picture */}
+          {post && post.profile_picture && (
+            <Image width={256} height={256} className="rounded-full h-14 w-14 shadow-sm mb-4 z-10" src={post.profile_picture} alt="Author" />
+          )}
         </div>
 
       {/* Content and Buttons Column */}
@@ -105,7 +114,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
         </div>
         )}
         {parent && (
-            <Link className="flex w-full justify-between items-center" href={`http://localhost:3000/p/${post.id}`}>
+            <Link className="flex w-full justify-between items-center text-sm font-mono text-slate-400 font-light hover:underline hover:text-slate-600" href={`http://localhost:3000/p/${post.id}`}>
             Link
             </Link>
                     )}
