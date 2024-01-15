@@ -76,7 +76,7 @@ def get_likes_count(post_id: int):
 def get_comments_count(post_id: int): 
     session = SessionLocal()
     post = session.query(Post).get(post_id)
-    comment_count = post.replies.count()  # count the number of users who liked this post
+    comment_count = post.replies.count()  # count the number of users who commented on this post
     session.close()
     return {"comment_count": comment_count}
 
@@ -124,25 +124,31 @@ def check_for_more_replies(session, post_id, max_depth):
     return replies_exist if max_depth > 0 else False
 
 
-def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3, depth=0, liked_posts_by_user=None):
+def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=100, depth=0, liked_posts_by_user=None):
     if depth > max_depth:
         return []
-    
+
     if post_id not in posts_dict:
         return []  # or some other placeholder value
 
     post = posts_dict[post_id]
-
-
-    comment_count = comment_count_dict.get(post_id, 0)
-
     user = users_dict.get(post.user_poster_id)
 
     try:
         is_liked = post in liked_posts_by_user
     except:
         is_liked = False
+
     user_display_name = user.display_name if user else 'Unknown User'
+    replies_data = []
+
+    for reply in post.replies:
+        if reply.id in posts_dict:
+            reply_data = build_reply_tree(posts_dict, users_dict, comment_count_dict, reply.id, max_depth, depth + 1, liked_posts_by_user)
+            replies_data.append(reply_data)
+
+    # Recursive count of all nested replies
+    total_comment_count = sum(reply['comment_count'] for reply in replies_data) + len(post.replies)
 
     post_data = {
         'id': post.id,
@@ -155,21 +161,29 @@ def build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_de
         'is_liked': is_liked,
         'hasChildren': len(post.replies) > 0,
         'profile_picture': get_profile_picture(post.user_poster_id)['url'],
-        'comment_count': comment_count,
-        'replies': [build_reply_tree(posts_dict, users_dict, comment_count_dict, reply.id, max_depth, depth + 1) for reply in post.replies if reply.id in posts_dict]
+        'comment_count': total_comment_count,
+        'replies': replies_data
     }
     return post_data
 
 
 @router.get("/posts/{post_id}/comments")
-def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_depth=3, user_id: int = None):
+def read_post_comments(post_id: int, page: int = 1, per_page: int = 100, max_depth=30, user_id: int = None):
     offset = (page - 1) * per_page
     session = SessionLocal()
 
 
 
+
+
+
     # Fetch the initial post
     initial_post = session.query(Post).get(post_id)
+
+
+    # Determine if the post is a reply to another post
+    is_reply = initial_post.reply_to is not None
+    reply_to_post_id = initial_post.reply_to if is_reply else None
 
     # Fetch the user who is viewing the post
     #print("user_id: ", user_id)
@@ -223,11 +237,14 @@ def read_post_comments(post_id: int, page: int = 1, per_page: int = 10, max_dept
 
     comment_count_dict = {count[0]: count[1] for count in comment_counts}
 
-    reply_tree = build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=3, liked_posts_by_user=liked_posts_by_user)
+    reply_tree = build_reply_tree(posts_dict, users_dict, comment_count_dict, post_id, max_depth=100, liked_posts_by_user=liked_posts_by_user)
     
     # Adds a flag to the top-level post indicating if there are more top-level comments
     has_more_top_level_comments = session.query(Post.id).filter(Post.reply_to == post_id).offset(offset + per_page).limit(1).scalar() is not None
     reply_tree['has_more_top_level_comments'] = has_more_top_level_comments
+
+    reply_tree['is_reply'] = is_reply
+    reply_tree['reply_to_post_id'] = reply_to_post_id
     
     session.close()
     return reply_tree
@@ -449,7 +466,7 @@ def fetch_replies(comment_id: int, session, depth: int, max_depth: int) -> List[
 
     return replies_dict
 
-def get_comments_limited(post_id, top_level_limit=10, depth=1, max_depth=3):
+def get_comments_limited(post_id, top_level_limit=100, depth=1, max_depth=100):
     session = SessionLocal()
     post = session.query(Post).get(post_id)
     comments = session.query(Post).filter(Post.reply_to == post_id).limit(top_level_limit).all()

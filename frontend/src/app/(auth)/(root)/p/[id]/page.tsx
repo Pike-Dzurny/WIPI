@@ -19,6 +19,7 @@ import { useSession } from 'next-auth/react';
 import { useProfilePic } from '@/components/ProfilePicContext';
 
 import Image from 'next/image'
+import PostComponent from '@/components/TopLevelPost';
 
 // Define the type for a comment
 type Comment = {
@@ -48,6 +49,8 @@ type Post = {
   profile_picture: string;
   is_liked: boolean;
   comment_count: number;
+  is_reply: boolean;
+  parentComment: Comment;
 };
 
 interface UserPostBase {
@@ -87,12 +90,25 @@ export default function Page({ params }: { params: { id: string } }) {
     profile_picture: '',
     is_liked: false,
     comment_count: 0,
+    is_reply: false,
+    parentComment: {
+      user_poster_id: 0,
+      user_display_name: '',
+      content: '',
+      likes_count: 0,
+      date_of_post: '',
+      id: 0,
+      reply_to: null,
+      replies: [],
+      hasChildren: false,
+      profile_picture: '',
+      is_liked: false,
+      comment_count: 0,
+    },
   });  
 
-
-
-
   const { profilePicUrl } = useProfilePic();
+  const [parentPost, setParentPost] = useState<Post | null>(null);
 
 
   // Fetch the post and its comments when the component mounts
@@ -104,8 +120,22 @@ export default function Page({ params }: { params: { id: string } }) {
       }
     })
       .then(response => {
-        console.log(response.data); // Log to check the response structure
         setPost(response.data);
+
+        if (response.data.reply_to && response.data.reply_to !== 0) {
+          // Replace this URL with the appropriate endpoint to fetch the parent post
+          console.log(response.data.reply_to);
+          console.log(`http://localhost:8000/posts/${response.data.reply_to}/`);
+          return axios.get(`http://localhost:8000/posts/${response.data.reply_to}/comments`);
+        }
+      })
+      .then(response => {
+        if (response) {
+          console.log(response.data);
+          setParentPost(response.data);
+        }
+
+
       })
       .catch(error => console.error(error));
     }
@@ -131,6 +161,12 @@ export default function Page({ params }: { params: { id: string } }) {
   };
 
   const formatRelativeTime = (dateString: string) => {
+
+    if (!dateString) {
+      console.error('dateString is undefined');
+      return '';
+    }
+
     const date = parseISO(dateString);
     let relativeTime = '';
     
@@ -319,12 +355,12 @@ export default function Page({ params }: { params: { id: string } }) {
       {comment.replies && comment.replies.map(reply => renderComment(reply, depth + 1))}
       
     {/* Load More Comments Button */}
-    {comment.hasChildren && (
+    {/* {comment.hasChildren && (
       <button 
         className="text-blue-500 hover:text-blue-700 text-sm font-semibold"
         onClick={() => loadMoreComments(comment.id)}>
         Load More Comments
-      </button> )}
+      </button> )} */}
 
     </div>
   );
@@ -451,82 +487,48 @@ const handleSubmit = async (postID: number) => {
   return (
     <div className='w-full'>
       <div className="relative rounded-t-2xl w-full">
-        <div className="flex pl-2 pr-4 rounded-t-2xl">
+        <div className="flex flex-col pl-2 pr-4 rounded-t-2xl">
+
+          {post && post.reply_to != null && (
+                    <div className="relative flex flex-row rounded-3xl py-4 w-full">
+
+              <PostComponent
+              post={parentPost}
+              toggleLike={toggleLike}
+              hasLiked={hasLiked}
+              likesCount={likesCount}
+              handleCopyClick={handleCopyClick}
+              formatRelativeTime={formatRelativeTime}
+              setIsChangeCircle={setIsChangeCircle}
+              isChangeCircle={isChangeCircle}
+              openComment={openComment}
+              setOpenComment={setOpenComment}
+              parent={true}
+              hasParent={post.reply_to != null}
+            />
+                      </div>
+
+           )}
           <div className="relative flex flex-row rounded-3xl py-4 w-full">
           {post && (
           <>
-            {/* Profile Picture Column */}
-            <div className="flex flex-col justify-start items-center mr-4 flex-shrink-0">
-              <Image width={256} height={256} className="rounded-full h-14 w-14 shadow-sm mb-4" src={post.profile_picture} alt="Author" />
-            </div>
-
-            {/* Content and Buttons Column */}
-            {/* Content */}
-            <div className="flex flex-col w-full">
-              <div className="flex flex-col justify-between overflow-hidden">
-                  <div>
-                    {/* Author and Date */}
-                    <div className='flex flex-row justify-between'>
-                      <p className='font-medium'>{post.user_display_name}</p>
-                      <div className='' title={post.date_of_post}>{formatRelativeTime(post.date_of_post)}</div>
-                    </div>
-                    {/* Content */}
-                    <div className="overflow-hidden overflow-wrap break-words pb-2">
-                      <p className="hyphens-auto">{post.content}</p>
-                    </div>
-                  </div>
-                
-                </div>
-
-              <div className="flex w-full justify-between items-center">
-
-                  <div className="flex items-center">
-                    <span 
-                      className={`cursor-pointer select-none material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`} 
-                      style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleLike();
-                      }}
-                    >
-                      favorite
-                    </span>
-                    <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{likesCount}</p>            
-                  </div>
-                  <div className="flex items-center">
-                    <span 
-                      className={`cursor-pointer select-none material-symbols-sharp rounded-full p-2 ${openComment ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`} 
-                      style={openComment ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
-                    >
-                      chat_bubble
-                    </span>
-                    <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{post.comment_count}</p>
-                  </div>
-                  <span 
-                    className={`cursor-pointer select-none material-symbols-sharp rounded-full p-2 ${isChangeCircle ? 'text-lime-400' : 'text-slate-500'} hover:text-lime-600 hover:bg-gray-200`} 
-                    style={isChangeCircle ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24"} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24"}}
-                    onClick={() => setIsChangeCircle(!isChangeCircle)}
-                  >
-                    change_circle
-                  </span>
-                  <span 
-                    className="cursor-pointer select-none material-symbols-sharp text-slate-500 hover:text-amber-600 hover:bg-gray-200 rounded-full p-2" 
-                    style={true ? {fontVariationSettings: "'FILL' 1, 'wght' 200, 'GRAD' -25, 'opsz' 24"} : {}}
-                    onClick={
-                      (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleCopyClick()
-                      }
-                    }
-                  >
-                    ios_share
-                  </span>
-                </div>
-              </div>
+            <PostComponent
+              post={post}
+              toggleLike={toggleLike}
+              hasLiked={hasLiked}
+              likesCount={likesCount}
+              handleCopyClick={handleCopyClick}
+              formatRelativeTime={formatRelativeTime}
+              setIsChangeCircle={setIsChangeCircle}
+              isChangeCircle={isChangeCircle}
+              openComment={openComment}
+              setOpenComment={setOpenComment}
+              parent={false}
+              hasParent={post.reply_to != null}
+            />
           </>
-        )}   </div>
+        )}   
+        </div>
         </div>
         <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional" />

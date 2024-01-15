@@ -14,6 +14,8 @@ export interface Post {
     content: string;
     user_poster_id: number;
     user: User;
+    profile_picture: string;
+    user_display_name: string;
 }
 
 
