@@ -16,6 +16,7 @@ export interface Post {
     user: User;
     profile_picture: string;
     user_display_name: string;
+    reply_to: number | null;
 }
 
 

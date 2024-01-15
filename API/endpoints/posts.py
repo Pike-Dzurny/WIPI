@@ -300,7 +300,8 @@ def read_friend_posts(user_id: int, page: int = 1, per_page: int = 6):
                 "likes_count": likes_count,
                 "comments_count": comments_count,
                 "user_has_liked": user_has_liked,
-                "user_has_commented": user_has_commented
+                "user_has_commented": user_has_commented,
+                "reply_to": post.reply_to
             }
         }
         for post, account_name, bio, display_name, profile_picture, likes_count, comments_count, user_has_liked, user_has_commented in posts

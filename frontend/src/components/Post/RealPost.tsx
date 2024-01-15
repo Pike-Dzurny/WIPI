@@ -253,7 +253,12 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
         <div className="flex flex-col justify-between overflow-hidden">
           <div>
             <div className='flex flex-row justify-between'>
-              <div className="font-medium">{post.user.account_name}</div>
+              <div className='flex flex-row justify-start items-center'>
+                <div className="font-medium">{post.user.account_name}</div>
+                {post.reply_to && (
+                  <a className="ml-1 text-sm text-slate-500 font-light font-mono italic items-center" href={`http://localhost:3000/p/${post.reply_to}`}>→ #{post.reply_to}</a>
+                )}
+              </div>
               <div className="ml-2 text-right font-light" title={date.toString()}>{relativeTime}</div>
             </div>
             <div className="overflow-hidden overflow-wrap break-words pb-2">
