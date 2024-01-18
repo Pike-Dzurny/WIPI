@@ -96,6 +96,9 @@ class PostBase(BaseModel):
 class UpdateUsernameRequest(BaseModel):
     username: str
 
+class UpdateBioRequest(BaseModel):
+    bio: str
+
 class PasswordChangeRequest(BaseModel):
     oldPassword: str
     newPassword: str

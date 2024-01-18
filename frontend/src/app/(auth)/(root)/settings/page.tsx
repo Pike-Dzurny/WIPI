@@ -23,6 +23,10 @@ export default function AboutPage() {
   const [email, setEmail] = useState('');
   const [emailmessage, setEmailMessage] = useState<string | null>(null);
 
+
+  const [bio, setBio] = useState('');
+  const [bioMessage, setBioMessage] = useState<string | null>(null);
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -249,6 +253,24 @@ const handleUpload = async () => {
     }
   }
 
+  console.log("Username:", bio);
+  if (bio) {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/bio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ bio: bio }),
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+    } else {
+      throw new Error('Failed to update bio');
+    }
+  }
+
   // Email
   if (email) {
     const formData = new FormData();
@@ -374,6 +396,10 @@ const handleAccountDeletion = async () => {
                 />
                 {backgroundMessage && <b className='text-red-500'>{backgroundMessage}</b>}
               </div>
+              <div className='mb-4'>
+                  <p>Change User Bio</p>
+                  <input type="text" placeholder="New User Bio" value={bio} onChange={(e) => setBio(e.target.value)} />
+                </div>
                 <div className='mb-4'>
                   <p>Change User Name</p>
                   <input type="text" placeholder="New User Name" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -383,6 +409,7 @@ const handleAccountDeletion = async () => {
                   <p>Change Email Address</p>
                   <input type="email" placeholder="New Email Address" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
+
                 <div className=''>
                   <button className='bg-sky-500 text-white rounded-lg p-2' onClick={handleUpload}>Save Changes</button>
                 </div>

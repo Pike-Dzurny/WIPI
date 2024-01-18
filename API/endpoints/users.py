@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_400_BAD_REQUEST
-from api_models import AuthDetails, SignUpUser, UpdateUsernameRequest, UsernameAvailability, PasswordChangeRequest
+from api_models import AuthDetails, SignUpUser, UpdateBioRequest, UpdateUsernameRequest, UsernameAvailability, PasswordChangeRequest
 from sqlalchemy.orm import declarative_base, joinedload, sessionmaker
 import re
 
@@ -444,6 +444,15 @@ def get_username(user_id: int, db: Session = Depends(get_db)):
             return {"username": user.display_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
+    
+@router.post("/user/{user_id}/username")
+def update_username(user_id: int, request: UpdateUsernameRequest, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.display_name = request.username
+    db.commit()
+    return {"message": "Username updated successfully"}
 
 @router.get("/user/{user_id}/accountname")
 def get_account_name(user_id: int, db: Session = Depends(get_db)):
@@ -457,14 +466,30 @@ def get_account_name(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e)) 
 
     
-@router.post("/user/{user_id}/username")
-def update_username(user_id: int, request: UpdateUsernameRequest, db: Session = Depends(get_db)):
+
+
+
+@router.get("/user/{user_id}/bio")
+def get_bio(user_id: int, db: Session = Depends(get_db)):
+    try:
+        user = db.query(User).get(user_id)
+        if user is None:
+            raise HTTPException(status_code=404, detail=str(e)) 
+        else:
+            return {"username": user.display_name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
+    
+
+
+@router.post("/user/{user_id}/bio")
+def set_bio(user_id: int, request: UpdateBioRequest, db: Session = Depends(get_db)):
     user = db.query(User).get(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    user.display_name = request.username
+    user.bio = request.bio
     db.commit()
-    return {"message": "Username updated successfully"}
+    return {"message": "Bio updated successfully"}
 
  
 @router.post("/user/{user_id}/email")
