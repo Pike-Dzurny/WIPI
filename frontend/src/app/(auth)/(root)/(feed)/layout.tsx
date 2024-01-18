@@ -51,6 +51,7 @@ function RootLayout({
   const { status } = useSession();
   const { data: session } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [bio, setBio] = useState('');
   
   const context = useContext(OverlayContext);
   
@@ -193,6 +194,7 @@ const fetchusername = async () => {
   }
 }
 
+
 const [accountName, setaccountName] = useState('');
 const fetchaccountname = async () => {
   try {
@@ -208,6 +210,20 @@ const fetchaccountname = async () => {
   }
 }
 
+const fetchbio = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/bio`);
+    if (response.ok) {
+      const data = await response.json();
+      setBio(data.bio);
+    } else {
+      console.error('Failed to fetch bio');
+    }
+  } catch (error) {
+    console.error('Failed to fetch bio:', error);
+  }
+}
+
 
   useEffect(() => {
 
@@ -216,30 +232,13 @@ const fetchaccountname = async () => {
       fetchusername();
       fetchPfpUrl();
       fetchaccountname();
+      fetchbio();
     }
   }, [session?.user?.id]);
 
   //const ProfilePicContext = React.createContext('');
   const { profilePicUrl, backgroundPicUrl, followerCount, followingCount } = useProfilePic();
 
-
-
-  // const [followings, setFollowings] = useState(0);
-  // const [followers, setFollowers] = useState(0);
-
-  // useEffect(() => {
-  //   console.log("Fetching follow counts for user ID: ", session?.user?.id);
-  //   if (!session?.user?.id) {
-  //     return;
-  //   }
-  //   fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       setFollowings(data.followingCount);
-  //       setFollowers(data.followersCount);
-  //     });
-  //     console.log("Follow counts: ", followings, followers);
-  // }, [session?.user?.id]);
 
   const queryClient = new QueryClient();
 
@@ -250,7 +249,7 @@ const fetchaccountname = async () => {
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                 <main className="w-full">
                     <div className="relative rounded-t-2xl">
-                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} name="" />            
+                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name="" />            
                     </div>
                     <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
                       <Dropdown />

@@ -11,9 +11,10 @@ interface ProfileCardProps {
   followingCount: number;
   followersCount: number;
   name: string;
+  bio: string;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount  }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio }) => {
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
@@ -32,7 +33,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
       <Image src={backgroundImage} width={100} height={100} alt="Background Image" className="w-full max-h-72" />
       <div className="absolute inset-0 bg-white/10 backdrop-blur-lg"></div> {/* Adjust the blur and color as needed */}
     </div>
+
     <div className="absolute inset-0 flex items-center justify-center">
+      <div className=''>{bio}</div>
       <div className="relative flex flex-row justify-center items-center bg-indigo-50 border border-indigo-200 p-20 rounded-3xl w-5/6">  
         <div className='absolute -left-4 transform hover:scale-110 transition-transform'>
           {profileImage}
