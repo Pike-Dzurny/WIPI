@@ -27,6 +27,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
     setIsOverlayOpen(true);
   };
 
+  console.log("profilecard", bio);
+
   return (  
   <div className="relative">
     <div className="relative md:rounded-t-xl w-full h-4/6 overflow-hidden">
@@ -35,7 +37,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
     </div>
 
     <div className="absolute inset-0 flex items-center justify-center">
-      <div className=''>{bio}</div>
+      <div className='absolute items-center justify-center'>{bio}</div>
       <div className="relative flex flex-row justify-center items-center bg-indigo-50 border border-indigo-200 p-20 rounded-3xl w-5/6">  
         <div className='absolute -left-4 transform hover:scale-110 transition-transform'>
           {profileImage}

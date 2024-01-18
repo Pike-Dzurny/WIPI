@@ -476,7 +476,7 @@ def get_bio(user_id: int, db: Session = Depends(get_db)):
         if user is None:
             raise HTTPException(status_code=404, detail=str(e)) 
         else:
-            return {"username": user.display_name}
+            return {"bio": user.bio}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
     
@@ -484,6 +484,8 @@ def get_bio(user_id: int, db: Session = Depends(get_db)):
 
 @router.post("/user/{user_id}/bio")
 def set_bio(user_id: int, request: UpdateBioRequest, db: Session = Depends(get_db)):
+    print(request.bio)
+    print("test")
     user = db.query(User).get(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
