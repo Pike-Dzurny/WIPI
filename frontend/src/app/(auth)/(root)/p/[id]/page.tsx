@@ -61,7 +61,7 @@ interface UserPostBase {
 
 
 export default function Page({ params }: { params: { id: string } }) {
-  const colors = ['indigo-500', 'red-500', 'blue-500', 'lime-500', 'purple-500'];
+  const colors = ['green-500', 'yello-500', 'blue-500', 'red-500'];
   const { status } = useSession();
   const { data: session } = useSession();
   const [postContent, setPostContent] = useState('');
@@ -264,6 +264,7 @@ export default function Page({ params }: { params: { id: string } }) {
         // Toggle the like state for the comment
         return {
           ...comment,
+          likes_count: comment.likes_count + (comment.is_liked ? -1 : 1),
           is_liked: !comment.is_liked, // Assuming you have an 'is_liked' field
           // Update any other relevant fields (e.g., likes_count)
         };
@@ -279,12 +280,7 @@ export default function Page({ params }: { params: { id: string } }) {
     });
   };
 
-  const handleReplySubmit = (replyContent: string, replyToId: number) => {
-    console.log("Reply Content:", replyContent);
-    console.log("Replying to Comment ID:", replyToId);
-    // Add your logic to submit the reply
-    setActiveReplyId(null); // Reset the active reply ID after submitting
-  };
+
 
   useEffect(() => {
     // Scroll to top on page load
@@ -342,11 +338,11 @@ export default function Page({ params }: { params: { id: string } }) {
     <div 
       key={comment.id} 
       className={clsx(
-        'pt-2 pl-2 ', 
+        'pt-2 pl-2', 
         { 'ml-[20px]': depth > 0},
         { 'border-l': depth > 0},
         { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 },
-        { [`border-${colors[depth % colors.length]}`]: depth > 0 }
+        { [`border-${colors[(depth+1) % colors.length]}`]: depth > 0 },
       )}
     >
     <div className="flex items-start space-x-4">
@@ -355,22 +351,34 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className='flex flex-col'>
-          <div className='flex flex-row gap-x-1'>
+          <div className='flex flex-row gap-x-1 break-all'>
             <p className='font-medium'>{comment.user_display_name}</p>
             <div className='' title={comment.date_of_post}>{formatRelativeTime(comment.date_of_post)}</div>
           </div>
 
-            <div className='border-l border-t border-b p-2 rounded-l-lg overflow-hidden overflow-wrap break-words max-w-lg'>
-            <p className='hyphens-auto'>{comment.content}</p>
+          <div className='border-l border-t border-b p-2 rounded-l-lg break-all'>
+          <div className={`overflow-wrap break-words w-[${Math.round(100/(depth+5))}%]`}>
+            <p className='hyphens-auto '>{comment.content}</p>
             </div>
+          </div>
         </div>
-        <button className="font-mono" onClick={() => handleReplyClick(comment.id)}>Reply</button>
+        <button           className={`font-mono  ${comment.is_liked ? 'text-red-500' : ''}`}>
+          {comment.likes_count}
+        </button>
         <button 
-      className={`ml-2 font-mono  ${comment.is_liked ? 'text-red-500' : ''}`}
-      onClick={() => toggleCommentLike(comment.id)}
-    >
-      Like
-    </button>
+          className={`ml-2 font-mono  ${comment.is_liked ? 'text-red-500' : ''}`}
+          onClick={() => toggleCommentLike(comment.id)}
+        >
+          Like
+        </button>
+        <button className="ml-2 font-mono" onClick={() => handleReplyClick(comment.id)}>Reply</button>
+
+        <a 
+          className={`ml-2 font-mono`}
+          href={`http://localhost:3000/p/${comment.id}`}
+        >
+          Link
+        </a>
           </div>
       </div>
       {activeReplyId === comment.id && (
@@ -565,7 +573,7 @@ const handleSubmit = async (postID: number) => {
 
 
   return (
-    <div className='w-full'>
+    <div className=''>
       <div className="relative rounded-t-2xl">
         <div className="flex flex-col pl-2 pr-4 rounded-t-2xl">
 
@@ -680,7 +688,7 @@ const handleSubmit = async (postID: number) => {
         </div>
         <div>
         {post && post.replies.map((comment, index) => (
-          <div key={comment.id}>
+          <div key={comment.id} className=''>
             {renderComment(comment)}
             {index < post.replies.length - 1 && <hr />}
           </div>

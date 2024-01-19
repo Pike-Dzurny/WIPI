@@ -40,12 +40,12 @@ const PostComponent: React.FC<PostComponentProps> = ({
         {/* Profile Picture Column */}
         <div className="relative flex flex-col justify-start items-center mr-4 flex-shrink-0">
           {/* Line going up if there's a parent */}
-          {hasParent && !parent && (
-            <div className="absolute left-1/2 w-px h-3/4 bg-slate-200 transform -translate-y-1/2"></div>
-          )}
+          {/* {hasParent && !parent && (
+            <div className="absolute left-1/2 top-0 w-px h-1/2 bg-slate-200 -translate-y-32"></div>
+          )} */}
           {/* Line going down if there are replies */}
           {parent && (
-            <div className="absolute bottom-0 left-1/2 w-px h-4/5 bg-slate-200 transform translate-y-1/2"></div>
+            <div className="absolute bottom-0 left-1/2 w-px h-full bg-slate-200 translate-y-14"></div> 
           )}
           {/* Profile Picture */}
           {post && post.profile_picture && (
@@ -65,7 +65,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
             </div>
             {/* Post Content */}
             <div className="overflow-hidden overflow-wrap break-words">
-              <p className="hyphens-auto">{post.content}</p>
+              <p className="hyphens-auto break-all">{post.content}</p>
               <p className='text-sm text-slate-500 font-light font-mono  italic'>#{post.id}</p>
 
             </div>
@@ -76,7 +76,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
         {!parent && (
         <div className="flex w-full justify-between items-center">
           {/* Like Button */}
-          <span className={`cursor-pointer select-none material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`}
+          <div className='select-none flex flex-row items-center'>
+          <span className={`cursor-pointer material-symbols-sharp rounded-full p-2 ${hasLiked ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 hover:bg-gray-200`}
             style={hasLiked ? {fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' -25, 'opsz' 24", padding: '10px'} : {fontVariationSettings: "'FILL' 0, 'wght' 200, 'GRAD' -25, 'opsz' 24", padding: '10px'}}
             onClick={(e) => {
               e.preventDefault();
@@ -85,7 +86,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
             }}>
             favorite
           </span>
-          <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{likesCount}</p>     
+            <p className="font-light" style={{ width: '10px', textAlign: 'right' }}>{likesCount}</p>
+          </div>
 
           {/* Comment Button */}
           <span className={`cursor-pointer select-none material-symbols-sharp rounded-full p-2 ${openComment ? 'text-sky-500' : 'text-slate-500'} hover:text-sky-500 hover:bg-gray-200`}

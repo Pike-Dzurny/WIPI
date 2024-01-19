@@ -249,7 +249,7 @@ const fetchbio = async () => {
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                 <main className="w-full">
                     <div className="relative rounded-t-2xl">
-                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name="" />            
+                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name={username} />            
                     </div>
                     <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
                       <Dropdown />

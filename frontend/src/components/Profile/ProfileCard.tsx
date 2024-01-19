@@ -14,7 +14,7 @@ interface ProfileCardProps {
   bio: string;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio, name }) => {
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
@@ -37,8 +37,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
     </div>
 
     <div className="absolute inset-0 flex items-center justify-center">
-      <div className='absolute items-center justify-center'>{bio}</div>
       <div className="relative flex flex-row justify-center items-center bg-indigo-50 border border-indigo-200 p-20 rounded-3xl w-5/6">  
+      <div className='flex flex-col items-center justify-center absolute'>
+        <div className='font-bold'>{name}</div>
+        <div className='italic'>{bio}</div>
+      </div>
         <div className='absolute -left-4 transform hover:scale-110 transition-transform'>
           {profileImage}
         </div>
