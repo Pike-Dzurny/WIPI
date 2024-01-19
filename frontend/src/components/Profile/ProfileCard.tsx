@@ -46,8 +46,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
           {profileImage}
         </div>
         <div className='absolute bottom-0 flex flex-row justify-between border-t border-l border-r rounded-t-lg border-indigo-200 bg-indigo-50'>
-            <div className='border-r border-indigo-200 p-2'>Following: {followingCount}</div>
-            <div className='p-2'>Followers: {followersCount}</div>        
+            <div className='border-r border-indigo-200 p-2 cursor-pointer'>Following: {followingCount}</div>
+            <div className='p-2 cursor-pointer'>Followers: {followersCount}</div>        
         </div>
         <div className={`profile-card`} />
           <button onClick={handleClick} className="absolute -bottom-4 -right-4 bg-indigo-500 border-indigo-300 hover:bg-indigo-400 hover:shadow-sm shadow-lg  text-white rounded-full py-4 px-6 text-2xl">+</button>
