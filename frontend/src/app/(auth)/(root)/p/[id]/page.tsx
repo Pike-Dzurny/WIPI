@@ -386,17 +386,17 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className="flex-1 min-w-0">
               <div className="h-[v30]">
                 {/* Textarea container */}
-                <div className={clsx('overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600', 
+                <div className={clsx('overflow-hidden rounded-lg shadow-sm w-full ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600', 
                       { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}>                
                 <textarea
                     name="reply"
-                    className={clsx("block outline-none", { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}
+                    className={clsx("p-2 block outline-none w-full resize-none", { 'bg-white': depth % 2 === 0, 'bg-slate-50': depth % 2 !== 0 })}
                     value={repliesContent[comment.id] || ""}
                     onChange={(e) => handleReplyChange(comment.id, e.target.value)}
                     placeholder="Write a reply..."
                   ></textarea>
                   {/* Button Container */}
-                  <div className="flex justify-end py-2">
+                  <div className="flex justify-end py-2 px-2">
                     <button type="submit" className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onClick={() => handleSubmit(comment.id)}>Post</button>
                   </div>
                 </div>
@@ -623,7 +623,7 @@ const handleSubmit = async (postID: number) => {
         </div>
         </div>
         {/* Reply box */}
-        <div className="p-4 border-b">
+        <div className="py-4 pl-2 pr-4 border-b">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
               {profilePicUrl && 
@@ -634,19 +634,19 @@ const handleSubmit = async (postID: number) => {
               <form action="#" className="relative">
                 <div className="overflow-hidden rounded-lg shadow-sm ring-0 ring-gray-300 border outline-none focus-within:ring-indigo-600">
                   <label className="sr-only">Add your comment</label>
-                  <textarea name="comment" id="comment" className="block w-full resize-none border-0 bg-transparent outline-none py-1.5 px-2 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 ring-0" 
+                  <textarea name="comment" id="comment" className="block w-full resize-none border-0 bg-transparent outline-none p-2 text-gray-900 placeholder:text-gray-400" 
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
-                  placeholder="Reply"></textarea>
+                  placeholder="Write a comment..."></textarea>
 
-                  <div className="py-2 px-4" aria-hidden="true">
+                  <div className="py-2 px-2" aria-hidden="true">
                     <div className="py-px">
                       <div className="h-9 px-8"></div>
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
+                <div className="absolute inset-x-0 bottom-0 flex justify-between py-2  pr-2">
                   <div className="flex items-center space-x-5">
                     <div className="flex items-center">
                     </div>

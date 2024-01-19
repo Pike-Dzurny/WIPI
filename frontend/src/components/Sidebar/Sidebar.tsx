@@ -100,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
         </button>
         <hr className="border-slate-300 border-1" />
         <div className='bg-white  w-30 h-12 rounded-full shadow border-black mt-4 flex items-center group'>
-          <div className="relative cursor-pointer" onClick={toggleMenu}>
+          <div className="relative" onClick={toggleMenu}>
             {/* Profile picture */}
             {!profilePicUrl &&
               <div className='w-14 h-14 rounded-full overflow-hidden'>
@@ -118,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
             </div>
 
             }
-            <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white group-hover:animate-ping ${userStatus === 'online' ? 'bg-green-500' :
+            {/* <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white group-hover:animate-ping ${userStatus === 'online' ? 'bg-green-500' :
               userStatus === 'offline' ? 'bg-gray-400' :
                 userStatus === 'dnd' ? 'bg-red-500' :
                   'bg-gray-500' // default color
@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
               }`}></div>
             {showMenu && (
               <div className="absolute bg-white p-4 rounded-lg shadow-lg z-30 w-30 md:w-80 mt-2">
-                {/* Menu content here */}
+                {/* Menu content here *}/
                 <div className='flex flex-col'>
                   <div className='flex flex-row items-center mb-2 hover:bg-slate-100 p-2 rounded-lg group' onClick={setOnline}>
                     <div className='w-4 h-4 bg-green-500 rounded-full border-2 border-white group-hover:border-slate-100 mr-2'></div>
@@ -163,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ username, accountName }) => {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
           <div className='flex w-full'>
             <div className='flex flex-col ml-1 leading-snug justify-start line-clamp-1'>
