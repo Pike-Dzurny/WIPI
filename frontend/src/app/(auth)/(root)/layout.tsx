@@ -248,7 +248,7 @@ const fetchaccountname = async () => {
           </div>
           <div className='md:hidden block backdrop-blur-sm	fixed bottom-0 w-screen h-14 z-20 border-t border-slate-100 border-2'>
             {//<MobileSidebar id={Number(session?.user?.id)} name={String(session?.user?.name)} pfp={pfpUrl} />}
-  }
+            }
           </div>
           <div className="flex-grow basis-1/5">
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
@@ -273,7 +273,6 @@ const fetchaccountname = async () => {
               X
             </button>
             <div className="flex items-start space-x-4">
-              {/* ... */}
               <div className="min-w-0 flex-1">
                 <form action="#" className="relative" onSubmit={handleSubmit}>
                   <div className="overflow-hidden rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
@@ -289,10 +288,8 @@ const fetchaccountname = async () => {
                       value={postContent}
                       onChange={(e) => setPostContent(e.target.value)}
                     />
-                    {/* ... */}
                   </div>
                   <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
-                    {/* ... */}
                     <div className="flex-shrink-0">
                       <button
                         type="submit"

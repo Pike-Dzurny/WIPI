@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
-import './ProfileCard.css'; // make sure to import your CSS file
-import Image from 'next/image'; // or 'react-bootstrap/Image'
+import React, { useContext, useState } from 'react';
+import Image from 'next/image';
 import { OverlayContext } from '../OverlayContext';
+import Link from 'next/link';
 
 interface ProfileCardProps {
   backgroundImage: string;
@@ -12,15 +12,41 @@ interface ProfileCardProps {
   followersCount: number;
   name: string;
   bio: string;
+  id: number | undefined;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio, name }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio, name, id }) => {
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
   }
   const { isOverlayOpen, setIsOverlayOpen } = context;
   const [isClicked, setIsClicked] = React.useState(false);
+
+
+  interface User {
+    id: number;
+    display_name: string;
+  }
+
+  const [followers, setFollowers] = useState<User[]>([]);
+  const [following, setFollowing] = useState<User[]>([]);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
+
+  const fetchFollowers = async () => {
+    console.log(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/followers`)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/followers`);
+    const data = await response.json();
+    console.log("fetchFollowers", data);
+    setFollowers(data);
+  };
+
+  const fetchFollowing = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/following`);
+    const data = await response.json();
+    setFollowing(data);
+  };
 
 
   const handleClick = () => {
@@ -46,8 +72,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
           {profileImage}
         </div>
         <div className='absolute bottom-0 flex flex-row justify-between border-t border-l border-r rounded-t-lg border-indigo-200 bg-indigo-50'>
-            <div className='border-r border-indigo-200 p-2 cursor-pointer'>Following: {followingCount}</div>
-            <div className='p-2 cursor-pointer'>Followers: {followersCount}</div>        
+            <Link 
+            className='border-r border-indigo-200 p-2 cursor-pointer'
+            href={`http://localhost:3000/following/${id}`}>
+            Following: {followingCount}
+            </Link>
+            <Link 
+              className='p-2 cursor-pointer'
+              href={`http://localhost:3000/followers/${id}`}>
+              Followers: {followersCount}
+            </Link>        
         </div>
         <div className={`profile-card`} />
           <button onClick={handleClick} className="absolute -bottom-4 -right-4 bg-indigo-500 border-indigo-300 hover:bg-indigo-400 hover:shadow-sm shadow-lg  text-white rounded-full py-4 px-6 text-2xl">+</button>

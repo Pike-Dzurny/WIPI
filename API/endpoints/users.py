@@ -542,7 +542,7 @@ def get_followers(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     followers_list = db.query(followers).filter(followers.c.followed_id == user_id).all()
-    followers_list = [db.query(User).get(follower.follower_id).to_dict() for follower in followers_list]
+    followers_list = [db.query(User).get(follower.follower_id)["account_name"].to_dict() for follower in followers_list]
 
     return followers_list
 
@@ -553,7 +553,7 @@ def get_following(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     following_list = db.query(followers).filter(followers.c.follower_id == user_id).all()
-    following_list = [db.query(User).get(following.followed_id).to_dict() for following in following_list]
+    following_list = [{"id": db.query(User).get(following.followed_id).id, "display_name": db.query(User).get(following.followed_id).display_name} for following in following_list]
 
     return following_list
 

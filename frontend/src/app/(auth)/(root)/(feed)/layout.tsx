@@ -58,7 +58,8 @@ function RootLayout({
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
   }
-  const { isOverlayOpen, setIsOverlayOpen } = context;  const [postContent, setPostContent] = useState('');
+  const { isOverlayOpen, setIsOverlayOpen } = context;  
+  const [postContent, setPostContent] = useState('');
 
   const { setNewPostAdded } = usePostUpdate();
 
@@ -249,7 +250,7 @@ const fetchbio = async () => {
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
                 <main className="w-full">
                     <div className="relative rounded-t-2xl">
-                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name={username} />            
+                      <ProfileCard backgroundImage={backgroundPicUrl} profileImage={<PFP profilePictureUrl={profilePicUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name={username} id={session?.user?.id} />            
                     </div>
                     <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
                       <Dropdown />
