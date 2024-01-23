@@ -181,7 +181,7 @@ const [followingCount, setFollowingCount] = useState(0);
 const[followerCount, setFollowerCount] = useState(0);
 
 const fetchFollowingCount = async () => {
-  fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
+  fetch(`http://localhost:8000/user/${id}/follow_counts`)
   .then(response => response.json())
   .then(data => {
     setFollowingCount(data.followingCount);
