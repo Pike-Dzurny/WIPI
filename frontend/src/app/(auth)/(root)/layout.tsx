@@ -17,6 +17,7 @@ import { usePostUpdate } from '@/components/PostUpdateContext';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 
 
@@ -232,8 +233,8 @@ const fetchaccountname = async () => {
       });
   }, [session?.user?.id]);
 
-
-
+  const queryClient = new QueryClient();
+  
   if (status === 'authenticated' || status === 'loading') {
     return (
       <body className={`${font.className} antialiased sm:bg-gradient-to-br sm:from-sky-50 sm:via-slate-100 sm:to-indigo-100`}>
@@ -254,9 +255,10 @@ const fetchaccountname = async () => {
             <div className="flex flex-row pt-0 md:pt-10 rounded-none md:rounded-t-3xl">
               <div className="flex md:rounded-t-xl md:border-l md:border-r shrink-0 shadow-sm min-h-screen flex-col flex-1 justify-between mx-auto z-0 bg-white">
               <OverlayContext.Provider value={{ isOverlayOpen, setIsOverlayOpen }}>
+                <QueryClientProvider client={queryClient}>
 
                     {children}
-
+                </QueryClientProvider>
               </OverlayContext.Provider> 
               </div>
             </div>

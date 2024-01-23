@@ -24,6 +24,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   const id = parseInt(params.id);
 
+  const  queryClient = useQueryClient();
 
 
 
@@ -63,7 +64,7 @@ export default function Page({ params }: { params: { id: string } }) {
     hasNextPage,
     isFetchingNextPage,
     refetch,
-  } = useInfiniteQuery('userPosts', fetchUserPosts, {
+  } = useInfiniteQuery(`user${id}Posts`, fetchUserPosts, {
     getNextPageParam: (lastPage, allPages) => allPages.length + 1,
     enabled: !!session?.user?.id, // This will delay the query until the session ID is available
     staleTime: Infinity, // Adjust according to your needs
@@ -176,6 +177,18 @@ const fetchbio = async () => {
   }
 }
 
+const [followingCount, setFollowingCount] = useState(0);
+const[followerCount, setFollowerCount] = useState(0);
+
+const fetchFollowingCount = async () => {
+  fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
+  .then(response => response.json())
+  .then(data => {
+    setFollowingCount(data.followingCount);
+    setFollowerCount(data.followersCount);
+  });
+}
+
 
   useEffect(() => {
     if (id) {
@@ -184,6 +197,7 @@ const fetchbio = async () => {
       fetchBackgroundUrl();
       fetchaccountname();
       fetchbio();
+      fetchFollowingCount();
     }
   }, []);
 

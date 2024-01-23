@@ -23,7 +23,7 @@ import React from 'react';
 
 import { PFP } from '../../../../components/pfp';
 
-import { QueryClient, QueryClientProvider, useInfiniteQuery } from 'react-query';
+import { QueryClient, QueryClientProvider, useInfiniteQuery, useQueryClient } from 'react-query';
 import { useIntersection } from '@mantine/hooks';
 import  ProfileCard  from '../../../../components/Profile/ProfileCard'; // Import RealPost at the top of your file
 
@@ -241,7 +241,7 @@ const fetchbio = async () => {
   const { profilePicUrl, backgroundPicUrl, followerCount, followingCount } = useProfilePic();
 
 
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
 
 
   if (status === 'authenticated' || status === 'loading') {
