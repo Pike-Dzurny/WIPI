@@ -23,32 +23,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
   const { isOverlayOpen, setIsOverlayOpen } = context;
   const [isClicked, setIsClicked] = React.useState(false);
 
-
-  interface User {
-    id: number;
-    display_name: string;
-  }
-
-  const [followers, setFollowers] = useState<User[]>([]);
-  const [following, setFollowing] = useState<User[]>([]);
-  const [showFollowers, setShowFollowers] = useState(false);
-  const [showFollowing, setShowFollowing] = useState(false);
-
-  const fetchFollowers = async () => {
-    console.log(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/followers`)
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/followers`);
-    const data = await response.json();
-    console.log("fetchFollowers", data);
-    setFollowers(data);
-  };
-
-  const fetchFollowing = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/following`);
-    const data = await response.json();
-    setFollowing(data);
-  };
-
-
   const handleClick = () => {
     setIsOverlayOpen(true);
   };
