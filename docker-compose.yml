@@ -5,6 +5,10 @@ services:
     build: ./frontend
     environment:
       - BACKEND_URL=${BACKEND_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - SECRET_API_URL=${SECRET_API_URL}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -26,7 +30,13 @@ services:
     depends_on:
       - db
     environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
       - DATABASE_URL=${DATABASE_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - BUCKET_NAME=${BUCKET_NAME}
 
   db:
     image: postgres:latest

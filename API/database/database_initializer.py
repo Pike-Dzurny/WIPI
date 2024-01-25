@@ -13,12 +13,22 @@ from dotenv import load_dotenv
 from sqlalchemy import inspect, MetaData
 
 
-# Construct the path to the .env file
-env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+# # Construct the path to the .env file
+# env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 
-# Load the environment variables
-load_dotenv(dotenv_path=env_path)
+# # Load the environment variables
+# load_dotenv(dotenv_path=env_path)
 
+postgres_user = os.getenv('POSTGRES_USER')
+postgres_password = os.getenv('POSTGRES_PASSWORD')
+postgres_db = os.getenv('POSTGRES_DB')
+database_url = os.getenv('DATABASE_URL')
+aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+bucket_name = os.getenv('BUCKET_NAME')
+
+print(postgres_user, postgres_password, postgres_db, database_url, aws_access_key_id, aws_secret_access_key, bucket_name)
+print("TEST TEST TEST")
 
 # Check if the script is being run by Docker Compose
 if os.getenv('AWS_ACCESS_KEY_ID'):
