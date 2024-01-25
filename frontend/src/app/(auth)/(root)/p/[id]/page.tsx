@@ -114,7 +114,7 @@ export default function Page({ params }: { params: { id: string } }) {
   // Fetch the post and its comments when the component mounts
   useEffect(() => {
     if(session?.user.id) {
-    axios.get(`http://localhost:8000/posts/${id}/comments`, {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/posts/${id}/comments`, {
       params: {
         user_id: session?.user.id
       }
@@ -125,8 +125,8 @@ export default function Page({ params }: { params: { id: string } }) {
         if (response.data.reply_to && response.data.reply_to !== 0) {
           // Replace this URL with the appropriate endpoint to fetch the parent post
           console.log(response.data.reply_to);
-          console.log(`http://localhost:8000/posts/${response.data.reply_to}/`);
-          return axios.get(`http://localhost:8000/posts/${response.data.reply_to}/comments`);
+          console.log(`${process.env.NEXT_PUBLIC_API_URL}/posts/${response.data.reply_to}/`);
+          return axios.get(`${process.env.NEXT_PUBLIC_API_URL}/posts/${response.data.reply_to}/comments`);
         }
       })
       .then(response => {
@@ -202,7 +202,7 @@ export default function Page({ params }: { params: { id: string } }) {
   };
 
   const handleCopyClick = async () => {
-    const textToCopy = `http://localhost:3000/p/${id}`; // Replace with the actual link
+    const textToCopy = `${process.env.NEXT_PUBLIC_FRONTED_URL}/p/${id}`; // Replace with the actual link
     try {
       await navigator.clipboard.writeText(textToCopy);
 
@@ -291,7 +291,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   const loadMoreComments = async (commentId: number) => {
     try {
-      const response = await axios.get(`http://localhost:8000/posts/${commentId}/comments`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/posts/${commentId}/comments`);
       if (response.status === 200 && response.data && Array.isArray(response.data.replies)) {
         const newComments = response.data.replies.map((comment: { hasChildren: any; }) => ({
           ...comment,
@@ -375,7 +375,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
         <a 
           className={`ml-2 font-mono`}
-          href={`http://localhost:3000/p/${comment.id}`}
+          href={`${process.env.NEXT_PUBLIC_FRONTED_URL}/p/${comment.id}`}
         >
           Link
         </a>
@@ -485,7 +485,7 @@ const handleSubmit = async (postID: number) => {
 
   try {
     console.log('Trying to wait for response!'); // The authenticated user
-    const response = await fetch(`http://localhost:8000/post`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

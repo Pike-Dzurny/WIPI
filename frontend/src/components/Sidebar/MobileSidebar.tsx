@@ -28,7 +28,7 @@ export const MobileSidebar: React.FC<SidebarProps> = ({ id, name }) => {
     const fetchPfpUrl = async () => {
       try {
         // Use session.user.id to fetch the profile picture URL
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/pfp`);
         if (response.ok) {
           const data = await response.json();
           setProfilePictureUrl(data.url); // Use the URL of the response

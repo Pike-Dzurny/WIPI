@@ -57,7 +57,7 @@ export default function AboutPage() {
   
 
   const handlePasswordChange = async () => {  
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/passwordchange`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/passwordchange`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ const handleUpload = async () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/pfp`, {
         method: 'POST',
         body: formData,
       });
@@ -237,7 +237,7 @@ const handleUpload = async () => {
   // Username
   console.log("Username:", username);
   if (username) {
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/username`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -255,7 +255,7 @@ const handleUpload = async () => {
 
   console.log("Username:", bio);
   if (bio) {
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/bio`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/bio`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -276,7 +276,7 @@ const handleUpload = async () => {
     const formData = new FormData();
     formData.append('email', email);
     try {
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/email`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/email`, {
         method: 'POST',
         body: formData,
       });
@@ -296,7 +296,7 @@ const handleUpload = async () => {
       const formData = new FormData();
       formData.append('file', file);
       try {
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/background`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/background`, {
           method: 'POST',
           body: formData,
         });
@@ -326,7 +326,7 @@ const handleAccountDeletion = async () => {
   const formData = new FormData();
   formData.append('password', accountPassword);
 
-  const response = await fetch(`http://localhost:8000/users/${session.user.id}/delete`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${session.user.id}/delete`, {
     method: 'DELETE',
     body: formData,
   });

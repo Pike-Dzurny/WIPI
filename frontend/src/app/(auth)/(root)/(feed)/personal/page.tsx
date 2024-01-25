@@ -49,7 +49,7 @@ export default function Home() {
     }
   
     console.log("Fetching trending posts for user ID:", userId);
-    const baseUrl = `http://localhost:8000/posts/${userId}/user/`;
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/posts/${userId}/user/`;
     const params = new URLSearchParams({
       page: pageParam.toString(),
       per_page: '10'

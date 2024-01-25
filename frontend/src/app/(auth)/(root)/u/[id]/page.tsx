@@ -46,7 +46,7 @@ export default function Page({ params }: { params: { id: string } }) {
       return { pages: [], pageParams: [] };
     }
   
-    const baseUrl = `http://localhost:8000/posts/${id}/user/`;
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/posts/${id}/user/`;
     const params = new URLSearchParams({
       page: pageParam.toString(),
       per_page: '10'
@@ -99,7 +99,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const fetchPfpUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${id}/pfp`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/pfp`);
       if (response.ok) {
         const data = await response.json();
         setProfilePictureUrl(data.url); // Use the URL of the response
@@ -116,7 +116,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const fetchBackgroundUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${id}/pfp`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/pfp`);
       if (response.ok) {
         const data = await response.json();
         setBackgroundImage(data.url); // Use the URL of the response
@@ -133,7 +133,7 @@ export default function Page({ params }: { params: { id: string } }) {
 const [username, setName] = useState('');
 const fetchusername = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/user/${id}/username`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/username`);
     if (response.ok) {
       const data = await response.json();
       setName(data.username);
@@ -149,7 +149,7 @@ const fetchusername = async () => {
 const [accountName, setaccountName] = useState('');
 const fetchaccountname = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/user/${id}/accountname`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/accountname`);
     if (response.ok) {
       const data = await response.json();
       setaccountName(data.accountname);
@@ -165,7 +165,7 @@ const [bio, setBio] = useState('');
 
 const fetchbio = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/user/${id}/bio`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/bio`);
     if (response.ok) {
       const data = await response.json();
       setBio(data.bio);
@@ -181,7 +181,7 @@ const [followingCount, setFollowingCount] = useState(0);
 const[followerCount, setFollowerCount] = useState(0);
 
 const fetchFollowingCount = async () => {
-  fetch(`http://localhost:8000/user/${id}/follow_counts`)
+  fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/follow_counts`)
   .then(response => response.json())
   .then(data => {
     setFollowingCount(data.followingCount);

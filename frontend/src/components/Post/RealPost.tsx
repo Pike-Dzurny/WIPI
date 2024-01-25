@@ -47,7 +47,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
   //console.log(id);
 
   const handleCopyClick = async () => {
-    const textToCopy = `http://localhost:3000/p/${post.id}`; // Replace with the actual link
+    const textToCopy = `${process.env.NEXT_PUBLIC_FRONTED_URL}/p/${post.id}`; // Replace with the actual link
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopySuccess('Link copied!');
@@ -125,18 +125,18 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
     if(id === someUserId) return;
     clearTimeout(timeoutId.current); // Clear any existing timeout to prevent the popup from hiding
     
-    fetch(`http://localhost:8000/user/${id}/is_following/${someUserId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/is_following/${someUserId}`)
     .then(response => response.json())
     .then(data => setIsFollowing(data.is_following));
 
-    fetch(`http://localhost:8000/user/${someUserId}/background`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${someUserId}/background`)
     .then(response => {
       console.log(response);
       return response.json();
     })
     .then(data => setBackgroundUrl(data.url));
 
-    fetch(`http://localhost:8000/user/${someUserId}/follow_counts`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${someUserId}/follow_counts`)
     .then(response => response.json())
     .then(data => {
       console.log(data);
@@ -166,7 +166,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
   const followUser = () => {
     console.log("Follow user " + someUserId + " from user " + id + "");
-    fetch(`http://localhost:8000/user/${id}/follow/${someUserId}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/follow/${someUserId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
 
   const unfollowUser = () => {
     console.log("Follow user " + someUserId + " from user " + id + "");
-    fetch(`http://localhost:8000/user/${id}/unfollow/${someUserId}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}/unfollow/${someUserId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -258,7 +258,7 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
               <div className='flex flex-row justify-start items-center'>
                 <div className="font-medium">{post.user.account_name}</div>
                 {post.reply_to && (
-                  <a className="ml-1 text-sm text-slate-500 font-light font-mono italic items-center" href={`http://localhost:3000/p/${post.reply_to}`}>→ #{post.reply_to}</a>
+                  <a className="ml-1 text-sm text-slate-500 font-light font-mono italic items-center" href={`${process.env.NEXT_PUBLIC_FRONTED_URL}/p/${post.reply_to}`}>→ #{post.reply_to}</a>
                 )}
               </div>
               <div className="ml-2 text-right font-light" title={date.toString()}>{relativeTime}</div>

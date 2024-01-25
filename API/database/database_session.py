@@ -11,7 +11,6 @@ database_url = os.getenv('DATABASE_URL')
 if not database_url:
     raise ValueError("DATABASE_URL environment variable not found")
 
-#engine = create_engine('postgresql://postgres:pass@localhost:5432/mydatabase')
 engine = create_engine(database_url)
 
 # SessionLocal is a class that can be used to create a database session

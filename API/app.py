@@ -11,6 +11,7 @@ from endpoints.users import router as user_router
 from endpoints.posts import router as posts_router
 
 import boto3
+import os
 
 # The declarative_base() function returns a class that is used as a base class for our models
 Base = declarative_base()
@@ -23,7 +24,7 @@ app.include_router(posts_router)
 
 # Origins for CORS
 origins = [
-    "http://localhost:3000",  # adjust to match the origins you need
+    "http://localhost:3000",  
     "http://frontend:3000",
     "*",
 ]

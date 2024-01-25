@@ -51,7 +51,7 @@ export default function Home() {
     }
   
     console.log("Fetching posts for user ID:", userId);
-    const baseUrl = `http://localhost:8000/posts/${userId}/`;
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/posts/${userId}/`;
     const params = new URLSearchParams({
       page: pageParam.toString(),
       per_page: '10'

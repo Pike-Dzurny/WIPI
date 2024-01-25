@@ -65,7 +65,7 @@ function RootLayout({
     console.log('Trying to post!'); // The authenticated user
     try {
       console.log('Trying to wait for response!'); // The authenticated user
-      const response = await fetch(`http://localhost:8000/post`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ function RootLayout({
     const fetchPfpUrl = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/pfp`);
         if (response.ok) {
           const data = await response.json();
           setPfpUrl(data.url);
@@ -144,8 +144,8 @@ function RootLayout({
   const fetchPfpUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
-      const background_response = await fetch(`http://localhost:8000/user/${session?.user?.id}/pfp`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/pfp`);
+      const background_response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/pfp`);
       if (response.ok) {
         const data = await response.json();
         setProfilePicUrl(data.url); // Use the URL of the response
@@ -161,7 +161,7 @@ function RootLayout({
 const fetchBackgroundPicUrl = async () => {
     try {
       // Use session.user.id to fetch the profile picture URL
-      const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/background`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/background`);
       if (response.ok) {
         const data = await response.json();
         setBackgroundPicUrl(data.url); // Use the URL of the response
@@ -178,7 +178,7 @@ const fetchBackgroundPicUrl = async () => {
 const [username, setName] = useState('');
 const fetchusername = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/username`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/username`);
     if (response.ok) {
       const data = await response.json();
       setName(data.username);
@@ -193,7 +193,7 @@ const fetchusername = async () => {
 const [accountName, setaccountName] = useState('');
 const fetchaccountname = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/user/${session?.user?.id}/accountname`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/accountname`);
     if (response.ok) {
       const data = await response.json();
       setaccountName(data.accountname);
@@ -225,7 +225,7 @@ const fetchaccountname = async () => {
     if (!session?.user?.id) {
       return;
     }
-    fetch(`http://localhost:8000/user/${session?.user?.id}/follow_counts`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${session?.user?.id}/follow_counts`)
       .then(response => response.json())
       .then(data => {
         setFollowingCount(data.followingCount);
