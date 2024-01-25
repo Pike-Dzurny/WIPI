@@ -12,19 +12,28 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import inspect, MetaData
 
+
+# Construct the path to the .env file
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+
+# Load the environment variables
+load_dotenv(dotenv_path=env_path)
+
+
 # Check if the script is being run by Docker Compose
-if os.getenv('COMPOSE_PROJECT_NAME'):
+if os.getenv('AWS_ACCESS_KEY_ID'):
     # If the script is being run by Docker Compose, load the environment variables from the .env file
     postgres_user = os.getenv('POSTGRES_USER')
     postgres_password = os.getenv('POSTGRES_PASSWORD')
     postgres_db = os.getenv('POSTGRES_DB')
+    print("BEING RAN")
     #load_dotenv('.env')
 else:
     # If the script is not being run by Docker Compose, load the environment variables from the Docker environment
     postgres_password = ''
     postgres_user = 'postgres'
     postgres_db = 'postgres'
-    print('test')
+    print('NOT BEING RAN')
 
 print(postgres_user)
 
