@@ -219,8 +219,9 @@ export const RealPost: React.FC<RealPostProps> = ({ postObject, className, id })
           onClick={(e) => { e.preventDefault(); // Prevents default link navigation
           e.stopPropagation(); // Stops event from propagating to parent Link component}
           }}>
-
-          <Image className="rounded-full h-12 w-12 shadow-sm" src={post.user.profile_picture} alt="Author" height={512} width={512} />
+          <Link href={`/u/${post.user_poster_id}`}>
+          <Image className="rounded-full h-12 w-12 shadow-sm"  src={post.user.profile_picture} alt="Author" height={512} width={512} />
+          </Link>
           {(showPFPPopup && (id !== someUserId)) && (
             <div className="absolute bg-white rounded-2xl shadow-xl w-64 h-auto transform -translate-y-2/3 z-50 flex flex-col cursor-default">
             <Link href={`/u/${post.user_poster_id}`}>
