@@ -206,7 +206,7 @@ const fetchFollowingCount = async () => {
   
   <main className="w-full">
   <div className="relative rounded-t-2xl">
-    <ProfileCard backgroundImage={backgroundImage} profileImage={<PFP profilePictureUrl={profilePictureUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name={username} id={id} />            
+    <ProfileCard backgroundImage={backgroundImage} profileImage={<PFP profilePictureUrl={profilePictureUrl} />} isOverlayOpen={isOverlayOpen} setIsOverlayOpen={setIsOverlayOpen} followingCount={followingCount} followersCount={followerCount} bio={bio} name={username} id={id} client_id={session?.user?.id} />            
   </div>
   <div className='backdrop-blur-sm border-slate-300 border-b border-t sticky top-0 z-10'>
     <Dropdown />

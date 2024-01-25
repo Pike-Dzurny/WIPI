@@ -13,9 +13,10 @@ interface ProfileCardProps {
   name: string;
   bio: string;
   id: number | undefined;
+  client_id: number | undefined;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio, name, id }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage, followingCount, followersCount, bio, name, id, client_id }) => {
   const context = useContext(OverlayContext);
   if (!context) {
     throw new Error('OverlayContext is undefined, make sure you are using the OverlayContext.Provider');
@@ -58,8 +59,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
             </Link>        
         </div>
         <div className={`profile-card`} />
+        {(id == client_id) && (
           <button onClick={handleClick} className="absolute -bottom-4 -right-4 bg-indigo-500 border-indigo-300 hover:bg-indigo-400 hover:shadow-sm shadow-lg  text-white rounded-full py-4 px-6 text-2xl">+</button>
-       </div>
+        )}
+        </div>
     </div>
   </div>
   );
