@@ -24,6 +24,7 @@ else:
     postgres_password = ''
     postgres_user = 'postgres'
     postgres_db = 'postgres'
+    print('test')
 
 print(postgres_user)
 

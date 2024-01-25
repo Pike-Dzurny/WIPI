@@ -4,7 +4,7 @@ services:
   frontend:
     build: ./frontend
     environment:
-      - BACKEND_URL=http://api:8000
+      - BACKEND_URL=${BACKEND_URL}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -26,7 +26,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://postgres:pass@db:5432/mydatabase
+      - DATABASE_URL=${DATABASE_URL}
 
   db:
     image: postgres:latest
@@ -35,9 +35,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./db/postgresql_init.sql:/docker-entrypoint-initdb.d/postgresql_init.sql
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: mydatabase
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - '5432:5432'
 
