@@ -48,12 +48,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ backgroundImage, profileImage
         <div className='absolute bottom-0 flex flex-row justify-between border-t border-l border-r rounded-t-lg border-indigo-200 bg-indigo-50'>
             <Link 
             className='border-r border-indigo-200 p-2 cursor-pointer'
-            href={`${process.env.NEXT_PUBLIC_FRONTED_URL}/following/${id}`}>
+            href={`/following/${id}`}>
             Following: {followingCount}
             </Link>
             <Link 
               className='p-2 cursor-pointer'
-              href={`${process.env.NEXT_PUBLIC_FRONTED_URL}/followers/${id}`}>
+              href={`/followers/${id}`}>
               Followers: {followersCount}
             </Link>        
         </div>
