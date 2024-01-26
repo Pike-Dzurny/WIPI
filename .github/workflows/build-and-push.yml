@@ -21,6 +21,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_PUSH_IMAGE_SECRET_KEY }}
         AWS_REGION: us-east-1
 
+
     - name: Build Frontend Docker Image
       run: docker build -t ${{ steps.login-ecr.outputs.registry }}/wipi-frontend:${{ github.sha }} ./frontend
 
