@@ -165,6 +165,7 @@ data "aws_route53_zone" "selected" {
   private_zone = false
 }
 
+
 resource "aws_route53_record" "www_record" {
   zone_id = data.aws_route53_zone.selected.zone_id
   name    = "www.test.com"
