@@ -37,11 +37,10 @@ jobs:
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
     
-    - name: Navigate to Terraform directory
-      run: cd terraform
-
     - name: Terraform Init
       run: terraform init
+      working-directory: ./terraform # Set the working directory here
+
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
@@ -59,3 +58,4 @@ jobs:
         TF_VAR_NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         TF_VAR_SECRET_API_URL: ${{ secrets.SECRET_API_URL }}
         TF_VAR_AMI_ID: ${{ secrets.AMI_ID }}
+      working-directory: ./terraform # Set the working directory here
