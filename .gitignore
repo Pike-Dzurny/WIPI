@@ -104,3 +104,6 @@ API/database/__pycache__/database_initializer.cpython-38.pyc
 API/database/__pycache__/database_session.cpython-38.pyc
 API/endpoints/__pycache__/posts.cpython-38.pyc
 API/endpoints/__pycache__/users.cpython-38.pyc
+terraform/.terraform/providers/registry.terraform.io/hashicorp/aws/5.34.0/windows_amd64/terraform-provider-aws_v5.34.0_x5.exe
+terraform/.terraform/providers/registry.terraform.io/hashicorp/random/3.6.0/windows_amd64/terraform-provider-random_v3.6.0_x5.exe
+terraform/.terraform.lock.hcl
