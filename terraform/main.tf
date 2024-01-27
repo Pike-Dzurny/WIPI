@@ -133,7 +133,7 @@ resource "aws_instance" "frontend_instance" {
 # }
 
 resource "aws_route53_record" "www_record" {
-  zone_id = "${{ secrets.AWS_ROUTE53_ZONE_ID }}"
+  zone_id = var.AWS_ROUTE53_ZONE_ID
   name    = "wipiproject.com"
   type    = "A"
   ttl     = "300"
