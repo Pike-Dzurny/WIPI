@@ -70,6 +70,11 @@ variable "SECRET_API_URL" {
   type        = string
 }
 
+variable "AWS_ROUTE53_ZONE_ID" {
+  description = "The AWS Route53 zone ID"
+  type        = string
+}
+
 variable "AMI_ID" {
   description = "The EC2 AMI ID"
   type        = string
