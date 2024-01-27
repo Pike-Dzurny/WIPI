@@ -71,7 +71,7 @@ resource "aws_security_group" "backend_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [aws_security_group.frontend_sg.id]
+    security_groups = [aws_security_group.frontend_sg.id]
   }
 
   egress {
@@ -109,10 +109,10 @@ resource "aws_instance" "frontend_instance" {
               $(aws ecr get-login --no-include-email --region ${var.aws_region})
 
               # Pull the Docker image from ECR
-              docker pull ${data.aws_ecr_repository.frontend.repository_url}:${ var.GITHUB_SHA }
+              docker pull ${data.aws_ecr_repository.frontend.repository_url}
 
               # Run the Docker container
-              docker run -d -p 80:80 ${data.aws_ecr_repository.frontend.repository_url}:${ var.GITHUB_SHA }
+              docker run -d -p 80:80 ${data.aws_ecr_repository.frontend.repository_url}
               EOF
 
   tags = {
