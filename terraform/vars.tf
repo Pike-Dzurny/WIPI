@@ -74,3 +74,8 @@ variable "AMI_ID" {
   description = "The EC2 AMI ID"
   type        = string
 }
+
+variable "GITHUB_SHA" {
+  description = "The GitHub SHA for tagging Docker images"
+  type        = string
+}
