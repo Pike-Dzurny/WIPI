@@ -109,10 +109,10 @@ resource "aws_instance" "frontend_instance" {
               $(aws ecr get-login --no-include-email --region ${var.aws_region})
 
               # Pull the Docker image from ECR
-              docker pull ${data.aws_ecr_repository.frontend.repository_url}:${var.image_tag}
+              docker pull ${data.aws_ecr_repository.frontend.repository_url}:${{ github.sha }}
 
               # Run the Docker container
-              docker run -d -p 80:80 ${data.aws_ecr_repository.frontend.repository_url}:${var.image_tag}
+              docker run -d -p 80:80 ${data.aws_ecr_repository.frontend.repository_url}:${{ github.sha }}
               EOF
 
   tags = {
