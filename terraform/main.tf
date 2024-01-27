@@ -88,7 +88,7 @@ data "aws_ecr_repository" "frontend" {
 
 # Frontend EC2 instance
 resource "aws_instance" "frontend_instance" {
-  ami                    = "ami-0abcdef1234567890" # Replace with AMI ID
+  ami                    = var.AMI_ID
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.subnet[0].id
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
@@ -120,21 +120,21 @@ resource "aws_instance" "frontend_instance" {
   }
 }
 
-# Backend EC2 instance
-resource "aws_instance" "backend_instance" {
-  ami                    = "ami-0abcdef1234567890" # Replace with AMI ID
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.subnet[1].id
-  vpc_security_group_ids = [aws_security_group.backend_sg.id]
+# # Backend EC2 instance
+# resource "aws_instance" "backend_instance" {
+#   ami                    = "ami-0abcdef1234567890" # Replace with AMI ID
+#   instance_type          = "t2.micro"
+#   subnet_id              = aws_subnet.subnet[1].id
+#   vpc_security_group_ids = [aws_security_group.backend_sg.id]
 
-  tags = {
-    Name = "Backend-${random_pet.name_randomness.id}"
-  }
-}
+#   tags = {
+#     Name = "Backend-${random_pet.name_randomness.id}"
+#   }
+# }
 
 resource "aws_route53_record" "www_record" {
-  zone_id = "your_zone_id" # Filler info for now
-  name    = "www.yourdomain.com"
+  zone_id = "${{ secrets.AWS_ROUTE53_ZONE_ID }}"
+  name    = "wipiproject.com"
   type    = "A"
   ttl     = "300"
   records = [aws_instance.frontend_instance.public_ip]

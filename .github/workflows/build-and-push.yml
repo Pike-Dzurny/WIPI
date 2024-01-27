@@ -58,3 +58,4 @@ jobs:
         TF_VAR_NEXT_PUBLIC_FRONTED_URL: ${{ secrets.NEXT_PUBLIC_FRONTED_URL }}
         TF_VAR_NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         TF_VAR_SECRET_API_URL: ${{ secrets.SECRET_API_URL }}
+        TF_VAR_AMI_ID: ${{ secrets.AMI_ID }}

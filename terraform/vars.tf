@@ -69,3 +69,8 @@ variable "SECRET_API_URL" {
   description = "The secret API URL"
   type        = string
 }
+
+variable "AMI_ID" {
+  description = "The EC2 AMI ID"
+  type        = string
+}
