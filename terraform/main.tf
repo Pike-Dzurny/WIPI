@@ -2,6 +2,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "terraformstateforwipi"
+    key            = "state/terraform.tfstate"
+    region         = "us-east-1"
+  }
+}
+
 resource "random_pet" "name_randomness" {
   length = 1
 }
