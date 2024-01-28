@@ -23,18 +23,18 @@ jobs:
         AWS_REGION: us-east-1
 
 
-    - name: Build Frontend Docker Image
-      run: |
-        docker build --build-arg NODE_ENV=production -t ${{ steps.login-ecr.outputs.registry }}/wipi-frontend ./frontend
+    # - name: Build Frontend Docker Image
+    #   run: |
+    #     docker build --build-arg NODE_ENV=production -t ${{ steps.login-ecr.outputs.registry }}/wipi-frontend ./frontend
     
-    - name: Push Frontend Image to ECR
-      run: docker push ${{ steps.login-ecr.outputs.registry }}/wipi-frontend:latest
+    # - name: Push Frontend Image to ECR
+    #   run: docker push ${{ steps.login-ecr.outputs.registry }}/wipi-frontend:latest
 
-    - name: Build API Docker Image
-      run: docker build -t ${{ steps.login-ecr.outputs.registry }}/wipi-api ./API
+    # - name: Build API Docker Image
+    #   run: docker build -t ${{ steps.login-ecr.outputs.registry }}/wipi-api ./API
 
-    - name: Push API Image to ECR
-      run: docker push ${{ steps.login-ecr.outputs.registry }}/wipi-api:latest
+    # - name: Push API Image to ECR
+    #   run: docker push ${{ steps.login-ecr.outputs.registry }}/wipi-api:latest
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
