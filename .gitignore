@@ -111,3 +111,4 @@ terraform/.terraform.tfstate.lock.info
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/.terraform/terraform.tfstate
+terraform/variableslocal.tfvars
