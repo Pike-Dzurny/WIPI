@@ -26,4 +26,9 @@ RUN npm install next@latest
 # Expose the port Next.js runs on
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Copy the start script
+COPY start.sh ./
+RUN chmod +x start.sh
+
+# Use the start script as the entry point
+CMD ["./start.sh"]
