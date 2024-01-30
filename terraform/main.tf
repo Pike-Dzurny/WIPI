@@ -39,6 +39,11 @@ resource "aws_route_table" "main_route_table" {
   }
 }
 
+resource "aws_main_route_table_association" "main_route_table_association" {
+  vpc_id         = aws_vpc.main_vpc.id
+  route_table_id = aws_route_table.main_route_table.id
+}
+
 # Creating three subnets
 resource "aws_subnet" "subnet" {
   count                   = 3
@@ -59,6 +64,13 @@ resource "aws_security_group" "frontend_sg" {
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
