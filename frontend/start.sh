@@ -10,5 +10,8 @@ if [ "$NODE_ENV" = "development" ]; then
   npm run dev
 else
   echo "Starting in production mode..."
-  npm run start
+  # Build the project for production
+  npm run build
+  # Start Next.js in production mode
+  npm start
 fi

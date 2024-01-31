@@ -102,9 +102,54 @@ resource "aws_security_group" "backend_sg" {
   }
 }
 
-data "aws_ecr_repository" "frontend" {
-  name = "wipi-frontend"
+resource "aws_iam_role" "ecr_access_role" {
+  name = "ecr-access-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
+
+resource "aws_iam_policy" "ecr_access_policy" {
+  name        = "ecr-access-policy"
+  description = "ECR access policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability"
+        ],
+        Effect = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_access_attach" {
+  role       = aws_iam_role.ecr_access_role.name
+  policy_arn = aws_iam_policy.ecr_access_policy.arn
+}
+
+resource "aws_iam_instance_profile" "ecr_access_instance_profile" {
+  name = "ecr-access-instance-profile"
+  role = aws_iam_role.ecr_access_role.name
+}
+
 
 # Frontend EC2 instance
 resource "aws_instance" "frontend_instance" {
@@ -112,21 +157,21 @@ resource "aws_instance" "frontend_instance" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.subnet[0].id
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.ecr_access_instance_profile.name
+  
   user_data = <<-EOF
               #!/bin/bash
-              # Install AWS CLI
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
-              sudo ./aws/install
 
               # Install Docker
               sudo yum update -y
-              sudo amazon-linux-extras install docker
+              sudo yum install docker -y
               sudo service docker start
               sudo usermod -a -G docker ec2-user
 
               # Authenticate with ECR
-              $(aws ecr get-login --no-include-email --region ${var.aws_region})
+              aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${data.aws_ecr_repository.frontend.repository_url}
 
               # Pull the Docker image from ECR
               docker pull ${data.aws_ecr_repository.frontend.repository_url}:latest
