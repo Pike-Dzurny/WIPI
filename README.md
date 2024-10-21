@@ -88,5 +88,5 @@ If you encounter any issues or have questions, please file an issue on the GitHu
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [BSD 2-Clause License](LICENSE).
 
